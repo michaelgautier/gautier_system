@@ -1,3 +1,9 @@
+/*
+	Licensed under the Gnu Public License version 3
+*/
+#ifndef __gautier_system_rss_gautier_rss_article__
+#define __gautier_system_rss_gautier_rss_article__
+
 namespace gautier::system::rss {
 	class gautier_rss_article {
 		public:
@@ -9,3 +15,4 @@ namespace gautier::system::rss {
 			std::string article_date{};
 	};
 }
+#endif
