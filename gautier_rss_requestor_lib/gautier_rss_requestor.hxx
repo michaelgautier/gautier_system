@@ -6,7 +6,8 @@
 
 #include <gautier_rss_request.hxx>
 #include <gautier_rss_article.hxx>
-
+#include <vector>
+#include <map>
 namespace gautier::system::rss {
 	class gautier_rss_requestor {
 		private:
