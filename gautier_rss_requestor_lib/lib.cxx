@@ -2,17 +2,19 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/URI.h>
 #include <gautier_rss_requestor.hxx>
-
+#include <iostream>
 void gautier::system::rss::gautier_rss_requestor::request_feeds(
 				std::vector<gautier_rss_request>& 				feed_parameters, 
 				std::map<std::string, std::vector<gautier_rss_article>>& 	feed_articles
 			) {
 				std::string request_method = "GET";
 
-				Poco::Net::HTTPClientSession http_session;
-
 				for(auto rss_location : feed_parameters) {
+					Poco::URI request_uri(rss_location.feed_url);
+					
+					Poco::Net::HTTPClientSession http_session(request_uri.getHost());
 
 					Poco::Net::HTTPRequest http_request(request_method, rss_location.feed_url);
 					
@@ -24,8 +26,12 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
 					
 					std::string http_response_text;
 					
-					http_response_stream >> http_response_text;
-					
+					while(!http_response_stream.eof()) {
+						http_response_stream >> http_response_text;
+
+						std::cout << http_response_text;
+					}
+						
 					/*
 					Poco::DOMParser rss_xml_reader;
 					
