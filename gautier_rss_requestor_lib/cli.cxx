@@ -3,6 +3,7 @@
 #include <gautier_rss_requestor.hxx>
 
 int main() {
+        
 	gautier::system::rss::gautier_rss_requestor rss_requestor;
 	
 	gautier::system::rss::gautier_rss_request test_request;

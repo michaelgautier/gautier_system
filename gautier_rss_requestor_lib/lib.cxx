@@ -1,6 +1,7 @@
 #include <codecvt>
 #include <cstddef>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <locale>
 #include <sstream>
@@ -24,14 +25,47 @@
 #include "gautier_rss_article.hxx"
 #include "gautier_rss_requestor.hxx"
 
+void read_file_into_string(std::string& location, std::string& output) {
+        std::ifstream rss_file;
+
+        rss_file.open(location.data(), std::ios::in);
+
+        char data;
+
+        while(!rss_file.eof()) {
+                rss_file.get(data);
+
+                if(rss_file.rdstate() == std::ios_base::goodbit) {
+                        output.push_back(data);
+                }
+        }
+        
+        rss_file.close();
+
+        return;
+}
+
+void read_istream_into_string(std::istream& input, std::string& output) {
+        char data;
+
+        while(!input.eof()) {
+                input.get(data);
+
+                if(input.rdstate() == std::ios_base::goodbit) {
+                        output.push_back(data);
+                }
+        }
+        
+        return;
+}
+
 void gautier::system::rss::gautier_rss_requestor::request_feeds(
 				std::vector<gautier_rss_request>& 				feed_parameters, 
 				std::map<std::string, std::vector<gautier_rss_article> >& 	feed_articles
 			) {
         for(auto rss_location : feed_parameters) {
-                    std::istringstream s1("");
-                    std::istream feed_document_stream(s1.rdbuf());
-                
+	        std::string feed_document_text;
+
                 std::string feed_name = rss_location.feed_name;
                 std::string feed_url = rss_location.feed_url;
                 
@@ -40,31 +74,17 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
                 std::cout << "checking feed " << feed_name << " \n";
 
                 if(request_url_is_http(feed_url)) {
-                        get_http_response_stream(feed_document_stream, feed_url);
+                        get_http_response_stream(feed_document_text, feed_url);
                 } 
                 else {
-                        get_file_stream(feed_document_stream, feed_url);
+                        get_file_stream(feed_document_text, feed_url);
                 }
-
-	        std::wstring feed_document_text;
-
-                std::cout << "diagnostic output \n";
-                
-                
-                
-        //					while(!feed_document_stream.eof()) {
-        //                                                std::wstring output;
-        //                                                
-        //						feed_document_stream >> output;
-
-        //                                                feed_document_text += output;
-        //					}
                 
                 std::cout << "feed collection \n";
                 
-                collect_feed(feed_name, feed_articles, feed_document_stream);
+                //collect_feed(feed_name, feed_articles, feed_document_stream);
 
-	        //std::wcout << feed_document_text;
+	        std::cout << feed_document_text;
         }
 
         return;
@@ -93,7 +113,7 @@ bool gautier::system::rss::gautier_rss_requestor::request_url_is_http(std::strin
         Planned refactoring
         Eventually, I am going to excise this method to another class.
 */
-void gautier::system::rss::gautier_rss_requestor::get_http_response_stream(std::istream& http_response_stream, std::string& request_url) {
+void gautier::system::rss::gautier_rss_requestor::get_http_response_stream(std::string& output, std::string& request_url) {
 	std::string request_method = "GET";
 
         Poco::URI request_uri(request_url);
@@ -108,40 +128,14 @@ void gautier::system::rss::gautier_rss_requestor::get_http_response_stream(std::
 
         std::istream& temp_http_response_stream = http_session.receiveResponse(http_response);
 
-//        while(!temp_http_response_stream.eof()){
-//                std::string output;
+        read_istream_into_string(temp_http_response_stream, output);
 
-//                temp_http_response_stream >> output;
-//                
-//                std::wstring output_w =  Poco::UnicodeConverter::to<std::wstring>(output);
-
-//                http_response_stream << output_w;
-//        }
-        
-        
-        temp_http_response_stream.swap(http_response_stream);
-        
         return;
 }
 
-void gautier::system::rss::gautier_rss_requestor::get_file_stream(std::istream& file_stream, std::string& location) {
-        std::ifstream rss_file;
+void gautier::system::rss::gautier_rss_requestor::get_file_stream(std::string& output, std::string& location) {
+        read_file_into_string(location, output);
 
-        rss_file.open(location.data(), std::ios::in);
-
-        file_stream.rdbuf(rss_file.rdbuf());
-//        while(!rss_file.eof()) {
-//                std::string output;
-
-//                rss_file >> output;
-
-//                std::wstring output_w =  Poco::UnicodeConverter::to<std::wstring>(output);
-//                
-//                file_stream << output_w;
-//        }
-        
-        rss_file.close();
-        
         return;
 }
 
@@ -236,23 +230,23 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
 */
 void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_name, std::map<std::string, std::vector<gautier_rss_article> >& feed_articles, std::istream& feed_document_stream) {
         try {
-        Poco::XML::DOMParser rss_xml_reader;
-        rss_xml_reader.setEncoding("utf-8");
+                Poco::XML::DOMParser rss_xml_reader;
+                rss_xml_reader.setEncoding("utf-8");
 	
-        //std::string feed_document_str;
-        //Poco::UnicodeConverter::convert(feed_document_stream, feed_document_str);
+                //std::string feed_document_str;
+                //Poco::UnicodeConverter::convert(feed_document_stream, feed_document_str);
 
-        Poco::XML::InputSource* source = new Poco::XML::InputSource(feed_document_stream);
+                Poco::XML::InputSource* source = new Poco::XML::InputSource(feed_document_stream);
 
-	Poco::XML::Document* rss_xml_document = rss_xml_reader.parse(source);
+	        Poco::XML::Document* rss_xml_document = rss_xml_reader.parse(source);
 	
-	Poco::XML::Element* rss_xml_root = rss_xml_document->documentElement();
+	        Poco::XML::Element* rss_xml_root = rss_xml_document->documentElement();
 	
-	Poco::XML::NodeList* rss_xml_nodes = rss_xml_root->childNodes();
+	        Poco::XML::NodeList* rss_xml_nodes = rss_xml_root->childNodes();
 
-        std::cout << "collecting nodes \n";
+                std::cout << "collecting nodes \n";
 
-        collect_feed_impl(feed_name, feed_articles, rss_xml_nodes);
+                collect_feed_impl(feed_name, feed_articles, rss_xml_nodes);
         } catch(Poco::XML::SAXParseException e) {
                 std::cout << e.message() << "\n";
                 std::cout << e.displayText() << "\n";
