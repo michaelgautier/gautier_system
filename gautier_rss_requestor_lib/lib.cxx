@@ -57,10 +57,6 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
         return;
 }
 
-/*
-        *************************************  Not yet tested.
-                                                ********************************** Not yet tested.
-*/
 void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_name, std::map<std::string, std::vector<gautier_rss_article*> >& feed_articles, std::string& feed_document_stream) {
         try {
                 std::cout << "feed: " << feed_name << "\n";
@@ -68,11 +64,6 @@ void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_
                 Poco::XML::DOMParser rss_xml_reader;
                 rss_xml_reader.setEncoding("utf-8");
 	
-//                std::wstring feed_document_str;
-//                Poco::UnicodeConverter::convert(feed_document_stream, feed_document_str);
-
-//                Poco::XML::InputSource* source = new Poco::XML::InputSource(feed_document_stream);
-
 	        Poco::XML::Document* rss_xml_document = rss_xml_reader.parseString(feed_document_stream);
 	
 	        Poco::XML::Element* rss_xml_root = rss_xml_document->documentElement();
@@ -93,10 +84,7 @@ void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_
         }
         return;
 }
-/*
-        *************************************  Not yet tested.
-                                                ********************************** Not yet tested.
-*/
+
 void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >& feed_articles, Poco::XML::NodeList* rss_xml_nodes, bool& on_item_node, gautier::system::rss::gautier_rss_article* article_item) {
         int node_count = rss_xml_nodes->length();
         
@@ -186,10 +174,6 @@ void read_istream_into_string(std::istream& input, std::string& output) {
         return;
 }
 
-/*
-        Planned refactoring
-        Eventually, I am going to excise this method to another class.
-*/
 bool request_url_is_http(std::string& request_url) {
         bool result = false;
 
@@ -206,10 +190,6 @@ bool request_url_is_http(std::string& request_url) {
         return result;
 }
 
-/*
-        Planned refactoring
-        Eventually, I am going to excise this method to another class.
-*/
 void get_http_response_stream(std::string& output, std::string& request_url) {
 	std::string request_method = "GET";
 
