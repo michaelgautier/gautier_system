@@ -21,6 +21,31 @@ int main() {
 	
 	rss_requestor.request_feeds(feed_parameters, feed_articles);
 	
+        for(auto feed_article_entry : feed_articles) {
+                /*
+                        To do items:
+                        
+                                - need to work on the offline caching
+                                - save the feed offline is the next thing to work on.
+                */
+
+                std::cout << feed_article_entry.first << "\t";
+
+                auto feed_articles = feed_article_entry.second;
+
+                for(gautier::system::rss::gautier_rss_article* feed_article_item : feed_articles) {
+	                std::string headline = feed_article_item->headline;
+	                std::string url = feed_article_item->url;
+	                std::string description = feed_article_item->description;
+	                std::string article_date = feed_article_item->article_date;
+                        
+                        std::cout << "headline: " << headline << "\n";
+                        std::cout << "date: " << article_date << "\n";
+                        std::cout << "url: " << url << "\n";
+                        std::cout << "description: " << description << "\n";
+                }
+        }
+        
 	return 0;
 }
 

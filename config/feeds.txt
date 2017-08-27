@@ -1,12 +1,23 @@
 #this file is the sample feeds for testing.
 #Feed Name      Feed URL
-Ars Technica	http://feeds.arstechnica.com/arstechnica/index
-BBC	http://feeds.bbci.co.uk/news/rss.xml?edition=int
-CNN Top Stories	http://rss.cnn.com/rss/cnn_topstories.rss
-Slashdot	http://rss.slashdot.org/Slashdot/slashdot
-CNet	http://www.cnet.com/rss/news/
-Forbes Business	http://www.forbes.com/business/feed/
-Forbes Leadership	http://www.forbes.com/leadership/feed/
-Forbes Technology	http://www.forbes.com/technology/feed/
-Phoronix	http://www.phoronix.com/rss.php
+
+Ars Technica	/home/standardaccount/Downloads/feeds/feed_arstechnica.xml
+BBC	/home/standardaccount/Downloads/feeds/feed_bbc.xml
+CNet	/home/standardaccount/Downloads/feeds/feed_cnet.xml
+CNN Top Stories	/home/standardaccount/Downloads/feeds/feed_cnn.xml
+Forbes Business	/home/standardaccount/Downloads/feeds/feed_forbes_business.xml
+Forbes Leadership	/home/standardaccount/Downloads/feeds/feed_forbes_leadership.xml
+Forbes Technology	/home/standardaccount/Downloads/feeds/feed_forbes_technology.xml
+Phoronix	/home/standardaccount/Downloads/feeds/feed_phoronix.xml
+Slashdot	/home/standardaccount/Downloads/feeds/feed_slashdot.xml
+
+#Ars Technica	http://feeds.arstechnica.com/arstechnica/index
+#BBC	http://feeds.bbci.co.uk/news/rss.xml?edition=int
+#CNet	http://www.cnet.com/rss/news/
+#CNN Top Stories	http://rss.cnn.com/rss/cnn_topstories.rss
+#Forbes Business	http://www.forbes.com/business/feed/
+#Forbes Leadership	http://www.forbes.com/leadership/feed/
+#Forbes Technology	http://www.forbes.com/technology/feed/
+#Phoronix	http://www.phoronix.com/rss.php
+#Slashdot	http://rss.slashdot.org/Slashdot/slashdot
 

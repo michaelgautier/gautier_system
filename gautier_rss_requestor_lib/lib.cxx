@@ -59,8 +59,6 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
 
 void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_name, std::map<std::string, std::vector<gautier_rss_article*> >& feed_articles, std::string& feed_document_stream) {
         try {
-                std::cout << "feed: " << feed_name << "\n";
-
                 Poco::XML::DOMParser rss_xml_reader;
                 rss_xml_reader.setEncoding("utf-8");
 	
@@ -75,13 +73,14 @@ void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_
 
                 collect_feed_impl(feed_name, feed_articles, rss_xml_nodes, on_item_node, article_item);
         } catch(Poco::XML::SAXParseException e) {
-                std::cout << e.message() << "\n";
-                std::cout << e.displayText() << "\n";
-                std::cout << e.name() << "\n";
-                std::cout << e.what() << "\n";
-                
-                std::cout << "line " << e.getLineNumber() << "\n";
+                std::cout << "Exception handler on line " << __LINE__ << " func " << __func__ << "\n";
+                std::cout << "\t" << "Exception generated on line " << e.getLineNumber() << "\n";
+                std::cout << "\t" << e.message() << "\n";
+                std::cout << "\t" << e.displayText() << "\n";
+                std::cout << "\t" << e.name() << "\n";
+                std::cout << "\t" << e.what() << "\n";
         }
+
         return;
 }
 
@@ -118,8 +117,8 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
 
                         if(required_values_available && on_item_node) {
                                 on_item_node = false;
-
-                                std::cout << "\t" << article_item->headline << " " << article_item->article_date << " " << article_item->url << " " << article_item->description << "\n";
+                                
+                                //std::cout << "feed item captured: " << article_item->headline << "\n";
                                 
                                 std::vector<gautier::system::rss::gautier_rss_article*> articles = feed_articles[feed_name];
 
@@ -141,18 +140,14 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
 }
 
 void read_file_into_string(std::string& location, std::string& output) {
-        std::ifstream rss_file;
-
-        rss_file.open(location.data(), std::ios::in);
-
-        char data;
+        std::ifstream rss_file(location.data());
 
         while(!rss_file.eof()) {
-                rss_file.get(data);
+                std::string line;
+                
+                std::getline(rss_file, line);
 
-                if(rss_file.rdstate() == std::ios_base::goodbit) {
-                        output.push_back(data);
-                }
+                output.append(line);
         }
         
         rss_file.close();
