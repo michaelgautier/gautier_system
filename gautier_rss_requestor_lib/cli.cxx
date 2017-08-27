@@ -2,42 +2,72 @@
 #include <gautier_rss_request.hxx>
 #include <gautier_rss_requestor.hxx>
 
+#include <ios>
 #include <iostream>
 #include <fstream>
+#include <vector>
+
+void get_feed_namedaddresses(std::string& location, std::vector<gautier::system::rss::gautier_rss_request>& feed_parameters);
+void get_feed_parameter_lines_from_config(std::string& location, std::vector<std::string>& feed_parameter_lines);
 
 int main() {
-        
-	gautier::system::rss::gautier_rss_requestor rss_requestor;
-	
-	gautier::system::rss::gautier_rss_request test_request;
-	
-         
-        std::ifstream feeds_file;
-        feeds_file.open("feeds.txt");
-        
-        std::string feeds_lines;
-        
-        while(!feeds_file.eof()) {
-                char feeds_data;
-                
-                feeds_data = feeds_file.get();
-                
-                feeds_lines.push_back(feeds_data);
-        }
-        
-        //to do: read the feeds data.       
-        
-        feeds_file.close();
-        
-	test_request.feed_name = "arstechnica";
-	test_request.feed_url = "http://feeds.arstechnica.com/arstechnica/index";
-
 	std::vector<gautier::system::rss::gautier_rss_request> 					feed_parameters;
 	std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >		feed_articles;
 
-	feed_parameters.push_back(test_request);
+        std::string feed_names_location = "feeds.txt";
+        
+        get_feed_namedaddresses(feed_names_location, feed_parameters);
+	gautier::system::rss::gautier_rss_requestor rss_requestor;
 	
 	rss_requestor.request_feeds(feed_parameters, feed_articles);
 	
 	return 0;
 }
+
+void get_feed_namedaddresses(std::string& location, std::vector<gautier::system::rss::gautier_rss_request>& feed_parameters) {
+        std::vector<std::string> feed_parameter_lines;
+
+        get_feed_parameter_lines_from_config(location, feed_parameter_lines);
+
+        for(auto feed_line : feed_parameter_lines) {
+                //define feed url
+                if(feed_line.size() > 1 && feed_line[0] == '#') {
+                        continue;
+                }
+
+                auto separator_pos = feed_line.find_first_of("\t");
+
+                if(separator_pos == std::string::npos) {
+                        continue;
+                }
+ 
+                std::string feed_name = feed_line.substr(0, separator_pos);
+                std::string feed_url = feed_line.substr(separator_pos+1);
+                
+                gautier::system::rss::gautier_rss_request feed_request;
+
+	        feed_request.feed_name = feed_name;
+	        feed_request.feed_url = feed_url;
+
+                feed_parameters.push_back(feed_request);
+        }
+        
+        return;
+}
+
+void get_feed_parameter_lines_from_config(std::string& location, std::vector<std::string>& feed_parameter_lines) {
+        std::ifstream feeds_file(location.data());
+                
+        while(!feeds_file.eof()) {
+                std::string feeds_data;
+
+                std::getline(feeds_file, feeds_data);
+
+                feed_parameter_lines.push_back(feeds_data);
+        }
+        
+        feeds_file.close();
+
+        return;
+}
+
