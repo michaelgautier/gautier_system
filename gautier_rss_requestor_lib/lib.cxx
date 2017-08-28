@@ -130,8 +130,6 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
                         if(required_values_available && on_item_node) {
                                 on_item_node = false;
                                 
-                                //std::cout << "feed item captured: " << article_item->headline << "\n";
-                                
                                 std::vector<gautier::system::rss::gautier_rss_article*>* articles = &feed_articles[feed_name];
 
                                 articles->push_back(article_item);
