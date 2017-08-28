@@ -41,26 +41,28 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
 
                 std::string feed_name = rss_location.feed_name;
                 std::string feed_url = rss_location.feed_url;
+                std::string feed_offline_location(feed_name + ".xml");
                 
                 feed_articles[feed_name] = std::vector<gautier_rss_article*>();
 
                 if(request_url_is_http(feed_url)) {
-                        get_http_response_stream(feed_document_text, feed_url);
+                        std::string feed_response_data;
+
+                        get_http_response_stream(feed_response_data, feed_url);
                         
-                        std::string feed_file_name(feed_name + ".xml");
+                        std::string feed_file_name(feed_offline_location.data(), std::ios_base::out | std::ios_base::trunc);
                         
                         std::ofstream feed_offline_file(feed_file_name.data());
                         
-                        feed_offline_file << feed_document_text;
+                        feed_offline_file << feed_response_data;
                         
                         feed_offline_file.flush();
                         
                         feed_offline_file.close();
                 } 
-                else {
-                        get_file_stream(feed_document_text, feed_url);
-                }
-                
+
+                get_file_stream(feed_document_text, feed_offline_location);
+
                 collect_feed(feed_name, feed_articles, feed_document_text);
         }
 
