@@ -29,9 +29,9 @@ int main() {
                                 - save the feed offline is the next thing to work on.
                 */
 
-                std::cout << feed_article_entry.first << "\t";
+                std::cout << feed_article_entry.first << "\n";
 
-                auto feed_articles = feed_article_entry.second;
+                std::vector<gautier::system::rss::gautier_rss_article*> feed_articles = feed_article_entry.second;
 
                 for(gautier::system::rss::gautier_rss_article* feed_article_item : feed_articles) {
 	                std::string headline = feed_article_item->headline;

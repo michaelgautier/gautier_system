@@ -46,6 +46,12 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
 
                 if(request_url_is_http(feed_url)) {
                         get_http_response_stream(feed_document_text, feed_url);
+                        
+                        std::string feed_file_name(feed_name + ".xml");
+                        
+                        std::ofstream feed_offline_file(feed_file_name.data());
+                        
+                        feed_offline_file << feed_document_text;
                 } 
                 else {
                         get_file_stream(feed_document_text, feed_url);
@@ -95,7 +101,7 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
                 auto xml_node_type = xml_node->nodeType();
 
                 if(xml_node_type == Poco::XML::Node::ELEMENT_NODE) {
-                        std::string xml_node_name = xml_node->localName();
+                        std::string xml_node_name = Poco::toLower(xml_node->localName());
 
                         if(xml_node_name == "item") {
                                 on_item_node = true;
@@ -109,7 +115,7 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
                         else if(xml_node_name == "description") {
                                 article_item->description = xml_node->innerText();
                         }
-                        else if(xml_node_name == "pub_date") {
+                        else if(xml_node_name == "pub_date" || xml_node_name == "pubdate") {
                                 article_item->article_date = xml_node->innerText();
                         }
 
@@ -120,9 +126,9 @@ void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<
                                 
                                 //std::cout << "feed item captured: " << article_item->headline << "\n";
                                 
-                                std::vector<gautier::system::rss::gautier_rss_article*> articles = feed_articles[feed_name];
+                                std::vector<gautier::system::rss::gautier_rss_article*>* articles = &feed_articles[feed_name];
 
-                                articles.push_back(article_item);
+                                articles->push_back(article_item);
                                 
                                 article_item = new gautier::system::rss::gautier_rss_article;
                         }

@@ -1,6 +1,7 @@
 #this file is the sample feeds for testing.
 #Feed Name      Feed URL
 
+#the following is for testing in the event you have manually saved feed output to file.
 Ars Technica	/home/standardaccount/Downloads/feeds/feed_arstechnica.xml
 BBC	/home/standardaccount/Downloads/feeds/feed_bbc.xml
 CNet	/home/standardaccount/Downloads/feeds/feed_cnet.xml
