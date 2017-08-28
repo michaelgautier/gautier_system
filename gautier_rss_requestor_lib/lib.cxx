@@ -52,6 +52,10 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
                         std::ofstream feed_offline_file(feed_file_name.data());
                         
                         feed_offline_file << feed_document_text;
+                        
+                        feed_offline_file.flush();
+                        
+                        feed_offline_file.close();
                 } 
                 else {
                         get_file_stream(feed_document_text, feed_url);
