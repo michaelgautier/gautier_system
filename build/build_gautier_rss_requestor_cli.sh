@@ -7,22 +7,26 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
-rm bin/gautier_rss_requestor_cli
 rm obj/gautier_rss_requestor_cli.o
+rm bin/gautier_rss_requestor_cli
+rm bin/libgautier_rss_requestor*
 
 reset
-
-g++ -std=c++14 -c -g -I../gautier_rss_requestor_lib/ -I/usr/include -lgautier_rss_requestor -o obj/gautier_rss_requestor_cli.o ../gautier_rss_requestor_cli.cxx
-g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -o bin/gautier_rss_requestor_cli obj/gautier_rss_requestor_lib.o obj/gautier_rss_requestor_cli.o
-cp ../config/feeds.txt bin
-
 echo "	build"
 ls -gGhU
 
-echo "	bin"
-ls -gGh bin/
+echo "Building rss_requestor library"
+g++ -std=c++14 -c -fPIC -g -I../gautier_rss_requestor_lib/ -o obj/gautier_rss_requestor_lib.o ../gautier_rss_requestor_lib/lib.cxx
+g++ -g -shared -I../gautier_rss_requestor_lib/ -lPocoFoundation -lPocoUtil -lPocoNet -o bin/libgautier_rss_requestor.so obj/gautier_rss_requestor_lib.o
 
 echo "	obj"
 ls -gGh obj/
 
+echo "Building rss_requestor cli"
+g++ -std=c++14 -c -g -I../gautier_rss_requestor_lib/ -I/usr/include -lgautier_rss_requestor -o obj/gautier_rss_requestor_cli.o ../gautier_rss_requestor_cli.cxx
+g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -o bin/gautier_rss_requestor_cli obj/gautier_rss_requestor_lib.o obj/gautier_rss_requestor_cli.o
+cp ../config/feeds.txt bin
+
+echo "	bin"
+ls -gGh bin/
 
