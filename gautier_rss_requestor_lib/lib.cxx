@@ -65,17 +65,19 @@ void gautier::system::rss::gautier_rss_requestor::request_feeds(
                         std::string feed_response_data;
 
                         get_http_response_stream(feed_response_data, feed_url);
-                        
-                        std::string feed_file_name(feed_offline_location.data(), std::ios_base::out | std::ios_base::trunc);
-                        
-                        std::ofstream feed_offline_file(feed_file_name.data());
-                        
-                        feed_offline_file << feed_response_data;
-                        
-                        feed_offline_file.flush();
-                        
-                        feed_offline_file.close();
-                } 
+
+                        if(!feed_response_data.empty()) {
+                                std::string feed_file_name(feed_offline_location.data(), std::ios_base::out | std::ios_base::trunc);
+                                
+                                std::ofstream feed_offline_file(feed_file_name.data());
+                                
+                                feed_offline_file << feed_response_data;
+                                
+                                feed_offline_file.flush();
+                                
+                                feed_offline_file.close();
+                        }
+                }
 
                 get_file_stream(feed_document_text, feed_offline_location);
 
@@ -220,13 +222,20 @@ void get_http_response_stream(std::string& output, std::string& request_url) {
 
         Poco::Net::HTTPRequest http_request(request_method, request_url);
 
-        http_session.sendRequest(http_request);
+        try {
+                http_session.sendRequest(http_request);
 
-        Poco::Net::HTTPResponse http_response;
+                Poco::Net::HTTPResponse http_response;
 
-        std::istream& temp_http_response_stream = http_session.receiveResponse(http_response);
+                std::istream& temp_http_response_stream = http_session.receiveResponse(http_response);
 
-        read_istream_into_string(temp_http_response_stream, output);
+                read_istream_into_string(temp_http_response_stream, output);
+        }
+        catch(const std::exception& e) {
+                if(e.what() == "Host not found") {
+                        std::cout << e.what() << " " << "reverting to offline copy if available.\n";
+                }
+        }
 
         return;
 }
