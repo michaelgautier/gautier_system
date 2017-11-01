@@ -41,207 +41,213 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "gautier_rss_article.hxx"
 #include "gautier_rss_requestor.hxx"
 
-void get_file_stream(std::string& output, std::string& location);
-void get_http_response_stream(std::string& output, std::string& request_url);
-void read_file_into_string(std::string& location, std::string& output);
-void read_istream_into_string(std::istream& input, std::string& output);
-bool request_url_is_http(std::string& request_url);
-void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >& feed_articles, Poco::XML::NodeList* rss_xml_nodes, bool& on_item_node, gautier::system::rss::gautier_rss_article* article_item);
+using namespace std;
+using namespace Poco::XML;
+using namespace Poco::Net;
+using namespace Poco;
 
-void gautier::system::rss::gautier_rss_requestor::request_feeds(
-				std::vector<gautier_rss_request>& 				feed_parameters, 
-				std::map<std::string, std::vector<gautier_rss_article*> >& 	feed_articles
-			) {
-        for(auto rss_location : feed_parameters) {
-	        std::string feed_document_text;
+using cls = gautier::system::rss::gautier_rss_requestor;
+using cls_article = gautier::system::rss::gautier_rss_article;
 
-                std::string feed_name = rss_location.feed_name;
-                std::string feed_url = rss_location.feed_url;
-                std::string feed_offline_location(feed_name + ".xml");
-                
-                feed_articles[feed_name] = std::vector<gautier_rss_article*>();
+void get_file_stream(string& output, string& location);
+void get_http_response_stream(string& output, string& request_url);
+void read_file_into_string(string& location, string& output);
+void read_istream_into_string(istream& input, string& output);
+bool request_url_is_http(string& request_url);
+void collect_feed_impl(string feed_name, map<string, vector<cls_article*> >& feed_articles, NodeList* rss_xml_nodes, bool& on_item_node, cls_article* article_item);
 
-                if(request_url_is_http(feed_url)) {
-                        std::string feed_response_data;
+void cls::request_feeds(  vector<gautier_rss_request>& feed_parameters
+                        , map<string, vector<gautier_rss_article*>>& feed_articles) {
+	for(auto rss_location : feed_parameters) {
+		string feed_document_text;
 
-                        get_http_response_stream(feed_response_data, feed_url);
+		string feed_name = rss_location.feed_name;
+		string feed_url = rss_location.feed_url;
+		string feed_offline_location(feed_name + ".xml");
+		
+		feed_articles[feed_name] = vector<gautier_rss_article*>();
 
-                        if(!feed_response_data.empty()) {
-                                std::string feed_file_name(feed_offline_location.data(), std::ios_base::out | std::ios_base::trunc);
-                                
-                                std::ofstream feed_offline_file(feed_file_name.data());
-                                
-                                feed_offline_file << feed_response_data;
-                                
-                                feed_offline_file.flush();
-                                
-                                feed_offline_file.close();
-                        }
-                }
+		if(request_url_is_http(feed_url)) {
+			string feed_response_data;
 
-                get_file_stream(feed_document_text, feed_offline_location);
+			get_http_response_stream(feed_response_data, feed_url);
 
-                collect_feed(feed_name, feed_articles, feed_document_text);
-        }
+			if(!feed_response_data.empty()) {
+				string feed_file_name(feed_offline_location.data(), ios_base::out | ios_base::trunc);
+				
+				ofstream feed_offline_file(feed_file_name.data());
+				
+				feed_offline_file << feed_response_data;
+				
+				feed_offline_file.flush();
+				
+				feed_offline_file.close();
+			}
+		}
 
-        return;
+		get_file_stream(feed_document_text, feed_offline_location);
+
+		collect_feed(feed_name, feed_articles, feed_document_text);
+	}
+
+	return;
 }
 
-void gautier::system::rss::gautier_rss_requestor::collect_feed(std::string feed_name, std::map<std::string, std::vector<gautier_rss_article*> >& feed_articles, std::string& feed_document_stream) {
-        try {
-                Poco::XML::DOMParser rss_xml_reader;
-                rss_xml_reader.setEncoding("utf-8");
+void cls::collect_feed(string feed_name, map<string, vector<gautier_rss_article*> >& feed_articles, string& feed_document_stream) {
+	try {
+		DOMParser rss_xml_reader;
+		rss_xml_reader.setEncoding("utf-8");
 	
-	        Poco::XML::Document* rss_xml_document = rss_xml_reader.parseString(feed_document_stream);
+		Document* rss_xml_document = rss_xml_reader.parseString(feed_document_stream);
 	
-	        Poco::XML::Element* rss_xml_root = rss_xml_document->documentElement();
+		Element* rss_xml_root = rss_xml_document->documentElement();
 	
-	        Poco::XML::NodeList* rss_xml_nodes = rss_xml_root->childNodes();
+		NodeList* rss_xml_nodes = rss_xml_root->childNodes();
 
-                bool on_item_node = false;
-                gautier::system::rss::gautier_rss_article* article_item = new gautier::system::rss::gautier_rss_article;
+		bool on_item_node = false;
+		cls_article* article_item = new cls_article;
 
-                collect_feed_impl(feed_name, feed_articles, rss_xml_nodes, on_item_node, article_item);
-        } catch(Poco::XML::SAXParseException e) {
-                std::cout << "Exception handler on line " << __LINE__ << " func " << __func__ << "\n";
-                std::cout << "\t" << "Exception generated on line " << e.getLineNumber() << "\n";
-                std::cout << "\t" << e.message() << "\n";
-                std::cout << "\t" << e.displayText() << "\n";
-                std::cout << "\t" << e.name() << "\n";
-                std::cout << "\t" << e.what() << "\n";
-        }
+		collect_feed_impl(feed_name, feed_articles, rss_xml_nodes, on_item_node, article_item);
+	} catch(SAXParseException e) {
+		cout << "Exception handler on line " << __LINE__ << " func " << __func__ << "\n";
+		cout << "\t" << "Exception generated on line " << e.getLineNumber() << "\n";
+		cout << "\t" << e.message() << "\n";
+		cout << "\t" << e.displayText() << "\n";
+		cout << "\t" << e.name() << "\n";
+		cout << "\t" << e.what() << "\n";
+	}
 
-        return;
+	return;
 }
 
-void collect_feed_impl(std::string feed_name, std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >& feed_articles, Poco::XML::NodeList* rss_xml_nodes, bool& on_item_node, gautier::system::rss::gautier_rss_article* article_item) {
-        int node_count = rss_xml_nodes->length();
-        
-        bool is_item_node = false;
-        
+void collect_feed_impl(string feed_name, map<string, vector<cls_article*> >& feed_articles, NodeList* rss_xml_nodes, bool& on_item_node, cls_article* article_item) {
+	int node_count = rss_xml_nodes->length();
+	
+	bool is_item_node = false;
+	
 	for(int node_index = 0; node_index < node_count; node_index++) {
 		auto xml_node = rss_xml_nodes->item(node_index);
-                
-                auto xml_node_type = xml_node->nodeType();
+		
+		auto xml_node_type = xml_node->nodeType();
 
-                if(xml_node_type == Poco::XML::Node::ELEMENT_NODE) {
-                        std::string xml_node_name = Poco::toLower(xml_node->localName());
+		if(xml_node_type == Node::ELEMENT_NODE) {
+			string xml_node_name = toLower(xml_node->localName());
 
-                        if(xml_node_name == "item") {
-                                on_item_node = true;
-                        }
-                        else if(xml_node_name == "title") {
-                                article_item->headline = xml_node->innerText();
-                        }
-                        else if(xml_node_name == "link") {
-                                article_item->url = xml_node->innerText();
-                        }
-                        else if(xml_node_name == "description") {
-                                article_item->description = xml_node->innerText();
-                        }
-                        else if(xml_node_name == "pub_date" || xml_node_name == "pubdate") {
-                                article_item->article_date = xml_node->innerText();
-                        }
+			if(xml_node_name == "item") {
+				on_item_node = true;
+			}
+			else if(xml_node_name == "title") {
+				article_item->headline = xml_node->innerText();
+			}
+			else if(xml_node_name == "link") {
+				article_item->url = xml_node->innerText();
+			}
+			else if(xml_node_name == "description") {
+				article_item->description = xml_node->innerText();
+			}
+			else if(xml_node_name == "pub_date" || xml_node_name == "pubdate") {
+				article_item->article_date = xml_node->innerText();
+			}
 
-                        bool required_values_available = !(article_item->headline.empty() && article_item->url.empty() && article_item->description.empty() && article_item->article_date.empty());
+			bool required_values_available = !(article_item->headline.empty() && article_item->url.empty() && article_item->description.empty() && article_item->article_date.empty());
 
-                        if(required_values_available && on_item_node) {
-                                on_item_node = false;
-                                
-                                std::vector<gautier::system::rss::gautier_rss_article*>* articles = &feed_articles[feed_name];
+			if(required_values_available && on_item_node) {
+				on_item_node = false;
+				
+				vector<cls_article*>* articles = &feed_articles[feed_name];
 
-                                articles->push_back(article_item);
-                                
-                                article_item = new gautier::system::rss::gautier_rss_article;
-                        }
-                }
+				articles->push_back(article_item);
+				
+				article_item = new cls_article;
+			}
+		}
 
-                if(xml_node->hasChildNodes()) {
-                        auto xml_child_nodes = xml_node->childNodes();
+		if(xml_node->hasChildNodes()) {
+			auto xml_child_nodes = xml_node->childNodes();
 
-                        collect_feed_impl(feed_name, feed_articles, xml_child_nodes, on_item_node, article_item);
-                }
+			collect_feed_impl(feed_name, feed_articles, xml_child_nodes, on_item_node, article_item);
+		}
 
-        }
+	}
 
-        return;
+	return;
 }
 
-void read_file_into_string(std::string& location, std::string& output) {
-        std::ifstream rss_file(location.data());
+void read_file_into_string(string& location, string& output) {
+	ifstream rss_file(location.data());
 
-        while(!rss_file.eof()) {
-                std::string line;
-                
-                std::getline(rss_file, line);
+	while(!rss_file.eof()) {
+		string line;
+		
+		getline(rss_file, line);
 
-                output.append(line);
-        }
-        
-        rss_file.close();
+		output.append(line);
+	}
+	
+	rss_file.close();
 
-        return;
+	return;
 }
 
-void read_istream_into_string(std::istream& input, std::string& output) {
-        char data;
+void read_istream_into_string(istream& input, string& output) {
+	char data;
 
-        while(!input.eof()) {
-                input.get(data);
+	while(!input.eof()) {
+		input.get(data);
 
-                if(input.rdstate() == std::ios_base::goodbit) {
-                        output.push_back(data);
-                }
-        }
-        
-        return;
+		if(input.rdstate() == ios_base::goodbit) {
+			output.push_back(data);
+		}
+	}
+	
+	return;
 }
 
-bool request_url_is_http(std::string& request_url) {
-        bool result = false;
+bool request_url_is_http(string& request_url) {
+	bool result = false;
 
-        int found_string_comparison_http = Poco::icompare(request_url, 0, 4, "http");
-        
-        result = (found_string_comparison_http == 0);
+	int found_string_comparison_http = icompare(request_url, 0, 4, "http");
+	
+	result = (found_string_comparison_http == 0);
 
-        if(!result) {
-                int found_string_comparison_https = Poco::icompare(request_url, 0, 5, "https");
+	if(!result) {
+		int found_string_comparison_https = icompare(request_url, 0, 5, "https");
 
-                result = (found_string_comparison_https == 0);
-        }
-        
-        return result;
+		result = (found_string_comparison_https == 0);
+	}
+	
+	return result;
 }
 
-void get_http_response_stream(std::string& output, std::string& request_url) {
-	std::string request_method = "GET";
+void get_http_response_stream(string& output, string& request_url) {
+	string request_method = "GET";
 
-        Poco::URI request_uri(request_url);
-        
-        Poco::Net::HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
+	URI request_uri(request_url);
+	
+	HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
 
-        Poco::Net::HTTPRequest http_request(request_method, request_url);
+	HTTPRequest http_request(request_method, request_url);
 
-        try {
-                http_session.sendRequest(http_request);
+	try {
+		http_session.sendRequest(http_request);
 
-                Poco::Net::HTTPResponse http_response;
+		HTTPResponse http_response;
 
-                std::istream& temp_http_response_stream = http_session.receiveResponse(http_response);
+		istream& temp_http_response_stream = http_session.receiveResponse(http_response);
 
-                read_istream_into_string(temp_http_response_stream, output);
-        }
-        catch(const std::exception& e) {
-                if(e.what() == "Host not found") {
-                        std::cout << e.what() << " " << "reverting to offline copy if available.\n";
-                }
-        }
+		read_istream_into_string(temp_http_response_stream, output);
+	}
+	catch(const exception& e) {
+		if(e.what() == "Host not found") {
+			cout << e.what() << " " << "reverting to offline copy if available.\n";
+		}
+	}
 
-        return;
+	return;
 }
 
-void get_file_stream(std::string& output, std::string& location) {
-        read_file_into_string(location, output);
+void get_file_stream(string& output, string& location) {
+	read_file_into_string(location, output);
 
-        return;
+	return;
 }
