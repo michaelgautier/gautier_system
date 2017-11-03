@@ -14,22 +14,20 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
-#ifndef __gautier_system_rss_gautier_rss_requestor__
-#define __gautier_system_rss_gautier_rss_requestor__
+#ifndef __newscollector__
+#define __newscollector__
 
-#include <gautier_rss_request.hxx>
-#include <gautier_rss_article.hxx>
+#include <string>
 #include <vector>
-#include <map>
-namespace gautier::system::rss {
-	class gautier_rss_requestor {
-		private:
-		        void collect_feed(std::string feed_name, std::map<std::string, std::vector<gautier_rss_article*> >& feed_articles, std::string& feed_document_stream);
+
+#include "request.hxx"
+#include "material.hxx"
+
+namespace rss {
+        using namespace std;
+	class collector {
 		public:
-			void request_feeds(
-				std::vector<gautier::system::rss::gautier_rss_request>& 				feed_parameters, 
-				std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >& 		feed_articles
-			);
+			vector<material>     pull(request request);
 	};
 }
 #endif

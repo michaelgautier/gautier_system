@@ -14,15 +14,18 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
-#ifndef __gautier_system_rss_gautier_rss_request__
-#define __gautier_system_rss_gautier_rss_request__
+#ifndef __newsrequest__
+#define __newsrequest__
 
-namespace gautier::system::rss {
-	class gautier_rss_request {
+#include <string>
+
+namespace rss {
+        using namespace std;
+	class request {
 		private:
 		public:
-			std::string feed_name;
-			std::string feed_url;
+			string feedname;
+			string webaddress;
 	};
 }
 #endif
