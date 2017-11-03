@@ -13,53 +13,59 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
-
-#include <gautier_rss_article.hxx>
-#include <gautier_rss_request.hxx>
-#include <gautier_rss_requestor.hxx>
-
 #include <ios>
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
 
-void get_feed_namedaddresses(std::string& location, std::vector<gautier::system::rss::gautier_rss_request>& feed_parameters);
-void get_feed_parameter_lines_from_config(std::string& location, std::vector<std::string>& feed_parameter_lines);
+#include "material.hxx"
+#include "request.hxx"
+#include "collector.hxx"
+
+using material = rss::material;
+using request = rss::request;
+using collector = rss::collector;
+
+using namespace std;
+
+void get_feed_namedaddresses(string& location, vector<request>& feed_parameters);
+void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
 
 int main() {
-	std::vector<gautier::system::rss::gautier_rss_request> 					feed_parameters;
-	std::map<std::string, std::vector<gautier::system::rss::gautier_rss_article*> >		feed_articles;
+	vector<request> feed_parameters;
 
-	std::string feed_names_location = "feeds.txt";
+	string feed_names_location = "feeds.txt";
 	
 	get_feed_namedaddresses(feed_names_location, feed_parameters);
-	gautier::system::rss::gautier_rss_requestor rss_requestor;
-	
-	rss_requestor.request_feeds(feed_parameters, feed_articles);
-	
-	for(auto feed_article_entry : feed_articles) {
-		std::cout << feed_article_entry.first << "\n";
 
-		std::vector<gautier::system::rss::gautier_rss_article*> feed_articles = feed_article_entry.second;
+	collector rss_requestor;
+	
+	for(auto feedsource : feed_parameters) {
+	        cout << "******** feed: \t " << feedsource.feedname << "\n\n\n";
 
-		for(gautier::system::rss::gautier_rss_article* feed_article_item : feed_articles) {
-			std::string headline = feed_article_item->headline;
-			std::string url = feed_article_item->url;
-			std::string description = feed_article_item->description;
-			std::string article_date = feed_article_item->article_date;
-			
-			std::cout << "headline: " << headline << "\n";
-			std::cout << "date: " << article_date << "\n";
-			std::cout << "url: " << url << "\n";
-			std::cout << "description: " << description << "\n";
-		}
+	        vector<material> feed_articles = rss_requestor.pull(feedsource);
+	
+	        for(auto feed_article_entry : feed_articles) {
+		        string headline = feed_article_entry.headline;
+		        string url = feed_article_entry.url;
+		        string description = feed_article_entry.description;
+		        string article_date = feed_article_entry.article_date;
+
+		        cout << "\t headline: " << headline << "\n";
+		        cout << "\t date: " << article_date << "\n";
+		        cout << "\t url: " << url << "\n";
+		        cout << "\t description: " << description << "\n";
+	        }
+
+	        cout << "\n\n\n";
 	}
-	
+		
 	return 0;
 }
 
-void get_feed_namedaddresses(std::string& location, std::vector<gautier::system::rss::gautier_rss_request>& feed_parameters) {
-	std::vector<std::string> feed_parameter_lines;
+void get_feed_namedaddresses(string& location, vector<request>& feed_parameters) {
+	vector<string> feed_parameter_lines;
 
 	get_feed_parameter_lines_from_config(location, feed_parameter_lines);
 
@@ -71,17 +77,17 @@ void get_feed_namedaddresses(std::string& location, std::vector<gautier::system:
 
 		auto separator_pos = feed_line.find_first_of("\t");
 
-		if(separator_pos == std::string::npos) {
+		if(separator_pos == string::npos) {
 			continue;
 		}
  
-		std::string feed_name = feed_line.substr(0, separator_pos);
-		std::string feed_url = feed_line.substr(separator_pos+1);
+		string feed_name = feed_line.substr(0, separator_pos);
+		string feed_url = feed_line.substr(separator_pos+1);
 		
-		gautier::system::rss::gautier_rss_request feed_request;
+		request feed_request;
 
-		feed_request.feed_name = feed_name;
-		feed_request.feed_url = feed_url;
+		feed_request.feedname = feed_name;
+		feed_request.webaddress = feed_url;
 
 		feed_parameters.push_back(feed_request);
 	}
@@ -89,13 +95,13 @@ void get_feed_namedaddresses(std::string& location, std::vector<gautier::system:
 	return;
 }
 
-void get_feed_parameter_lines_from_config(std::string& location, std::vector<std::string>& feed_parameter_lines) {
-	std::ifstream feeds_file(location.data());
+void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines) {
+	ifstream feeds_file(location.data());
 		
 	while(!feeds_file.eof()) {
-		std::string feeds_data;
+		string feeds_data;
 
-		std::getline(feeds_file, feeds_data);
+		getline(feeds_file, feeds_data);
 
 		feed_parameter_lines.push_back(feeds_data);
 	}
