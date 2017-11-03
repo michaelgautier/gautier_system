@@ -20,7 +20,8 @@ rm bin/newsc.e
 echo "Building rss_requestor cli"
 g++ -std=c++14 -c -g -I../lib/news -I/usr/include -o obj/newsc.o ../news_cli.cxx
 g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -Wl,-rpath,. -o bin/newsc.e obj/newsc.o 
-cp ../config/feeds.txt bin
+cp --update ../config/feeds.txt bin
+cp --update ../config/*.xml bin
 
 echo "	bin"
 ls -gGh bin/
