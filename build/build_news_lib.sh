@@ -8,20 +8,30 @@
 #C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
 rm obj/*.o
-rm bin/libgautier_rss_requestor*
+rm bin/*.so
 
 reset
-
-clang -std=c++17 -c -fPIC -g -I../gautier_rss_requestor_lib/ -o obj/gautier_rss_requestor_lib.o ../gautier_rss_requestor_lib/lib.cxx
-clang -std=c++17 -g -shared -I../gautier_rss_requestor_lib/ -lPocoFoundation -lPocoUtil -lPocoNet -o bin/libgautier_rss_requestor.so obj/gautier_rss_requestor_lib.o
-
 echo "	build"
 ls -gGhU
 
-echo "	bin"
-ls -gGh bin/
+echo "build file lib"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_file.o ../lib/news/techconstruct/file.cxx
+g++ -g -shared -I../lib/news/techconstruct/ -lPocoFoundation -Wl,-rpath,. -o bin/libnews_file.so obj/libnews_file.o
+
+echo "build http lib"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_http.o ../lib/news/techconstruct/http.cxx
+g++ -g -shared -I../lib/news/techconstruct/ -lPocoFoundation -lPocoUtil -lPocoNet -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
+
+echo "build parser lib"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -I../lib/news/ -o obj/libnews_parser.o ../lib/news/techconstruct/parser.cxx
+g++ -g -shared -I../lib/news/techconstruct/ -I../lib/news/ -lPocoFoundation -lPocoXML -Wl,-rpath,. -o bin/libnews_parser.so obj/libnews_parser.o
+
+echo "build collector lib"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -I../lib/news/ -o obj/libnews_collector.o ../lib/news/collector.cxx
+g++ -g -shared -I../lib/news/techconstruct/ -I../lib/news/ -Wl,-rpath,. -o bin/libnews_collector.so obj/libnews_collector.o
 
 echo "	obj"
 ls -gGh obj/
 
-
+echo "	bin"
+ls -gGh bin/*.so
