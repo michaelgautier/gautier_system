@@ -9,7 +9,7 @@
 
 reset
 echo "Building rss_requestor library"
-#./build_news_lib.sh
+./build_news_lib.sh
 
 echo "Building visual function library"
 ./build_news_reader_lib.sh
