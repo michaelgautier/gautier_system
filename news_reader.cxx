@@ -79,7 +79,7 @@ class mainscreenheaderbar : public Fl_Widget {
 
                         //cout << "draw() text x/y/w/h " << text_x << "/" << text_y << "/" << text_w << "/" << text_h << "\n";
                         
-                        int text_visual_x = 20;
+                        const int text_visual_x = 20;
                         int text_visual_y = h();
                         
                         if(abs(text_y) > 0) {
@@ -181,32 +181,14 @@ class visualcallable {
                         return;
                 }
 };
-int main() {
-	const int xy = 0;
-
-	const int workarea_w = Fl::w();
-	const int workarea_h = Fl::h();
-
-        /*
-                Not using any of this but is a good way to 
-                determine how much of the system generated 
-                title bar is used up in vertical pixels.
-        */
-        //int screen_x = 0;
-        //int screen_y = 0;
-        //int screen_w = 0;
-        //int screen_h = 0;
-
-        //Fl::screen_xywh(screen_x, screen_y, screen_w, screen_h);
-
-        //int window_chrome_offset = screen_h - workarea_h;
-
+auto get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
         int next_y = 0;
         int text_w = 0;
         int text_h = 0;
         int accumulated_h = 0;
+        int remaining_h = 0;
 
         int x = 0;
         int y = 0;
@@ -216,13 +198,13 @@ int main() {
         int rh = 0;
 
         const int max_elems = 6;
-        cout << "workarea_h " << workarea_h << "\n";
+
         for(int index = 0; index < max_elems; index++) {
                 visualcallable callable(index);
 
                 x = 0;
                 y = next_y;
-                w = workarea_w;
+                w = screen_w;
 
                 switch(index) {
                         case 0://RSS Reader Header
@@ -242,46 +224,35 @@ int main() {
                         break;
                         case 1://RSS Reader Headlines
                         {
-                                h = (workarea_h) / 2;
+                                h = remaining_h / 2;
                         }
                         break;
                         case 2://RSS Reader article content
                         {
                                 double dv = 1.4;
-                                h = (workarea_h - accumulated_h)/dv;
+                                h = remaining_h / dv;
                         }
                         break;
                         case 3:
                         {
-                                double dv = 4.6;
-                                rh = (workarea_h - accumulated_h)/dv;
+                                double dv = 3;
+                                rh = remaining_h / dv;
+
                                 h = rh;
-                                cout << "rh " << rh << "\n";
+
                                 callable.label("test 1");
                         }
                         break;
                         case 4:
                         {
-                                int dv = 3;
                                 h = rh;
+
                                 callable.label("test 2");
                         }
                         break;
                         case 5:
                         {
-                                int dv = 3;
                                 h = rh;
-                                
-                                if((accumulated_h + h) < workarea_h) {
-                                        cout << "compare workarea_h to h + accumulated_h " << workarea_h << " " << (accumulated_h + h) << "\n";
-                                        int additional_area_h = workarea_h-accumulated_h;
-
-                                        cout << "additional_area " << additional_area_h << " last_h " << h << "\n";
-                                        
-                                        h = additional_area_h;
-
-                                        cout << "final last h " << h << "\n";
-                                }
                                 
                                 callable.label("test 3");
                         }
@@ -291,33 +262,49 @@ int main() {
                 callable.x(x);
                 callable.y(y);
                 callable.w(w);
-                callable.h(abs(h));
+                callable.h(h);
                 
                 accumulated_h = (accumulated_h + callable.h());
                 next_y = (next_y + callable.h());
+                //remaining_h = ((workarea_h - window_chrome_offset) - accumulated_h);
+                remaining_h = (screen_h - accumulated_h);
 
-                cout << index << ": accumulated_h " << accumulated_h << "\n";
+                cout << "index: " << index << " ";
+                cout << " h: " << h;
+                cout << " accumulated_h: " << accumulated_h;
+                cout << " remaining_h: " << remaining_h;
+                cout << "\n";
 
                 callables.push_back(callable);
         }
-
-        Fl_Double_Window visual_window(xy, xy, workarea_w, workarea_h);
-        visual_window.end();
-
-	visual_window.size_range(480, 320, workarea_w, workarea_h);
-        visual_window.label("RSS Reader");
         
+        return callables;
+}
+auto get_widgets(const vector<visualcallable> & callables) {
         vector<shared_ptr<Fl_Widget>> widgets;
-        
-        for(visualcallable callable : callables) {
-                int index = callable.id();
-                string label = callable.label();
-                auto label_text = label.data();
 
-                x = callable.x();
-                y = callable.y();
-                w = callable.w();
-                h = callable.h();
+        for(visualcallable callable : callables) {
+                const int index = callable.id();
+
+                /*
+                        Raw pointer necessary.
+                        Quickly tried both C++14 smart pointers and both 
+                        resulted in text that was missing.
+                        
+                        Without a raw pointer the text is garbled.
+                        
+                        FLTK is accessing string data such that this approach 
+                        is required.
+                */
+                auto label = new string(callable.label());
+
+                auto label_text = label->data();
+
+                const int x = callable.x();
+                const int y = callable.y();
+                const int w = callable.w();
+                const int h = callable.h();
+
                 cout << index << ": ";
 
                 switch(index) {
@@ -372,27 +359,109 @@ int main() {
                 fl_color(fl_rgb_color(213, 255, 246));
         }
 
-        for(auto widget : widgets) {
-                visual_window.add(widget.get());
+        return widgets;
+}
+auto get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
+        unique_ptr<Fl_Double_Window> visual_window(new Fl_Double_Window(x, y, w, h));
+        visual_window->end();
+
+	visual_window->size_range(w_lo, h_lo, w, h);
+        visual_window->label(label.data());
+
+        return visual_window;
+}
+void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window) {
+        const int widgetcount = visual_window->children();
+        
+        for(int index = 0; index < widgetcount; index++) {
+                visual_window->remove(index);
         }
 
-        visual_window.show();
-        visual_window.redraw();
+        return;
+}
+int main() {
+	int workarea_x = 0;
+	int workarea_y = 0;
+	int workarea_w = 0;
+	int workarea_h = 0;
 
-        int last_w = visual_window.w();
-        int last_h = visual_window.h();
+        int screen_x = 0;
+        int screen_y = 0;
+        int screen_w = 0;
+        int screen_h = 0;
+
+        Fl::screen_xywh(screen_x, screen_y, screen_w, screen_h);
+        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
+
+        Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
+        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+
+        auto visual_window = get_window(0, 0, workarea_w, workarea_h, 320, 480, "RSS Reader");
+
+        visual_window->show();
+        visual_window->redraw();
+
+        int last_w = visual_window->w();
+        int last_h = visual_window->h();
+
+        cout << "last w/h before " << last_w << "/" << last_h << "\n";
+
+        auto callables = get_callables(workarea_x, screen_y, workarea_w, (workarea_h - workarea_y));
+        
+        auto widgets = get_widgets(callables);
 
 	while(Fl::check()) {
-		int new_w = visual_window.w();
-		int new_h = visual_window.h();
+		const int new_w = visual_window->w();
+		const int new_h = visual_window->h();
 
 		if(last_h != new_h || last_w != new_w) {
 			last_h = new_h;
 			last_w = new_w;
 
-			visual_window.redraw();
+//                        cout << " last w/h " << last_w << "/" << last_h << "\n";
+//                        cout << "  new w/h " << new_w << "/" << new_h << "\n";
+
+//                        Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
+//                        cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+
+                        clear_window_widgets(visual_window);
+
+                        widgets.clear();
+
+                        callables = get_callables(workarea_x, screen_y, new_w, new_h);
+                        
+                        widgets = get_widgets(callables);
+
+                        for(auto widget : widgets) {
+                                visual_window->add(widget.get());
+                        }
+
+			visual_window->redraw();
 		}		
 	}
+
+        /*
+                Segmentation fault if you don't do exactly this.
+                You can model it by changing visual_window to a raw pointer
+                use an compare visual_window to raw pointer and then 
+                delete visual_window (or don't). Whether you delete or not,
+                you will get a segmentation fault because the order of 
+                deallocation may occur counter-intuitively.
+                If vector<*> is cleared before FLTK window, then when 
+                FLTK attempts to recursively deallocate, it accesses 
+                pointers without checking they are valid.
+                Anyway, this can be controlled by removing the widgets 
+                from the window first (do not call window.clear()).
+                Next, use clear on the vector to allow the standard 
+                library to reclaim them (they were allocated through a 
+                call to emplace_back after all).
+                
+                What this reveals is that smart pointers are not 100% smart 
+                and some knowledge about raw pointers is still necessary.
+        */
+        clear_window_widgets(visual_window);
+
+        widgets.clear();
         
 	return 0;
 }
