@@ -18,11 +18,26 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <fstream>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include <FL/Fl.H>
 #include <FL/Enumerations.H>
 #include <FL/names.h>
+#include <FL/abi-version.h>
+#include <FL/Fl_Export.H>
+#include <FL/fl_types.h>
+#include <FL/fl_draw.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Group.H>
+#include <FL/Fl_Hold_Browser.H>
+#include <FL/Fl_Help_View.H>
+#include <FL/Fl_Pack.H>
+#include <FL/Fl_Tile.H>
 #include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Widget.H>
 
 #include "material.hxx"
 #include "request.hxx"
@@ -32,130 +47,352 @@ using material = rss::material;
 using request = rss::request;
 using collector = rss::collector;
 
-#include "visualcycle.hxx"
-#include "visualcallable.hxx"
-#include "visualsheet.hxx"
-
 using namespace std;
-namespace ns_vf = visualfunc::formulation;
 
-/*
-        Mix of the functional style with objects passed through functions.
-        The functional nature is driven by the way FLTK is designed.
+class mainscreenheaderbar : public Fl_Widget {
+        public:
+                mainscreenheaderbar(int x, int y, int w, int h, const char *label = 0) : Fl_Widget(x, y, w, h, label) {
+                        box(FL_FLAT_BOX);
 
-        Plan to have icons at the bottom for navigation.
-        A mobile app friendly design that can work equally on desktop and mobile
-        in that the program structure is simple, not too complex.
-        
-        If abstracted properly, all the high-level program branches can be 
-        placed here. The key is to properly abstract the code that would 
-        otherwise be in the function bodies.
-        
-        The way that will work is to write all the code in the function bodies 
-        first and then systematically abstract the function bodies. That will 
-        allow for greater, up-front, productivity while planning for a cleaner 
-        program representation in this module.
-*/
+                        return;
+                }
+        protected:
+                void draw() {
+                        /*
+                                Thanks to Erco's Cheat Sheet page http://seriss.com/people/erco/fltk/
+                                That page was far more clear than the FLTK page discussing drawing things.
+                        */
+                        string label_text = "RSS Reader";
+                        fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), fl_rgb_color(212, 85, 0));
+                        
+                        //cout << "draw() x/y/w/h " << x() << "/" << y() << "/" << w() << "/" << h() << "\n";
+                        
+                        fl_font(FL_HELVETICA, 72);
+                        fl_color(fl_rgb_color(213, 255, 246));
 
-//void get_feed_namedaddresses(string& location, vector<request>& feed_parameters);
-//void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
+                        int text_x = 0;
+                        int text_y = 0;
+                        int text_w = 0;
+                        int text_h = 0;
+                        
+                        fl_text_extents(label_text.data(), text_x, text_y, text_w, text_h);
 
-//void render_reader(Fl_Double_Window& winhost, Fl_Widget& winframe, bool is_inited);
+                        //cout << "draw() text x/y/w/h " << text_x << "/" << text_y << "/" << text_w << "/" << text_h << "\n";
+                        
+                        int text_visual_x = 20;
+                        int text_visual_y = h();
+                        
+                        if(abs(text_y) > 0) {
+                                int text_y_offset = abs(h() - abs(text_y))/2;
 
+                                text_visual_y = h()-text_y_offset;
+                        }
+                        
+                        fl_draw(label_text.data(), text_visual_x, text_visual_y);
+
+                        return;
+                }
+                int handle(int event) {
+                        //redraw();
+                        return 1;
+                }
+//                void hide() {
+//                        return;
+//                }
+//                void resize(int x, int y, int w, int h) {
+//                        return;
+//                }
+//                void show() {
+//                        return;
+//                }
+};
+class visualcallable {
+        private:
+                int _id = 0;
+                int _x = 0;
+                int _y = 0;
+                int _w = 0;
+                int _h = 0;
+                string _label;
+        public:
+                visualcallable(int id) {
+                        _id = id;
+                        
+                        return;
+                }
+                
+                int id() {
+                        return _id;
+                }
+                
+                void id(int v) {
+                        _id = v;
+                        
+                        return;
+                }
+                
+                int x() {
+                        return _x;
+                }
+                
+                void x(int v) {
+                        _x = v;
+                        
+                        return;
+                }
+                
+                int y() {
+                        return _y;
+                }
+                
+                void y(int v) {
+                        _y = v;
+                        
+                        return;
+                }
+                
+                int w() {
+                        return _w;
+                }
+                
+                void w(int v) {
+                        _w = v;
+                        
+                        return;
+                }
+                
+                int h() {
+                        return _h;
+                }
+                
+                void h(int v) {
+                        _h = v;
+                        
+                        return;
+                }
+                
+                string label() {
+                        return _label;
+                }
+                
+                void label(string v) {
+                        _label = v;
+                        
+                        return;
+                }
+};
 int main() {
-        auto cf = ns_vf::get_visual_sheet_config();
+	const int xy = 0;
 
-        ns_vf::visualsheet vs = ns_vf::make_visual_sheet(cf);
+	const int workarea_w = Fl::w();
+	const int workarea_h = Fl::h();
 
-        vector<ns_vf::visualcallable> vce = ns_vf::make_visual_callables(ns_vf::get_visual_callable_prototypes());
+        /*
+                Not using any of this but is a good way to 
+                determine how much of the system generated 
+                title bar is used up in vertical pixels.
+        */
+        //int screen_x = 0;
+        //int screen_y = 0;
+        //int screen_w = 0;
+        //int screen_h = 0;
 
-        vs(vce);
+        //Fl::screen_xywh(screen_x, screen_y, screen_w, screen_h);
 
-        bool success = vs();
+        //int window_chrome_offset = screen_h - workarea_h;
 
-	return (int)success;
+        vector<visualcallable> callables;
+        
+        int next_y = 0;
+        int text_w = 0;
+        int text_h = 0;
+        int accumulated_h = 0;
+
+        int x = 0;
+        int y = 0;
+        int w = 0;
+        int h = 0;
+
+        int rh = 0;
+
+        const int max_elems = 6;
+        cout << "workarea_h " << workarea_h << "\n";
+        for(int index = 0; index < max_elems; index++) {
+                visualcallable callable(index);
+
+                x = 0;
+                y = next_y;
+                w = workarea_w;
+
+                switch(index) {
+                        case 0://RSS Reader Header
+                        {
+                                fl_font(FL_HELVETICA, 72);
+                                
+                                /*
+                                        Usually results in a bounding box larger than  
+                                        the text based on the same font size.
+                                */
+                                fl_measure("W", text_w, text_h, 1);
+
+                                callable.label("RSS Reader");
+
+                                h = text_h;
+                        }
+                        break;
+                        case 1://RSS Reader Headlines
+                        {
+                                h = (workarea_h) / 2;
+                        }
+                        break;
+                        case 2://RSS Reader article content
+                        {
+                                double dv = 1.4;
+                                h = (workarea_h - accumulated_h)/dv;
+                        }
+                        break;
+                        case 3:
+                        {
+                                double dv = 4.6;
+                                rh = (workarea_h - accumulated_h)/dv;
+                                h = rh;
+                                cout << "rh " << rh << "\n";
+                                callable.label("test 1");
+                        }
+                        break;
+                        case 4:
+                        {
+                                int dv = 3;
+                                h = rh;
+                                callable.label("test 2");
+                        }
+                        break;
+                        case 5:
+                        {
+                                int dv = 3;
+                                h = rh;
+                                
+                                if((accumulated_h + h) < workarea_h) {
+                                        cout << "compare workarea_h to h + accumulated_h " << workarea_h << " " << (accumulated_h + h) << "\n";
+                                        int additional_area_h = workarea_h-accumulated_h;
+
+                                        cout << "additional_area " << additional_area_h << " last_h " << h << "\n";
+                                        
+                                        h = additional_area_h;
+
+                                        cout << "final last h " << h << "\n";
+                                }
+                                
+                                callable.label("test 3");
+                        }
+                        break;
+                }
+
+                callable.x(x);
+                callable.y(y);
+                callable.w(w);
+                callable.h(abs(h));
+                
+                accumulated_h = (accumulated_h + callable.h());
+                next_y = (next_y + callable.h());
+
+                cout << index << ": accumulated_h " << accumulated_h << "\n";
+
+                callables.push_back(callable);
+        }
+
+        Fl_Double_Window visual_window(xy, xy, workarea_w, workarea_h);
+        visual_window.end();
+
+	visual_window.size_range(480, 320, workarea_w, workarea_h);
+        visual_window.label("RSS Reader");
+        
+        vector<shared_ptr<Fl_Widget>> widgets;
+        
+        for(visualcallable callable : callables) {
+                int index = callable.id();
+                string label = callable.label();
+                auto label_text = label.data();
+
+                x = callable.x();
+                y = callable.y();
+                w = callable.w();
+                h = callable.h();
+                cout << index << ": ";
+
+                switch(index) {
+                        case 0://RSS Reader Header
+                        {
+                                cout << "RSS Reader Header setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new mainscreenheaderbar(x, y, w, h, label_text)));
+                        }
+                        break;
+                        case 1://RSS Reader Headlines
+                        {
+                                cout << "RSS Reader Headlines setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Hold_Browser(x, y, w, h, label_text)));
+                        }
+                        break;
+                        case 2://RSS Reader article content
+                        {
+                                cout << "RSS Reader Article setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Help_View(x, y, w, h, label_text)));
+                        }
+                        break;
+                        case 3:
+                        {
+                                cout << "RSS Reader Control Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
+                                auto widget = widgets.back();
+                                widget->box(FL_FLAT_BOX);
+                                widget->color(fl_rgb_color(200, 113, 55));
+                        }
+                        break;
+                        case 4:
+                        {
+                                cout << "RSS Reader RSS Change Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
+                                auto widget = widgets.back();
+                                widget->box(FL_FLAT_BOX);
+                                widget->color(fl_rgb_color(83, 108, 83));
+                        }
+                        break;
+                        case 5:
+                        {
+                                cout << "RSS Reader Feed Choice Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
+                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
+                                auto widget = widgets.back();
+                                widget->box(FL_FLAT_BOX);
+                                widget->color(fl_rgb_color(255, 204, 170));
+                        }
+                        break;
+                }
+
+                fl_font(FL_HELVETICA, 20);
+                fl_color(fl_rgb_color(213, 255, 246));
+        }
+
+        for(auto widget : widgets) {
+                visual_window.add(widget.get());
+        }
+
+        visual_window.show();
+        visual_window.redraw();
+
+        int last_w = visual_window.w();
+        int last_h = visual_window.h();
+
+	while(Fl::check()) {
+		int new_w = visual_window.w();
+		int new_h = visual_window.h();
+
+		if(last_h != new_h || last_w != new_w) {
+			last_h = new_h;
+			last_w = new_w;
+
+			visual_window.redraw();
+		}		
+	}
+        
+	return 0;
 }
-
-//void render_reader(Fl_Double_Window& winhost, Fl_Widget& winframe, bool is_inited) {
-//        if(!is_inited) {
-//                //construct the reader
-
-//                //add data to the reader
-//	        vector<request> feed_parameters;
-
-//	        string feed_names_location = "feeds.txt";
-
-//	        get_feed_namedaddresses(feed_names_location, feed_parameters);
-
-//	        collector rss_requestor;
-
-//	        for(auto feedsource : feed_parameters) {
-//	                cout << "******** feed: \t " << feedsource.feedname << "\n\n\n";
-
-//	                vector<material> feed_articles = rss_requestor.pull(feedsource);
-
-//	                for(auto feed_article_entry : feed_articles) {
-//		                string headline = feed_article_entry.headline;
-//		                string url = feed_article_entry.url;
-//		                string description = feed_article_entry.description;
-//		                string article_date = feed_article_entry.article_date;
-
-//		                cout << "\t headline: " << headline << "\n";
-//		                cout << "\t date: " << article_date << "\n";
-//		                cout << "\t url: " << url << "\n";
-//		                cout << "\t description: " << description << "\n";
-//	                }
-
-//	                cout << "\n\n\n";
-//	        }
-//        }
-//        return;
-//}
-
-//void get_feed_namedaddresses(string& location, vector<request>& feed_parameters) {
-//	vector<string> feed_parameter_lines;
-
-//	get_feed_parameter_lines_from_config(location, feed_parameter_lines);
-
-//	for(auto feed_line : feed_parameter_lines) {
-//		//define feed url
-//		if(feed_line.size() > 1 && feed_line[0] == '#') {
-//			continue;
-//		}
-
-//		auto separator_pos = feed_line.find_first_of("\t");
-
-//		if(separator_pos == string::npos) {
-//			continue;
-//		}
-// 
-//		string feed_name = feed_line.substr(0, separator_pos);
-//		string feed_url = feed_line.substr(separator_pos+1);
-//		
-//		request feed_request;
-
-//		feed_request.feedname = feed_name;
-//		feed_request.webaddress = feed_url;
-
-//		feed_parameters.push_back(feed_request);
-//	}
-//	
-//	return;
-//}
-
-//void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines) {
-//	ifstream feeds_file(location.data());
-//		
-//	while(!feeds_file.eof()) {
-//		string feeds_data;
-
-//		getline(feeds_file, feeds_data);
-
-//		feed_parameter_lines.push_back(feeds_data);
-//	}
-//	
-//	feeds_file.close();
-
-//	return;
-//}
-
