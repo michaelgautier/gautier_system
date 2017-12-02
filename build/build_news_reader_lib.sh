@@ -48,6 +48,11 @@ echo "build main screen header bar"
 g++ -std=c++14 -c -fPIC -g -I../librss_ui_impl/ -o obj/librssui_mainscreenheaderbar.o ../librss_ui_impl/mainscreenheaderbar.cxx
 g++ -g -shared -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreenheaderbar.so obj/librssui_mainscreenheaderbar.o
 
+#must be last
+echo "build main screen generator"
+g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
+g++ -g -shared -L./bin -I../librss_ui_impl/ -lrssui_mainscreenheaderbar -Wl,-rpath,. -o bin/librssui_mainscreengenerator.so obj/librssui_mainscreengenerator.o
+
 echo "	obj"
 ls -gGh obj/
 
