@@ -66,6 +66,93 @@ vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callabl
 unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
 void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window);
 
+void cls::generate() {
+	int workarea_x = 0;
+	int workarea_y = 0;
+	int workarea_w = 0;
+	int workarea_h = 0;
+
+        int screen_x = 0;
+        int screen_y = 0;
+        int screen_w = 0;
+        int screen_h = 0;
+
+        Fl::screen_xywh(screen_x, screen_y, screen_w, screen_h);
+        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
+
+        Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
+        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+
+        auto visual_window = get_window(0, 0, workarea_w, workarea_h, 320, 480, "RSS Reader");
+
+        visual_window->show();
+        visual_window->redraw();
+
+        int last_w = visual_window->w();
+        int last_h = visual_window->h();
+
+        cout << "last w/h before " << last_w << "/" << last_h << "\n";
+
+        auto callables = get_callables(workarea_x, screen_y, workarea_w, (workarea_h - workarea_y));
+        
+        auto widgets = get_widgets(callables);
+
+	while(Fl::check()) {
+		const int new_w = visual_window->w();
+		const int new_h = visual_window->h();
+
+		if(last_h != new_h || last_w != new_w) {
+			last_h = new_h;
+			last_w = new_w;
+
+                        //cout << " last w/h " << last_w << "/" << last_h << "\n";
+                        //cout << "  new w/h " << new_w << "/" << new_h << "\n";
+
+                        //Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
+                        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+
+                        clear_window_widgets(visual_window);
+
+                        widgets.clear();
+
+                        callables = get_callables(workarea_x, screen_y, new_w, new_h);
+                        
+                        widgets = get_widgets(callables);
+
+                        for(auto widget : widgets) {
+                                visual_window->add(widget.get());
+                        }
+
+			visual_window->redraw();
+		}		
+	}
+
+        /*
+                Segmentation fault if you don't do exactly this. You can model 
+                it by changing visual_window to a raw pointer compare 
+                visual_window to raw pointer and then delete visual_window 
+                (or don't). Whether you delete or not, you will get a 
+                segmentation fault because the order of deallocation may occur 
+                counter-intuitively. If vector<*> is cleared before 
+                FLTK window, then when FLTK attempts to recursively 
+                deallocate, it accesses pointers without checking they are 
+                valid. Anyway, this can be controlled by removing the widgets 
+                from the window first (do not call window.clear()). Next, 
+                use clear on the vector to allow the standard library to 
+                reclaim them (they were allocated through a call to 
+                emplace_back after all).
+                
+                What this reveals is that smart pointers are not 100% smart 
+                and some knowledge about raw pointers is still necessary. You 
+                cannot just code without thinking about the memory model once 
+                you include third-party libraries that may work differently 
+                than the latest espoused practice in C++ coding.
+        */
+        clear_window_widgets(visual_window);
+
+        widgets.clear();
+}
+
 vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
@@ -165,6 +252,7 @@ vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, i
         
         return callables;
 }
+
 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callables) {
         vector<shared_ptr<Fl_Widget>> widgets;
 
@@ -246,6 +334,7 @@ vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callabl
 
         return widgets;
 }
+
 unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
         unique_ptr<Fl_Double_Window> visual_window(new Fl_Double_Window(x, y, w, h));
         visual_window->end();
@@ -255,6 +344,7 @@ unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, in
 
         return visual_window;
 }
+
 void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window) {
         const int widgetcount = visual_window->children();
         
@@ -263,91 +353,4 @@ void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window) {
         }
 
         return;
-}
-
-void cls::generate() {
-	int workarea_x = 0;
-	int workarea_y = 0;
-	int workarea_w = 0;
-	int workarea_h = 0;
-
-        int screen_x = 0;
-        int screen_y = 0;
-        int screen_w = 0;
-        int screen_h = 0;
-
-        Fl::screen_xywh(screen_x, screen_y, screen_w, screen_h);
-        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
-
-        Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
-        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
-
-        auto visual_window = get_window(0, 0, workarea_w, workarea_h, 320, 480, "RSS Reader");
-
-        visual_window->show();
-        visual_window->redraw();
-
-        int last_w = visual_window->w();
-        int last_h = visual_window->h();
-
-        cout << "last w/h before " << last_w << "/" << last_h << "\n";
-
-        auto callables = get_callables(workarea_x, screen_y, workarea_w, (workarea_h - workarea_y));
-        
-        auto widgets = get_widgets(callables);
-
-	while(Fl::check()) {
-		const int new_w = visual_window->w();
-		const int new_h = visual_window->h();
-
-		if(last_h != new_h || last_w != new_w) {
-			last_h = new_h;
-			last_w = new_w;
-
-                        //cout << " last w/h " << last_w << "/" << last_h << "\n";
-                        //cout << "  new w/h " << new_w << "/" << new_h << "\n";
-
-                        //Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
-                        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
-
-                        clear_window_widgets(visual_window);
-
-                        widgets.clear();
-
-                        callables = get_callables(workarea_x, screen_y, new_w, new_h);
-                        
-                        widgets = get_widgets(callables);
-
-                        for(auto widget : widgets) {
-                                visual_window->add(widget.get());
-                        }
-
-			visual_window->redraw();
-		}		
-	}
-
-        /*
-                Segmentation fault if you don't do exactly this. You can model 
-                it by changing visual_window to a raw pointer compare 
-                visual_window to raw pointer and then delete visual_window 
-                (or don't). Whether you delete or not, you will get a 
-                segmentation fault because the order of deallocation may occur 
-                counter-intuitively. If vector<*> is cleared before 
-                FLTK window, then when FLTK attempts to recursively 
-                deallocate, it accesses pointers without checking they are 
-                valid. Anyway, this can be controlled by removing the widgets 
-                from the window first (do not call window.clear()). Next, 
-                use clear on the vector to allow the standard library to 
-                reclaim them (they were allocated through a call to 
-                emplace_back after all).
-                
-                What this reveals is that smart pointers are not 100% smart 
-                and some knowledge about raw pointers is still necessary. You 
-                cannot just code without thinking about the memory model once 
-                you include third-party libraries that may work differently 
-                than the latest espoused practice in C++ coding.
-        */
-        clear_window_widgets(visual_window);
-
-        widgets.clear();
 }
