@@ -42,12 +42,14 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "material.hxx"
 #include "request.hxx"
 #include "collector.hxx"
+#include "visualcallable.hxx"
 
 using material = rss::material;
 using request = rss::request;
 using collector = rss::collector;
 
 using namespace std;
+using visualcallable = visualfunc::formulation::visualcallable;
 
 class mainscreenheaderbar : public Fl_Widget {
         public:
@@ -105,81 +107,6 @@ class mainscreenheaderbar : public Fl_Widget {
 //                void show() {
 //                        return;
 //                }
-};
-class visualcallable {
-        private:
-                int _id = 0;
-                int _x = 0;
-                int _y = 0;
-                int _w = 0;
-                int _h = 0;
-                string _label;
-        public:
-                visualcallable(int id) {
-                        _id = id;
-                        
-                        return;
-                }
-                
-                int id() {
-                        return _id;
-                }
-                
-                void id(int v) {
-                        _id = v;
-                        
-                        return;
-                }
-                
-                int x() {
-                        return _x;
-                }
-                
-                void x(int v) {
-                        _x = v;
-                        
-                        return;
-                }
-                
-                int y() {
-                        return _y;
-                }
-                
-                void y(int v) {
-                        _y = v;
-                        
-                        return;
-                }
-                
-                int w() {
-                        return _w;
-                }
-                
-                void w(int v) {
-                        _w = v;
-                        
-                        return;
-                }
-                
-                int h() {
-                        return _h;
-                }
-                
-                void h(int v) {
-                        _h = v;
-                        
-                        return;
-                }
-                
-                string label() {
-                        return _label;
-                }
-                
-                void label(string v) {
-                        _label = v;
-                        
-                        return;
-                }
 };
 auto get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
@@ -418,11 +345,11 @@ int main() {
 			last_h = new_h;
 			last_w = new_w;
 
-//                        cout << " last w/h " << last_w << "/" << last_h << "\n";
-//                        cout << "  new w/h " << new_w << "/" << new_h << "\n";
+                        //cout << " last w/h " << last_w << "/" << last_h << "\n";
+                        //cout << "  new w/h " << new_w << "/" << new_h << "\n";
 
-//                        Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
-//                        cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+                        //Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
+                        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
 
                         clear_window_widgets(visual_window);
 
@@ -441,23 +368,25 @@ int main() {
 	}
 
         /*
-                Segmentation fault if you don't do exactly this.
-                You can model it by changing visual_window to a raw pointer
-                use an compare visual_window to raw pointer and then 
-                delete visual_window (or don't). Whether you delete or not,
-                you will get a segmentation fault because the order of 
-                deallocation may occur counter-intuitively.
-                If vector<*> is cleared before FLTK window, then when 
-                FLTK attempts to recursively deallocate, it accesses 
-                pointers without checking they are valid.
-                Anyway, this can be controlled by removing the widgets 
-                from the window first (do not call window.clear()).
-                Next, use clear on the vector to allow the standard 
-                library to reclaim them (they were allocated through a 
-                call to emplace_back after all).
+                Segmentation fault if you don't do exactly this. You can model 
+                it by changing visual_window to a raw pointer compare 
+                visual_window to raw pointer and then delete visual_window 
+                (or don't). Whether you delete or not, you will get a 
+                segmentation fault because the order of deallocation may occur 
+                counter-intuitively. If vector<*> is cleared before 
+                FLTK window, then when FLTK attempts to recursively 
+                deallocate, it accesses pointers without checking they are 
+                valid. Anyway, this can be controlled by removing the widgets 
+                from the window first (do not call window.clear()). Next, 
+                use clear on the vector to allow the standard library to 
+                reclaim them (they were allocated through a call to 
+                emplace_back after all).
                 
                 What this reveals is that smart pointers are not 100% smart 
-                and some knowledge about raw pointers is still necessary.
+                and some knowledge about raw pointers is still necessary. You 
+                cannot just code without thinking about the memory model once 
+                you include third-party libraries that may work differently 
+                than the latest espoused practice in C++ coding.
         */
         clear_window_widgets(visual_window);
 
