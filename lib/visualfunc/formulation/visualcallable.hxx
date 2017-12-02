@@ -17,11 +17,50 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #ifndef __visualfunc_formulation_visualcallable__
 #define __visualfunc_formulation_visualcallable__
 
+#include <string>
+
 namespace visualfunc {
 namespace formulation {
         using namespace std;
-	class visualcallable {
-	};
+        class visualcallable {
+                private:
+                        int _id = 0;
+                        int _x = 0;
+                        int _y = 0;
+                        int _w = 0;
+                        int _h = 0;
+                        string _label;
+                public:
+                        visualcallable(int id) {
+                                _id = id;
+                                
+                                return;
+                        }
+                        
+                        int id();
+                        
+                        void id(int v);
+                        
+                        int x();
+                        
+                        void x(int v);
+                        
+                        int y();
+                        
+                        void y(int v);
+                        
+                        int w();
+                        
+                        void w(int v);
+                        
+                        int h();
+                        
+                        void h(int v);
+                        
+                        string label();
+                        
+                        void label(string v);
+        };
 }
 }
 #endif
