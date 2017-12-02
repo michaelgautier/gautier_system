@@ -61,13 +61,7 @@ using cls = rss::ui::mainscreengenerator;
 using visualcallable = visualfunc::formulation::visualcallable;
 using mainscreenheaderbar = rss::ui::mainscreenheaderbar;
 
-/*
-        I am going to get rid of these auto declarations for the functions, 
-        they don't help when you want to declare the function separate from the 
-        implementation. You have to use decltype anyway and declaring the 
-        return type is simpler.
-*/
-auto get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
+vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
         int next_y = 0;
@@ -166,7 +160,7 @@ auto get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         
         return callables;
 }
-auto get_widgets(const vector<visualcallable> & callables) {
+vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callables) {
         vector<shared_ptr<Fl_Widget>> widgets;
 
         for(visualcallable callable : callables) {
@@ -247,7 +241,7 @@ auto get_widgets(const vector<visualcallable> & callables) {
 
         return widgets;
 }
-auto get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
+unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
         unique_ptr<Fl_Double_Window> visual_window(new Fl_Double_Window(x, y, w, h));
         visual_window->end();
 
