@@ -42,7 +42,9 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "material.hxx"
 #include "request.hxx"
 #include "collector.hxx"
+
 #include "visualcallable.hxx"
+#include "mainscreenheaderbar.hxx"
 
 using material = rss::material;
 using request = rss::request;
@@ -50,64 +52,8 @@ using collector = rss::collector;
 
 using namespace std;
 using visualcallable = visualfunc::formulation::visualcallable;
+using mainscreenheaderbar = rss::ui::mainscreenheaderbar;
 
-class mainscreenheaderbar : public Fl_Widget {
-        public:
-                mainscreenheaderbar(int x, int y, int w, int h, const char *label = 0) : Fl_Widget(x, y, w, h, label) {
-                        box(FL_FLAT_BOX);
-
-                        return;
-                }
-        protected:
-                void draw() {
-                        /*
-                                Thanks to Erco's Cheat Sheet page http://seriss.com/people/erco/fltk/
-                                That page was far more clear than the FLTK page discussing drawing things.
-                        */
-                        string label_text = "RSS Reader";
-                        fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), fl_rgb_color(212, 85, 0));
-                        
-                        //cout << "draw() x/y/w/h " << x() << "/" << y() << "/" << w() << "/" << h() << "\n";
-                        
-                        fl_font(FL_HELVETICA, 72);
-                        fl_color(fl_rgb_color(213, 255, 246));
-
-                        int text_x = 0;
-                        int text_y = 0;
-                        int text_w = 0;
-                        int text_h = 0;
-                        
-                        fl_text_extents(label_text.data(), text_x, text_y, text_w, text_h);
-
-                        //cout << "draw() text x/y/w/h " << text_x << "/" << text_y << "/" << text_w << "/" << text_h << "\n";
-                        
-                        const int text_visual_x = 20;
-                        int text_visual_y = h();
-                        
-                        if(abs(text_y) > 0) {
-                                int text_y_offset = abs(h() - abs(text_y))/2;
-
-                                text_visual_y = h()-text_y_offset;
-                        }
-                        
-                        fl_draw(label_text.data(), text_visual_x, text_visual_y);
-
-                        return;
-                }
-                int handle(int event) {
-                        //redraw();
-                        return 1;
-                }
-//                void hide() {
-//                        return;
-//                }
-//                void resize(int x, int y, int w, int h) {
-//                        return;
-//                }
-//                void show() {
-//                        return;
-//                }
-};
 auto get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
