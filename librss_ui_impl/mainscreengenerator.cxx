@@ -61,6 +61,11 @@ using cls = rss::ui::mainscreengenerator;
 using visualcallable = visualfunc::formulation::visualcallable;
 using mainscreenheaderbar = rss::ui::mainscreenheaderbar;
 
+vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h);
+vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callables);
+unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
+void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window);
+
 vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
