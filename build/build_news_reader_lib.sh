@@ -44,6 +44,10 @@ g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visu
 #g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualsheetconfigparam.o ../lib/visualfunc/formulation/visualsheetconfigparam.cxx
 #g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualsheetconfigparam.so obj/libnews_visualsheetconfigparam.o
 
+echo "build main screen header bar"
+g++ -std=c++14 -c -fPIC -g -I../librss_ui_impl/ -o obj/librssui_mainscreenheaderbar.o ../librss_ui_impl/mainscreenheaderbar.cxx
+g++ -g -shared -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreenheaderbar.so obj/librssui_mainscreenheaderbar.o
+
 echo "	obj"
 ls -gGh obj/
 
