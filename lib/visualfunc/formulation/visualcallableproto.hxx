@@ -18,11 +18,27 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #define __visualfunc_formulation_visualcallableproto__
 
 #include <vector>
+#include "visualcallable.hxx"
 
 namespace visualfunc {
 namespace formulation {
         using namespace std;
 	class visualcallableproto {
+	        public:
+	        visualcallableproto(int screen_x, int screen_y, int screen_w, int screen_h) {
+	                _screen_x = screen_x;
+	                _screen_y = screen_y;
+	                _screen_w = screen_w;
+	                _screen_h = screen_h;
+
+	                return;
+	        }
+	        vector<visualcallable> get_callables();
+	        private:
+                int _screen_x = 0;
+                int _screen_y = 0;
+                int _screen_w = 0;
+                int _screen_h = 0;
 	};
 }
 }

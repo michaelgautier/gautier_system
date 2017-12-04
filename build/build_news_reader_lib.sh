@@ -28,9 +28,9 @@ echo "build visual callable"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallable.o ../lib/visualfunc/formulation/visualcallable.cxx
 g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallable.so obj/libnews_visualcallable.o
 
-#echo "build visual callable proto"
-#g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallableproto.o ../lib/visualfunc/formulation/visualcallableproto.cxx
-#g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallableproto.so obj/libnews_visualcallableproto.o
+echo "build visual callable proto"
+g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallableproto.o ../lib/visualfunc/formulation/visualcallableproto.cxx
+g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallableproto.so obj/libnews_visualcallableproto.o
 
 #echo "build visual cycle"
 #g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcycle.o ../lib/visualfunc/formulation/visualcycle.cxx
