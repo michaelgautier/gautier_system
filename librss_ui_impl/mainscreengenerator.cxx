@@ -83,7 +83,7 @@ void cls::generate() {
         Fl::screen_work_area(workarea_x, workarea_y, workarea_w, workarea_h);
         //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
 
-        auto visual_window = get_window(0, 0, workarea_w, workarea_h, 320, 480, "RSS Reader");
+        unique_ptr<Fl_Double_Window> visual_window = get_window(0, 0, workarea_w, workarea_h, 320, 480, "RSS Reader");
 
         visual_window->show();
         visual_window->redraw();
@@ -91,11 +91,11 @@ void cls::generate() {
         int last_w = visual_window->w();
         int last_h = visual_window->h();
 
-        cout << "last w/h before " << last_w << "/" << last_h << "\n";
+        //cout << "last w/h before " << last_w << "/" << last_h << "\n";
 
-        auto callables = get_callables(workarea_x, screen_y, workarea_w, (workarea_h - workarea_y));
+        vector<visualcallable> callables;
         
-        auto widgets = get_widgets(callables);
+        vector<shared_ptr<Fl_Widget>> widgets;
 
 	while(Fl::check()) {
 		const int new_w = visual_window->w();
@@ -241,11 +241,11 @@ vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, i
                 //remaining_h = ((workarea_h - window_chrome_offset) - accumulated_h);
                 remaining_h = (screen_h - accumulated_h);
 
-                cout << "index: " << index << " ";
-                cout << " h: " << h;
-                cout << " accumulated_h: " << accumulated_h;
-                cout << " remaining_h: " << remaining_h;
-                cout << "\n";
+                //cout << "index: " << index << " ";
+                //cout << " h: " << h;
+                //cout << " accumulated_h: " << accumulated_h;
+                //cout << " remaining_h: " << remaining_h;
+                //cout << "\n";
 
                 callables.push_back(callable);
         }
@@ -278,48 +278,40 @@ vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callabl
                 const int w = callable.w();
                 const int h = callable.h();
 
-                cout << index << ": ";
-
                 switch(index) {
                         case 0://RSS Reader Header
                         {
-                                cout << "RSS Reader Header setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new mainscreenheaderbar(x, y, w, h, label_text)));
                         }
                         break;
                         case 1://RSS Reader Headlines
                         {
-                                cout << "RSS Reader Headlines setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Hold_Browser(x, y, w, h, label_text)));
                         }
                         break;
                         case 2://RSS Reader article content
                         {
-                                cout << "RSS Reader Article setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Help_View(x, y, w, h, label_text)));
                         }
                         break;
-                        case 3:
+                        case 3://RSS Reader Control Bar
                         {
-                                cout << "RSS Reader Control Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
                                 auto widget = widgets.back();
                                 widget->box(FL_FLAT_BOX);
                                 widget->color(fl_rgb_color(200, 113, 55));
                         }
                         break;
-                        case 4:
+                        case 4://RSS Reader RSS Change Bar
                         {
-                                cout << "RSS Reader RSS Change Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
                                 auto widget = widgets.back();
                                 widget->box(FL_FLAT_BOX);
                                 widget->color(fl_rgb_color(83, 108, 83));
                         }
                         break;
-                        case 5:
+                        case 5://RSS Reader Feed Choice Bar
                         {
-                                cout << "RSS Reader Feed Choice Bar setup x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
                                 widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
                                 auto widget = widgets.back();
                                 widget->box(FL_FLAT_BOX);
@@ -327,6 +319,9 @@ vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callabl
                         }
                         break;
                 }
+
+                //cout << index << ": ";
+                //cout << "x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
 
                 fl_font(FL_HELVETICA, 20);
                 fl_color(fl_rgb_color(213, 255, 246));
