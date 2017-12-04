@@ -26,6 +26,13 @@ using collector = rss::collector;
 using namespace std;
 
 int main() {
+        /*
+        
+                Will need a thing that holds, pulls, and processes data
+                then passes that data to the generator.
+        
+        */
+
         rss::ui::mainscreengenerator generator;
         generator.generate();
         

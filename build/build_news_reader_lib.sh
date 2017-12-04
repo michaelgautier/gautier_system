@@ -36,6 +36,10 @@ echo "build main screen blueprint"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreenblueprint.o ../librss_ui_impl/mainscreenblueprint.cxx
 g++ -g -shared -Wl,-rpath,. -o bin/librssui_mainscreenblueprint.so obj/librssui_mainscreenblueprint.o
 
+echo "build main screen visualsbuilder"
+g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreenvisualsbuilder.o ../librss_ui_impl/mainscreenvisualsbuilder.cxx
+g++ -g -shared -Wl,-rpath,. -o bin/librssui_mainscreenvisualsbuilder.so obj/librssui_mainscreenvisualsbuilder.o
+
 echo "build main screen header bar"
 g++ -std=c++14 -c -fPIC -g -I../librss_ui_impl/ -o obj/librssui_mainscreenheaderbar.o ../librss_ui_impl/mainscreenheaderbar.cxx
 g++ -g -shared -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreenheaderbar.so obj/librssui_mainscreenheaderbar.o
