@@ -39,7 +39,7 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <FL/Fl_Tile.H>
 
 #include "visualcallable.hxx"
-#include "visualcallableproto.hxx"
+#include "mainscreenblueprint.hxx"
 #include "mainscreengenerator.hxx"
 #include "mainscreenheaderbar.hxx"
 
@@ -47,10 +47,10 @@ using namespace std;
 using cls = rss::ui::mainscreengenerator;
 
 using visualcallable = visualfunc::formulation::visualcallable;
-using visualcallableproto = visualfunc::formulation::visualcallableproto;
+using mainscreenblueprint = rss::ui::mainscreenblueprint;
 using mainscreenheaderbar = rss::ui::mainscreenheaderbar;
 
-vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h);
+vector<visualcallable> get_visual_areas(int screen_x, int screen_y, int screen_w, int screen_h);
 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callables);
 unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
 void clear_window_widgets(unique_ptr<Fl_Double_Window>& visual_window);
@@ -104,9 +104,9 @@ void cls::generate() {
 
                         widgets.clear();
 
-                        visualcallableproto vc_proto(workarea_x, screen_y, new_w, new_h);
+                        mainscreenblueprint visual_blueprint(workarea_x, screen_y, new_w, new_h);
                         
-                        callables = vc_proto.get_callables();
+                        callables = visual_blueprint.get_visual_definitions();
 
                         widgets = get_widgets(callables);
 
@@ -143,106 +143,6 @@ void cls::generate() {
 
         widgets.clear();
 }
-
-//vector<visualcallable> get_callables(int screen_x, int screen_y, int screen_w, int screen_h) {
-//        vector<visualcallable> callables;
-//        
-//        int next_y = 0;
-//        int text_w = 0;
-//        int text_h = 0;
-//        int accumulated_h = 0;
-//        int remaining_h = 0;
-
-//        int x = 0;
-//        int y = 0;
-//        int w = 0;
-//        int h = 0;
-
-//        int rh = 0;
-
-//        const int max_elems = 6;
-
-//        for(int index = 0; index < max_elems; index++) {
-//                visualcallable callable(index);
-
-//                x = 0;
-//                y = next_y;
-//                w = screen_w;
-
-//                switch(index) {
-//                        case 0://RSS Reader Header
-//                        {
-//                                fl_font(FL_HELVETICA, 72);
-//                                
-//                                /*
-//                                        Usually results in a bounding box larger than  
-//                                        the text based on the same font size.
-//                                */
-//                                fl_measure("W", text_w, text_h, 1);
-
-//                                callable.label("RSS Reader");
-
-//                                h = text_h;
-//                        }
-//                        break;
-//                        case 1://RSS Reader Headlines
-//                        {
-//                                h = remaining_h / 2;
-//                        }
-//                        break;
-//                        case 2://RSS Reader article content
-//                        {
-//                                double dv = 1.4;
-//                                h = remaining_h / dv;
-//                        }
-//                        break;
-//                        case 3:
-//                        {
-//                                double dv = 3;
-//                                rh = remaining_h / dv;
-
-//                                h = rh;
-
-//                                callable.label("test 1");
-//                        }
-//                        break;
-//                        case 4:
-//                        {
-//                                h = rh;
-
-//                                callable.label("test 2");
-//                        }
-//                        break;
-//                        case 5:
-//                        {
-//                                h = rh;
-//                                
-//                                callable.label("test 3");
-//                        }
-//                        break;
-//                }
-
-//                callable.x(x);
-//                callable.y(y);
-//                callable.w(w);
-//                callable.h(h);
-//                
-//                accumulated_h = (accumulated_h + callable.h());
-//                next_y = (next_y + callable.h());
-//                //remaining_h = ((workarea_h - window_chrome_offset) - accumulated_h);
-//                remaining_h = (screen_h - accumulated_h);
-
-//                //cout << "index: " << index << " ";
-//                //cout << " h: " << h;
-//                //cout << " accumulated_h: " << accumulated_h;
-//                //cout << " remaining_h: " << remaining_h;
-//                //cout << "\n";
-
-//                callables.push_back(callable);
-//        }
-//        
-//        return callables;
-//}
 
 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualcallable> & callables) {
         vector<shared_ptr<Fl_Widget>> widgets;

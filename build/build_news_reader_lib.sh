@@ -7,17 +7,9 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
-rm obj/libnews_visualcallable.o
-rm obj/libnews_visualcallableproto.o
-rm obj/libnews_visualcycle.o
-rm obj/libnews_visualsheet.o
-rm obj/libnews_visualsheetconfigparam.o
+rm obj/libnews_visual*.o
 
-rm bin/libnews_visualcallable.so
-rm bin/libnews_visualcycle.so
-rm bin/libnews_visualcycle.so
-rm bin/libnews_visualsheet.so
-rm bin/libnews_visualsheetconfigparam.so
+rm bin/libnews_visual*.so
 
 reset
 
@@ -27,10 +19,6 @@ ls -gGhU
 echo "build visual callable"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallable.o ../lib/visualfunc/formulation/visualcallable.cxx
 g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallable.so obj/libnews_visualcallable.o
-
-echo "build visual callable proto"
-g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallableproto.o ../lib/visualfunc/formulation/visualcallableproto.cxx
-g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallableproto.so obj/libnews_visualcallableproto.o
 
 #echo "build visual cycle"
 #g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcycle.o ../lib/visualfunc/formulation/visualcycle.cxx
@@ -44,11 +32,14 @@ g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visu
 #g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualsheetconfigparam.o ../lib/visualfunc/formulation/visualsheetconfigparam.cxx
 #g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualsheetconfigparam.so obj/libnews_visualsheetconfigparam.o
 
+echo "build main screen blueprint"
+g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreenblueprint.o ../librss_ui_impl/mainscreenblueprint.cxx
+g++ -g -shared -Wl,-rpath,. -o bin/librssui_mainscreenblueprint.so obj/librssui_mainscreenblueprint.o
+
 echo "build main screen header bar"
 g++ -std=c++14 -c -fPIC -g -I../librss_ui_impl/ -o obj/librssui_mainscreenheaderbar.o ../librss_ui_impl/mainscreenheaderbar.cxx
 g++ -g -shared -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreenheaderbar.so obj/librssui_mainscreenheaderbar.o
 
-#must be last
 echo "build main screen generator"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
 g++ -g -shared -L./bin -I../librss_ui_impl/ -lrssui_mainscreenheaderbar -Wl,-rpath,. -o bin/librssui_mainscreengenerator.so obj/librssui_mainscreengenerator.o

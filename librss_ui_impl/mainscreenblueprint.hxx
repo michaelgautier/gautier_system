@@ -14,18 +14,18 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
-#ifndef __visualfunc_formulation_visualcallableproto__
-#define __visualfunc_formulation_visualcallableproto__
+#ifndef __rss_ui_mainscreenblueprint__
+#define __rss_ui_mainscreenblueprint__
 
 #include <vector>
 #include "visualcallable.hxx"
 
-namespace visualfunc {
-namespace formulation {
+namespace rss {
+namespace ui {
         using namespace std;
-	class visualcallableproto {
+	class mainscreenblueprint {
 	        public:
-	        visualcallableproto(int screen_x, int screen_y, int screen_w, int screen_h) {
+	        mainscreenblueprint(int screen_x, int screen_y, int screen_w, int screen_h) {
 	                _screen_x = screen_x;
 	                _screen_y = screen_y;
 	                _screen_w = screen_w;
@@ -33,7 +33,7 @@ namespace formulation {
 
 	                return;
 	        }
-	        vector<visualcallable> get_callables();
+	        vector<visualfunc::formulation::visualcallable> get_visual_definitions();
 	        private:
                 int _screen_x = 0;
                 int _screen_y = 0;

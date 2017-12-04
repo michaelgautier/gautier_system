@@ -3,13 +3,13 @@
 #include <FL/fl_draw.H>
 
 #include "visualcallable.hxx"
-#include "visualcallableproto.hxx"
+#include "mainscreenblueprint.hxx"
 
 using namespace std;
-using cls = visualfunc::formulation::visualcallableproto;
+using cls = rss::ui::mainscreenblueprint;
 using visualcallable = visualfunc::formulation::visualcallable;
 
-vector<visualcallable> cls::get_callables() {
+vector<visualcallable> cls::get_visual_definitions() {
         vector<visualcallable> callables;
         
         int next_y = 0;
