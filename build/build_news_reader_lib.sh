@@ -20,18 +20,6 @@ echo "build visual callable"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallable.o ../lib/visualfunc/formulation/visualcallable.cxx
 g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallable.so obj/libnews_visualcallable.o
 
-#echo "build visual cycle"
-#g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcycle.o ../lib/visualfunc/formulation/visualcycle.cxx
-#g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcycle.so obj/libnews_visualcycle.o
-
-#echo "build visual sheet"
-#g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualsheet.o ../lib/visualfunc/formulation/visualsheet.cxx
-#g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualsheet.so obj/libnews_visualsheet.o
-
-#echo "build visual sheet config param"
-#g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualsheetconfigparam.o ../lib/visualfunc/formulation/visualsheetconfigparam.cxx
-#g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualsheetconfigparam.so obj/libnews_visualsheetconfigparam.o
-
 echo "build main screen blueprint"
 g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreenblueprint.o ../librss_ui_impl/mainscreenblueprint.cxx
 g++ -g -shared -Wl,-rpath,. -o bin/librssui_mainscreenblueprint.so obj/librssui_mainscreenblueprint.o
