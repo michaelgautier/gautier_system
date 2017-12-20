@@ -11,31 +11,36 @@ rm obj/libnews_file.o
 rm obj/libnews_http.o
 rm obj/libnews_parser.o
 rm obj/libnews_collector.o
+rm obj/libnews_feedscycle.o
 
 rm bin/libnews_file.so
 rm bin/libnews_http.so
 rm bin/libnews_parser.so
 rm bin/libnews_collector.so
+rm bin/libnews_feedscycle.so
 
-reset
 echo "	build"
 ls -gGhU
 
 echo "build file lib"
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_file.o ../lib/news/techconstruct/file.cxx
-g++ -g -shared -I../lib/news/techconstruct/ -lPocoFoundation -Wl,-rpath,. -o bin/libnews_file.so obj/libnews_file.o
+g++ -g -shared -lPocoFoundation -Wl,-rpath,. -o bin/libnews_file.so obj/libnews_file.o
 
 echo "build http lib"
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_http.o ../lib/news/techconstruct/http.cxx
-g++ -g -shared -I../lib/news/techconstruct/ -lPocoFoundation -lPocoUtil -lPocoNet -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
+g++ -g -shared -lPocoFoundation -lPocoUtil -lPocoNet -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
 
 echo "build parser lib"
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -I../lib/news/ -o obj/libnews_parser.o ../lib/news/techconstruct/parser.cxx
-g++ -g -shared -I../lib/news/techconstruct/ -I../lib/news/ -lPocoFoundation -lPocoXML -Wl,-rpath,. -o bin/libnews_parser.so obj/libnews_parser.o
+g++ -g -shared -lPocoFoundation -lPocoXML -Wl,-rpath,. -o bin/libnews_parser.so obj/libnews_parser.o
 
 echo "build collector lib"
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -I../lib/news/ -o obj/libnews_collector.o ../lib/news/collector.cxx
-g++ -g -shared -I../lib/news/techconstruct/ -I../lib/news/ -Wl,-rpath,. -o bin/libnews_collector.so obj/libnews_collector.o
+g++ -g -shared -Wl,-rpath,. -o bin/libnews_collector.so obj/libnews_collector.o
+
+echo "build feedscycle lib"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_feedscycle.o ../lib/news/feedscycle.cxx
+g++ -g -shared -lPocoFoundation -Wl,-rpath,. -o bin/libnews_feedscycle.so obj/libnews_feedscycle.o
 
 echo "	obj"
 ls -gGh obj/

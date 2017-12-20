@@ -8,16 +8,16 @@
 #C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
 reset
-#echo "Building rss_requestor library"
-#./build_news_lib.sh
+echo "Building rss_requestor library"
+./build_news_lib.sh
 
 echo "Building visual function library"
 ./build_news_reader_lib.sh
 
 echo "Building rss reader"
-g++ -std=c++14 -c -g -I../lib/news -I../lib/visualfunc/formulation -I../librss_ui_impl -I/usr/include -o obj/newsreader.o ../news_reader.cxx
-g++ -lfltk -L./bin -lnews_visualcallable -lrssui_mainscreenheaderbar -lrssui_mainscreenblueprint -lrssui_mainscreenvisualsbuilder -lrssui_mainscreengenerator -Wl,-rpath,. -o bin/newsreader obj/newsreader.o 
-
+g++ -std=c++14 -c -g  -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx
+g++ -lfltk -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -lrssui_mainscreenblueprint -Wl,-rpath,. -o bin/newsreader obj/newsreader.o 
+# -lrssui_mainscreenheaderbar 
 echo "	bin"
 ls -gGh bin/
 

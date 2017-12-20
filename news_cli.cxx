@@ -13,33 +13,30 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
-#include <ios>
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
 
-#include "material.hxx"
-#include "request.hxx"
 #include "collector.hxx"
+#include "request.hxx"
+#include "material.hxx"
+#include "feedscycle.hxx"
 
+using collector = rss::collector;
 using material = rss::material;
 using request = rss::request;
-using collector = rss::collector;
+using feedscycle = rss::feedscycle;
 
 using namespace std;
-
-void get_feed_namedaddresses(string& location, vector<request>& feed_parameters);
-void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
 
 int main() {
 	vector<request> feed_parameters;
 
 	string feed_names_location = "feeds.txt";
 	
-	get_feed_namedaddresses(feed_names_location, feed_parameters);
-
 	collector rss_requestor;
+
+        feedscycle feeds_group;
+        
+	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
 	
 	for(auto feedsource : feed_parameters) {
 	        cout << "******** feed: \t " << feedsource.feedname << "\n\n\n";
@@ -63,51 +60,3 @@ int main() {
 		
 	return 0;
 }
-
-void get_feed_namedaddresses(string& location, vector<request>& feed_parameters) {
-	vector<string> feed_parameter_lines;
-
-	get_feed_parameter_lines_from_config(location, feed_parameter_lines);
-
-	for(auto feed_line : feed_parameter_lines) {
-		//define feed url
-		if(feed_line.size() > 1 && feed_line[0] == '#') {
-			continue;
-		}
-
-		auto separator_pos = feed_line.find_first_of("\t");
-
-		if(separator_pos == string::npos) {
-			continue;
-		}
- 
-		string feed_name = feed_line.substr(0, separator_pos);
-		string feed_url = feed_line.substr(separator_pos+1);
-		
-		request feed_request;
-
-		feed_request.feedname = feed_name;
-		feed_request.webaddress = feed_url;
-
-		feed_parameters.push_back(feed_request);
-	}
-	
-	return;
-}
-
-void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines) {
-	ifstream feeds_file(location.data());
-		
-	while(!feeds_file.eof()) {
-		string feeds_data;
-
-		getline(feeds_file, feeds_data);
-
-		feed_parameter_lines.push_back(feeds_data);
-	}
-	
-	feeds_file.close();
-
-	return;
-}
-
