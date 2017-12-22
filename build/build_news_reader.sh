@@ -17,7 +17,7 @@ echo "Building visual function library"
 echo "Building rss reader"
 g++ -std=c++14 -c -g  -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx
 g++ -lfltk -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -lrssui_mainscreenblueprint -Wl,-rpath,. -o bin/newsreader obj/newsreader.o 
-# -lrssui_mainscreenheaderbar 
+
 echo "	bin"
 ls -gGh bin/
 

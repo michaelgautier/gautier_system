@@ -27,7 +27,6 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Output.H>
-#include <FL/Fl_Tile.H>
 
 #include "mainscreengenerator.hxx"
 
@@ -38,7 +37,6 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "feedscycle.hxx"
 
 #include "mainscreenblueprint.hxx"
-//#include "mainscreenheaderbar.hxx"
 
 using collector = rss::collector;
 using material = rss::material;
@@ -51,6 +49,91 @@ using namespace std;
 using cls = rss::ui::mainscreengenerator;
 
 vector<string> _strings;
+
+Fl_Output* get_visual_rss_header_display() {
+        Fl_Output* HeaderRegion = new Fl_Output(0, 0, 0, 0);
+
+        HeaderRegion->box(FL_FLAT_BOX);
+        HeaderRegion->color(fl_rgb_color(212, 85, 0));
+        HeaderRegion->value("RSS Reader");
+        HeaderRegion->textfont(FL_HELVETICA);
+        HeaderRegion->textsize(72);
+        HeaderRegion->textcolor(fl_rgb_color(213, 255, 246));
+
+        return HeaderRegion;
+}
+
+Fl_Hold_Browser* get_visual_rss_headlines_display() {
+        Fl_Hold_Browser* HeadlinesRegion = new Fl_Hold_Browser(0, 0, 0, 0);
+
+        return HeadlinesRegion;
+}
+
+Fl_Help_View* get_visual_rss_article_contents_display() {
+        Fl_Help_View* ArticleContentsRegion = new Fl_Help_View(0, 0, 0, 0);
+
+        return ArticleContentsRegion;
+}
+
+Fl_Pack* get_visual_rss_control_bar_display() {
+        Fl_Pack* RSSControlBarRegion = new Fl_Pack(0, 0, 0, 0);
+
+        RSSControlBarRegion->type(Fl_Pack::HORIZONTAL);
+
+        int text_x = 0;
+        int text_y = 0;
+        int text_w = 0;
+        int text_h = 0;
+        
+        int text_wh_plus = 20;
+        
+        fl_font(FL_HELVETICA, 12);
+
+        string enlarge_button_label_text = "Enlarge";
+        fl_text_extents((new string(enlarge_button_label_text))->data(), text_x, text_y, text_w, text_h);
+        //cout << "text_w " << text_w << "\n";
+
+        Fl_Button* enlarge_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
+        enlarge_button->copy_label((new string(enlarge_button_label_text))->data());
+
+        RSSControlBarRegion->add(enlarge_button);
+
+        return RSSControlBarRegion;
+}
+
+Fl_Pack* get_visual_rss_change_bar_display() {
+        Fl_Pack* RSSChangeBarRegion = new Fl_Pack(0, 0, 0, 0);
+
+        RSSChangeBarRegion->type(Fl_Pack::HORIZONTAL);
+
+        int text_x = 0;
+        int text_y = 0;
+        int text_w = 0;
+        int text_h = 0;
+        
+        int text_wh_plus = 20;
+
+        fl_font(FL_HELVETICA, 12);
+
+        string update_button_label_text = "Update";
+        fl_text_extents((new string(update_button_label_text))->data(), text_x, text_y, text_w, text_h);
+        //cout << "text_w " << text_w << "\n";
+
+        Fl_Button* update_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
+        update_button->copy_label(update_button_label_text.data());
+
+        RSSChangeBarRegion->add(update_button);
+
+        return RSSChangeBarRegion;
+}
+
+Fl_Pack* get_visual_rss_choice_display() {
+        Fl_Pack* RSSFeedChoiceRegion = new Fl_Pack(0, 0, 0, 0);
+
+        RSSFeedChoiceRegion->type(Fl_Pack::HORIZONTAL);
+
+        return RSSFeedChoiceRegion;
+}
 
 void cls::generate() {
         const int w_lo = 320;
@@ -118,74 +201,6 @@ void cls::generate() {
         Fl_Pack WorkAreaRegion(0, 0, _workarea_w, _workarea_h);
         WorkAreaRegion.type(Fl_Pack::VERTICAL);
 
-        Fl_Output HeaderRegion(0, 0, 0, 0);
-        Fl_Hold_Browser HeadlinesRegion(0, 0, 0, 0);
-        Fl_Help_View ArticleContentsRegion(0, 0, 0, 0);
-        Fl_Pack RSSControlBarRegion(0, 0, 0, 0);
-        Fl_Pack RSSChangeBarRegion(0, 0, 0, 0);
-        Fl_Pack RSSFeedChoiceRegion(0, 0, 0, 0);
-
-        WorkAreaRegion.add(HeaderRegion);
-        WorkAreaRegion.add(HeadlinesRegion);
-        WorkAreaRegion.add(ArticleContentsRegion);
-        WorkAreaRegion.add(RSSControlBarRegion);
-        WorkAreaRegion.add(RSSChangeBarRegion);
-        WorkAreaRegion.add(RSSFeedChoiceRegion);
-
-        HeaderRegion.box(FL_FLAT_BOX);
-        HeaderRegion.color(fl_rgb_color(212, 85, 0));
-        HeaderRegion.value("RSS Reader");
-        HeaderRegion.textfont(FL_HELVETICA);
-        HeaderRegion.textsize(72);
-        HeaderRegion.textcolor(fl_rgb_color(213, 255, 246));
-
-        RSSControlBarRegion.type(Fl_Pack::HORIZONTAL);
-        RSSChangeBarRegion.type(Fl_Pack::HORIZONTAL);
-        RSSFeedChoiceRegion.type(Fl_Pack::HORIZONTAL);
-
-        int text_x = 0;
-        int text_y = 0;
-        int text_w = 0;
-        int text_h = 0;
-        
-        int text_wh_plus = 20;
-        
-        fl_font(FL_HELVETICA, 12);
-
-        string enlarge_button_label_text = "Enlarge";
-        fl_text_extents((new string(enlarge_button_label_text))->data(), text_x, text_y, text_w, text_h);
-        cout << "text_w " << text_w << "\n";
-
-        Fl_Button* enlarge_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
-        enlarge_button->copy_label((new string(enlarge_button_label_text))->data());
-
-        RSSControlBarRegion.add(enlarge_button);
-
-        string update_button_label_text = "Update";
-        fl_text_extents((new string(update_button_label_text))->data(), text_x, text_y, text_w, text_h);
-        cout << "text_w " << text_w << "\n";
-
-        Fl_Button* update_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
-        update_button->copy_label(update_button_label_text.data());
-
-        RSSChangeBarRegion.add(update_button);
-        
-        for(auto feed_article_entry : feed_articles) {
-              HeadlinesRegion.add(string(feed_article_entry.headline).data());
-        }
-
-        for(auto feedsource : feed_parameters) {
-                auto feedname = feedsource.feedname;
-
-                fl_text_extents(feedname.data(), text_x, text_y, text_w, text_h);
-                cout << "text_w " << text_w << "\n";
-
-                Fl_Button* feed_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
-                feed_button->copy_label(feedname.data());
-
-                RSSFeedChoiceRegion.add(feed_button);
-        }
-
         _visual_window->add(WorkAreaRegion);
 
         vector<visualcallable> callables;
@@ -203,8 +218,12 @@ void cls::generate() {
 
                         callables = visual_blueprint.get_visual_definitions();
 
-                        for(visualcallable callable : callables) {
-                                const int index = callable.id();
+                        const int callable_size = callables.size();
+                        
+                        bool children_count_matches = (WorkAreaRegion.children() == callable_size);
+
+                        for(int callable_index = 0; callable_index < callable_size; callable_index++) {
+                                visualcallable callable = callables[callable_index];
 
                                 auto label = new string(callable.label());
 
@@ -215,35 +234,130 @@ void cls::generate() {
                                 const int w = callable.w();
                                 const int h = callable.h();
 
-                                switch(index) {
+                                switch(callable_index) {
                                         case 0://RSS Reader Header
                                         {
-                                                HeaderRegion.size(w, h);
+                                                Fl_Output* HeaderRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        HeaderRegion = (decltype(HeaderRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        HeaderRegion = get_visual_rss_header_display();
+
+                                                        WorkAreaRegion.add(HeaderRegion);
+                                                }
+
+                                                HeaderRegion->size(w, h);
                                         }
                                         break;
                                         case 1://RSS Reader Headlines
                                         {
-                                                HeadlinesRegion.size(w, h);
+                                                Fl_Hold_Browser* HeadlinesRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        HeadlinesRegion = (decltype(HeadlinesRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        HeadlinesRegion = get_visual_rss_headlines_display();
+
+                                                        WorkAreaRegion.add(HeadlinesRegion);
+                                                }
+
+                                                HeadlinesRegion->size(w, h);
+
+                                                if(HeadlinesRegion->size() == 0) {
+                                                        for(auto feed_article_entry : feed_articles) {
+                                                              HeadlinesRegion->add(string(feed_article_entry.headline).data());
+                                                        }
+                                                }
                                         }
                                         break;
                                         case 2://RSS Reader article content
                                         {
-                                                ArticleContentsRegion.size(w, h);
+                                                Fl_Help_View* ArticleContentsRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        ArticleContentsRegion = (decltype(ArticleContentsRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        ArticleContentsRegion = get_visual_rss_article_contents_display();
+
+                                                        WorkAreaRegion.add(ArticleContentsRegion);
+                                                }
+
+                                                ArticleContentsRegion->size(w, h);
                                         }
                                         break;
                                         case 3://RSS Reader Control Bar
                                         {
-                                                RSSControlBarRegion.size(w, h);
+                                                Fl_Pack* RSSControlBarRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        RSSControlBarRegion = (decltype(RSSControlBarRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        RSSControlBarRegion = get_visual_rss_control_bar_display();
+
+                                                        WorkAreaRegion.add(RSSControlBarRegion);
+                                                }
+
+                                                RSSControlBarRegion->size(w, h);
                                         }
                                         break;
                                         case 4://RSS Reader RSS Change Bar
                                         {
-                                                RSSChangeBarRegion.size(w, h);
+                                                Fl_Pack* RSSChangeBarRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        RSSChangeBarRegion = (decltype(RSSChangeBarRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        RSSChangeBarRegion = get_visual_rss_change_bar_display();
+
+                                                        WorkAreaRegion.add(RSSChangeBarRegion);
+                                                }
+
+                                                RSSChangeBarRegion->size(w, h);
                                         }
                                         break;
                                         case 5://RSS Reader Feed Choice Bar
                                         {
-                                                RSSFeedChoiceRegion.size(w, h);
+                                                Fl_Pack* RSSFeedChoiceRegion = nullptr;
+
+                                                if(children_count_matches) {
+                                                        RSSFeedChoiceRegion = (decltype(RSSFeedChoiceRegion))WorkAreaRegion.child(callable_index);
+                                                }
+                                                else {
+                                                        RSSFeedChoiceRegion = get_visual_rss_choice_display();
+
+                                                        WorkAreaRegion.add(RSSFeedChoiceRegion);
+                                                }
+
+                                                RSSFeedChoiceRegion->size(w, h);
+
+                                                if(RSSFeedChoiceRegion->children() == 0) {
+                                                        for(auto feedsource : feed_parameters) {
+                                                                auto feedname = feedsource.feedname;
+
+                                                                int text_x = 0;
+                                                                int text_y = 0;
+                                                                int text_w = 0;
+                                                                int text_h = 0;
+                                                                
+                                                                int text_wh_plus = 20;
+
+                                                                fl_font(FL_HELVETICA, 12);
+
+                                                                fl_text_extents(feedname.data(), text_x, text_y, text_w, text_h);
+                                                                //cout << "text_w " << text_w << "\n";
+
+                                                                Fl_Button* feed_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
+                                                                feed_button->copy_label(feedname.data());
+
+                                                                RSSFeedChoiceRegion->add(feed_button);
+                                                        }
+                                                }
                                         }
                                         break;
                                 }
@@ -257,85 +371,6 @@ void cls::generate() {
 
         return;
 }
-
-//vector<shared_ptr<Fl_Widget>> cls::get_widgets(const vector<visualcallable> & callables) {
-//        vector<shared_ptr<Fl_Widget>> widgets;
-
-//        for(visualcallable callable : callables) {
-//                const int index = callable.id();
-
-//                /*
-//                        Raw pointer necessary.
-//                        Quickly tried both C++14 smart pointers and both 
-//                        resulted in text that was missing.
-//                        
-//                        Without a raw pointer the text is garbled.
-//                        
-//                        FLTK is accessing string data such that this approach 
-//                        is required.
-//                */
-//                auto label = new string(callable.label());
-
-//                auto label_text = label->data();
-
-//                const int x = callable.x();
-//                const int y = callable.y();
-//                const int w = callable.w();
-//                const int h = callable.h();
-
-//                switch(index) {
-//                        case 0://RSS Reader Header
-//                        {
-//                                widgets.emplace_back(shared_ptr<Fl_Widget>(new mainscreenheaderbar(x, y, w, h, label_text)));
-//                        }
-//                        break;
-//                        case 1://RSS Reader Headlines
-//                        {
-//                                auto widget = new Fl_Hold_Browser(x, y, w, h, label_text);
-//                                widget->textsize(60);
-//                                widgets.push_back(shared_ptr<Fl_Widget>(widget));
-//                        }
-//                        break;
-//                        case 2://RSS Reader article content
-//                        {
-//                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Help_View(x, y, w, h, label_text)));
-//                        }
-//                        break;
-//                        case 3://RSS Reader Control Bar
-//                        {
-//                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
-//                                auto widget = widgets.back();
-//                                widget->box(FL_FLAT_BOX);
-//                                widget->color(fl_rgb_color(200, 113, 55));
-//                        }
-//                        break;
-//                        case 4://RSS Reader RSS Change Bar
-//                        {
-//                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
-//                                auto widget = widgets.back();
-//                                widget->box(FL_FLAT_BOX);
-//                                widget->color(fl_rgb_color(83, 108, 83));
-//                        }
-//                        break;
-//                        case 5://RSS Reader Feed Choice Bar
-//                        {
-//                                widgets.emplace_back(shared_ptr<Fl_Widget>(new Fl_Box(x, y, w, h, label_text)));
-//                                auto widget = widgets.back();
-//                                widget->box(FL_FLAT_BOX);
-//                                widget->color(fl_rgb_color(255, 204, 170));
-//                        }
-//                        break;
-//                }
-
-//                //cout << index << ": ";
-//                //cout << "x/y/w/h " << x << "/" << y << "/" << w << "/" << h << "\n";
-
-//                fl_font(FL_HELVETICA, 20);
-//                fl_color(fl_rgb_color(213, 255, 246));
-//        }
-
-//        return widgets;
-//}
 
 unique_ptr<Fl_Double_Window> cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
         unique_ptr<Fl_Double_Window> visual_window(new Fl_Double_Window(x, y, w, h));
