@@ -68,10 +68,17 @@ namespace ui {
 	        int _last_w = 0;
 	        int _last_h = 0;
 
+                const int _w_lo = 320;
+                const int _h_lo = 480;
+
 	        unique_ptr<Fl_Double_Window> _visual_window;
 
                 unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
                 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
+
+                void measure_screen();
+                void get_rss_feed_data();
+                vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
                 void clear(Fl_Group*);
                 void update_screen();

@@ -36,19 +36,30 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "material.hxx"
 #include "feedscycle.hxx"
 
-#include "mainscreenblueprint.hxx"
-
 using collector = rss::collector;
 using material = rss::material;
 using request = rss::request;
 using feedscycle = rss::feedscycle;
 using visualcallable = visualfunc::formulation::visualcallable;
-using mainscreenblueprint = rss::ui::mainscreenblueprint;
 
 using namespace std;
 using cls = rss::ui::mainscreengenerator;
 
-vector<string> _strings;
+int _text_x = 0;
+int _text_y = 0;
+int _text_w = 0;
+int _text_h = 0;
+
+const int _text_wh_plus = 20;
+
+enum visual_index_rss_reader_region {
+        header = 0,//RSS Reader Header
+        headlines = 1,//RSS Reader Headlines
+        article_content = 2,//RSS Reader article content
+        control_bar = 3,//RSS Reader Control Bar
+        change_bar = 4,//RSS Reader RSS Change Bar
+        choice_bar = 5//RSS Reader Feed Choice Bar
+};
 
 Fl_Output* get_visual_rss_header_display() {
         Fl_Output* HeaderRegion = new Fl_Output(0, 0, 0, 0);
@@ -79,21 +90,14 @@ Fl_Pack* get_visual_rss_control_bar_display() {
         Fl_Pack* RSSControlBarRegion = new Fl_Pack(0, 0, 0, 0);
 
         RSSControlBarRegion->type(Fl_Pack::HORIZONTAL);
-
-        int text_x = 0;
-        int text_y = 0;
-        int text_w = 0;
-        int text_h = 0;
-        
-        int text_wh_plus = 20;
         
         fl_font(FL_HELVETICA, 12);
 
         string enlarge_button_label_text = "Enlarge";
-        fl_text_extents((new string(enlarge_button_label_text))->data(), text_x, text_y, text_w, text_h);
-        //cout << "text_w " << text_w << "\n";
+        fl_text_extents((new string(enlarge_button_label_text))->data(), _text_x, _text_y, _text_w, _text_h);
+        //cout << "_text_w " << _text_w << "\n";
 
-        Fl_Button* enlarge_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
+        Fl_Button* enlarge_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
         enlarge_button->copy_label((new string(enlarge_button_label_text))->data());
 
         RSSControlBarRegion->add(enlarge_button);
@@ -106,20 +110,13 @@ Fl_Pack* get_visual_rss_change_bar_display() {
 
         RSSChangeBarRegion->type(Fl_Pack::HORIZONTAL);
 
-        int text_x = 0;
-        int text_y = 0;
-        int text_w = 0;
-        int text_h = 0;
-        
-        int text_wh_plus = 20;
-
         fl_font(FL_HELVETICA, 12);
 
         string update_button_label_text = "Update";
-        fl_text_extents((new string(update_button_label_text))->data(), text_x, text_y, text_w, text_h);
-        //cout << "text_w " << text_w << "\n";
+        fl_text_extents((new string(update_button_label_text))->data(), _text_x, _text_y, _text_w, _text_h);
+        //cout << "_text_w " << _text_w << "\n";
 
-        Fl_Button* update_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
+        Fl_Button* update_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
         update_button->copy_label(update_button_label_text.data());
 
         RSSChangeBarRegion->add(update_button);
@@ -136,72 +133,17 @@ Fl_Pack* get_visual_rss_choice_display() {
 }
 
 void cls::generate() {
-        const int w_lo = 320;
-        const int h_lo = 480;
-        string label = "RSS Reader";
+        measure_screen();
 
-        Fl::screen_xywh(_screen_x, _screen_y, _screen_w, _screen_h);
-        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
-
-        Fl::screen_work_area(_workarea_x, _workarea_y, _workarea_w, _workarea_h);
-        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
-
-        _visual_window = get_window(0, 0, _workarea_w, _workarea_h, w_lo, h_lo, label);
-
-        show();
+        _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _w_lo, _h_lo, "RSS Reader");
 	
-	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
-
-	//When starting up, just get the first one.
-	if(feed_parameters.size() > 0) {
-	        feedsource = feed_parameters[0];
-
-	        feed_articles = rss_requestor.pull(feedsource);
-	}
-	
-	/*
-	 links section and content sections
-	 
-	        when auto feedsource = feed_parameters[index];
-	        
-	        then 
-	 
-	        vector<material> feed_articles = rss_requestor.pull(feedsource);
-	
-	        for(auto feed_article_entry : feed_articles) {
-	                show the headline in the links section
-	        
-		                string headline = feed_article_entry.headline;
-	
-	
-	                hold onto the vector, when a headline is clicked, simply match by headline
-	
-		                string url = feed_article_entry.url;
-		                string description = feed_article_entry.description;
-		                string article_date = feed_article_entry.article_date;
-	        }
-	*/
-	
-	
-        /*top bottom bar ... when the enlarge button is clicked, expand the content*/
-
-        /*middle bottom bar ... just a feed adder ... later on*/
-
-        /*bottom bar
-        
-	for(auto feedsource : feed_parameters) {
-	        render a button for each of:
-	        
-	                feedsource.feedname
-
-
-	}
-        */
-
         Fl_Pack WorkAreaRegion(0, 0, _workarea_w, _workarea_h);
+
         WorkAreaRegion.type(Fl_Pack::VERTICAL);
 
         _visual_window->add(WorkAreaRegion);
+
+        show();
 
         vector<visualcallable> callables;
 
@@ -214,9 +156,7 @@ void cls::generate() {
 		        _last_h = new_h;
 		        _last_w = new_w;
 
-                        mainscreenblueprint visual_blueprint(_workarea_x, _screen_y, new_w, new_h);
-
-                        callables = visual_blueprint.get_visual_definitions();
+                        callables = get_visual_definitions(_workarea_x, _screen_y, new_w, new_h);
 
                         const int callable_size = callables.size();
                         
@@ -225,9 +165,11 @@ void cls::generate() {
                         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
                                 visualcallable callable = callables[callable_index];
 
-                                auto label = new string(callable.label());
+                                string* label = new string(callable.label());
 
-                                auto label_text = label->data();
+                                const char* label_text = label->data();
+
+                                delete label;
 
                                 const int x = callable.x();
                                 const int y = callable.y();
@@ -235,7 +177,7 @@ void cls::generate() {
                                 const int h = callable.h();
 
                                 switch(callable_index) {
-                                        case 0://RSS Reader Header
+                                        case visual_index_rss_reader_region::header://RSS Reader Header
                                         {
                                                 Fl_Output* HeaderRegion = nullptr;
 
@@ -251,7 +193,7 @@ void cls::generate() {
                                                 HeaderRegion->size(w, h);
                                         }
                                         break;
-                                        case 1://RSS Reader Headlines
+                                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                                         {
                                                 Fl_Hold_Browser* HeadlinesRegion = nullptr;
 
@@ -265,15 +207,9 @@ void cls::generate() {
                                                 }
 
                                                 HeadlinesRegion->size(w, h);
-
-                                                if(HeadlinesRegion->size() == 0) {
-                                                        for(auto feed_article_entry : feed_articles) {
-                                                              HeadlinesRegion->add(string(feed_article_entry.headline).data());
-                                                        }
-                                                }
                                         }
                                         break;
-                                        case 2://RSS Reader article content
+                                        case visual_index_rss_reader_region::article_content://RSS Reader article content
                                         {
                                                 Fl_Help_View* ArticleContentsRegion = nullptr;
 
@@ -289,7 +225,7 @@ void cls::generate() {
                                                 ArticleContentsRegion->size(w, h);
                                         }
                                         break;
-                                        case 3://RSS Reader Control Bar
+                                        case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
                                         {
                                                 Fl_Pack* RSSControlBarRegion = nullptr;
 
@@ -305,7 +241,7 @@ void cls::generate() {
                                                 RSSControlBarRegion->size(w, h);
                                         }
                                         break;
-                                        case 4://RSS Reader RSS Change Bar
+                                        case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
                                         {
                                                 Fl_Pack* RSSChangeBarRegion = nullptr;
 
@@ -321,7 +257,7 @@ void cls::generate() {
                                                 RSSChangeBarRegion->size(w, h);
                                         }
                                         break;
-                                        case 5://RSS Reader Feed Choice Bar
+                                        case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                                         {
                                                 Fl_Pack* RSSFeedChoiceRegion = nullptr;
 
@@ -335,29 +271,6 @@ void cls::generate() {
                                                 }
 
                                                 RSSFeedChoiceRegion->size(w, h);
-
-                                                if(RSSFeedChoiceRegion->children() == 0) {
-                                                        for(auto feedsource : feed_parameters) {
-                                                                auto feedname = feedsource.feedname;
-
-                                                                int text_x = 0;
-                                                                int text_y = 0;
-                                                                int text_w = 0;
-                                                                int text_h = 0;
-                                                                
-                                                                int text_wh_plus = 20;
-
-                                                                fl_font(FL_HELVETICA, 12);
-
-                                                                fl_text_extents(feedname.data(), text_x, text_y, text_w, text_h);
-                                                                //cout << "text_w " << text_w << "\n";
-
-                                                                Fl_Button* feed_button = new Fl_Button(0, 0, text_w+text_wh_plus, text_h+text_wh_plus);
-                                                                feed_button->copy_label(feedname.data());
-
-                                                                RSSFeedChoiceRegion->add(feed_button);
-                                                        }
-                                                }
                                         }
                                         break;
                                 }
@@ -365,9 +278,46 @@ void cls::generate() {
 
 		        _visual_window->redraw();
 	        }
+
+                if(WorkAreaRegion.children() > 5 && feed_articles.size() == 0) {
+                        Fl_Hold_Browser* HeadlinesRegion = (decltype(HeadlinesRegion))WorkAreaRegion.child(visual_index_rss_reader_region::headlines);
+
+                        if(HeadlinesRegion && HeadlinesRegion->size() == 0) {
+                                //cout << "get_rss_feed_data()\n";
+                                get_rss_feed_data();
+
+                                if(feed_articles.size() > 0) {
+                                        //cout << "headlines\n";
+
+                                        for(auto feed_article_entry : feed_articles) {
+                                              HeadlinesRegion->add(string(feed_article_entry.headline).data());
+                                        }
+                                }
+                        }
+
+                        Fl_Pack* RSSFeedChoiceRegion = (decltype(RSSFeedChoiceRegion))WorkAreaRegion.child(visual_index_rss_reader_region::choice_bar);
+
+                        if(RSSFeedChoiceRegion && RSSFeedChoiceRegion->children() == 0) {
+                                fl_font(FL_HELVETICA, 12);
+
+                                for(auto feedsource : feed_parameters) {
+                                        auto feedname = feedsource.feedname;
+
+                                        fl_text_extents(feedname.data(), _text_x, _text_y, _text_w, _text_h);
+                                        //cout << "_text_w " << _text_w << "\n";
+
+                                        Fl_Button* feed_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
+                                        feed_button->copy_label(feedname.data());
+
+                                        RSSFeedChoiceRegion->add(feed_button);
+                                }
+                        }
+                }
 	        
 	        Fl::flush();
 	}
+
+        clear(_visual_window->as_group());
 
         return;
 }
@@ -410,4 +360,163 @@ void cls::clear(Fl_Group* grp) {
         }
 
         return;
+}
+
+void cls::measure_screen() {
+        Fl::screen_xywh(_screen_x, _screen_y, _screen_w, _screen_h);
+        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
+
+        Fl::screen_work_area(_workarea_x, _workarea_y, _workarea_w, _workarea_h);
+        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
+
+        return;
+}
+
+void cls::get_rss_feed_data() {
+	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
+
+	//When starting up, just get the first one.
+	if(feed_parameters.size() > 0) {
+	        feedsource = feed_parameters[0];
+
+	        feed_articles = rss_requestor.pull(feedsource);
+	}
+	
+	/*
+	 links section and content sections
+	 
+	        when auto feedsource = feed_parameters[index];
+	        
+	        then 
+	 
+	        vector<material> feed_articles = rss_requestor.pull(feedsource);
+	
+	        for(auto feed_article_entry : feed_articles) {
+	                show the headline in the links section
+	        
+		                string headline = feed_article_entry.headline;
+	
+	
+	                hold onto the vector, when a headline is clicked, simply match by headline
+	
+		                string url = feed_article_entry.url;
+		                string description = feed_article_entry.description;
+		                string article_date = feed_article_entry.article_date;
+	        }
+	*/
+
+        /*top bottom bar ... when the enlarge button is clicked, expand the content*/
+
+        /*middle bottom bar ... just a feed adder ... later on*/
+
+        /*bottom bar
+        
+	for(auto feedsource : feed_parameters) {
+	        render a button for each of:
+	        
+	                feedsource.feedname
+	}
+        */
+
+        return;
+}
+
+vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
+        vector<visualcallable> callables;
+        
+        int next_y = 0;
+        int text_w = 0;
+        int text_h = 0;
+        int accumulated_h = 0;
+        int remaining_h = 0;
+
+        int x = 0;
+        int y = 0;
+        int w = 0;
+        int h = 0;
+
+        int rh = 0;
+
+        const int max_elems = 6;
+
+        for(int index = 0; index < max_elems; index++) {
+                visualcallable callable(index);
+
+                x = 0;
+                y = next_y;
+                w = _screen_w;
+
+                switch(index) {
+                        case visual_index_rss_reader_region::header://RSS Reader Header
+                        {
+                                fl_font(FL_HELVETICA, 72);
+                                
+                                /*
+                                        Usually results in a bounding box larger than  
+                                        the text based on the same font size.
+                                */
+                                fl_measure("W", text_w, text_h, 1);
+
+                                callable.label("RSS Reader");
+
+                                h = text_h;
+                        }
+                        break;
+                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
+                        {
+                                h = remaining_h / 2;
+                        }
+                        break;
+                        case visual_index_rss_reader_region::article_content://RSS Reader article content
+                        {
+                                double dv = 1.4;
+                                h = remaining_h / dv;
+                        }
+                        break;
+                        case visual_index_rss_reader_region::control_bar:
+                        {
+                                double dv = 3;
+                                rh = remaining_h / dv;
+
+                                h = rh;
+
+                                callable.label("test 1");
+                        }
+                        break;
+                        case visual_index_rss_reader_region::change_bar:
+                        {
+                                h = rh;
+
+                                callable.label("test 2");
+                        }
+                        break;
+                        case visual_index_rss_reader_region::choice_bar:
+                        {
+                                h = rh;
+                                
+                                callable.label("test 3");
+                        }
+                        break;
+                }
+
+                callable.x(x);
+                callable.y(y);
+                callable.w(w);
+                callable.h(h);
+                
+                accumulated_h = (accumulated_h + callable.h());
+                next_y = (next_y + callable.h());
+                //remaining_h = ((workarea_h - window_chrome_offset) - accumulated_h);
+                remaining_h = (screen_h - accumulated_h);
+
+                //cout << "index: " << index << " ";
+                //cout << " h: " << h;
+                //cout << " accumulated_h: " << accumulated_h;
+                //cout << " remaining_h: " << remaining_h;
+                //cout << "\n";
+
+                callables.push_back(callable);
+        }
+        
+        return callables;
 }
