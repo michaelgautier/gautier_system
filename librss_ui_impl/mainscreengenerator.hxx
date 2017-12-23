@@ -53,7 +53,6 @@ namespace ui {
                 rss::feedscycle feeds_group;
 
                 rss::request feedsource;
-                vector<rss::material> feed_articles;
 
                 int _workarea_x = 0;
                 int _workarea_y = 0;
@@ -71,9 +70,9 @@ namespace ui {
                 const int _w_lo = 320;
                 const int _h_lo = 480;
 
-	        unique_ptr<Fl_Double_Window> _visual_window;
+	        Fl_Double_Window* _visual_window;
 
-                unique_ptr<Fl_Double_Window> get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
+                Fl_Double_Window* get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
                 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
 
                 void measure_screen();

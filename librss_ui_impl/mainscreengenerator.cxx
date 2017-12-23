@@ -14,6 +14,7 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 #include <iostream>
+#include <cstring>
 
 #include <FL/Fl_Widget.H>
 #include <FL/Fl.H>
@@ -51,6 +52,8 @@ int _text_w = 0;
 int _text_h = 0;
 
 const int _text_wh_plus = 20;
+
+vector<material> feed_articles;
 
 enum visual_index_rss_reader_region {
         header = 0,//RSS Reader Header
@@ -130,6 +133,44 @@ Fl_Pack* get_visual_rss_choice_display() {
         RSSFeedChoiceRegion->type(Fl_Pack::HORIZONTAL);
 
         return RSSFeedChoiceRegion;
+}
+
+void feed_items_callback(Fl_Widget* widget) {
+        try{
+                if(widget) {
+                        Fl_Hold_Browser* HeadlinesRegion = (Fl_Hold_Browser*)widget;
+
+                        if(HeadlinesRegion) {
+                                auto WorkAreaRegion = (Fl_Pack*)HeadlinesRegion->parent();
+
+                                if(WorkAreaRegion) {
+                                        const int headline_index = HeadlinesRegion->value();
+                                        
+                                        material article_info = feed_articles[headline_index];
+                                        
+                                        Fl_Help_View* ArticleContentsRegion = (Fl_Help_View*)WorkAreaRegion->child(visual_index_rss_reader_region::article_content);
+                                        
+                                        if(ArticleContentsRegion) {
+                                                //FLTK has issues with memory involving strings. This approach is a little more stable.
+                                                //user_data function in FLTK is not 100% reliable
+                                                //Had to switch to global data for stability.
+                                                //feed_articles is now global -> article_info is copied from that global object
+                                                const char* src = article_info.description.data();
+                                                const int str_sz = strlen(src)+1;
+
+                                                char* dest = new char[str_sz];
+                  
+                                                strcpy(dest, src);
+                                                
+                                                ArticleContentsRegion->value(dest);
+                                        }
+                                }
+                        }
+                }
+        }
+        catch(...) {}
+
+        return;
 }
 
 void cls::generate() {
@@ -289,10 +330,16 @@ void cls::generate() {
                                 if(feed_articles.size() > 0) {
                                         //cout << "headlines\n";
 
-                                        for(auto feed_article_entry : feed_articles) {
-                                              HeadlinesRegion->add(string(feed_article_entry.headline).data());
+                                        const int articles_size = feed_articles.size();
+
+                                        for(int article_index = 0; article_index < articles_size; article_index++) {
+                                                auto feed_article_entry = feed_articles[article_index];
+
+                                                HeadlinesRegion->add(string(feed_article_entry.headline).data());
                                         }
                                 }
+
+                                HeadlinesRegion->callback(feed_items_callback);
                         }
 
                         Fl_Pack* RSSFeedChoiceRegion = (decltype(RSSFeedChoiceRegion))WorkAreaRegion.child(visual_index_rss_reader_region::choice_bar);
@@ -317,13 +364,17 @@ void cls::generate() {
 	        Fl::flush();
 	}
 
-        clear(_visual_window->as_group());
+        if(_visual_window) {
+                clear(_visual_window->as_group());
+
+                delete _visual_window;
+        }
 
         return;
 }
 
-unique_ptr<Fl_Double_Window> cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
-        unique_ptr<Fl_Double_Window> visual_window(new Fl_Double_Window(x, y, w, h));
+Fl_Double_Window* cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
+        Fl_Double_Window* visual_window = new Fl_Double_Window(x, y, w, h);
         visual_window->end();
 
 	visual_window->size_range(w_lo, h_lo, w, h);
