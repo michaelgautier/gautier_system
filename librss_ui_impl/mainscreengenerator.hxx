@@ -41,6 +41,7 @@ namespace ui {
         class mainscreengenerator {
                 public:
                 void generate();
+                void get_rss_feed_data(int feed_source_index);
 
                 private:
                 /*Data*/
@@ -76,7 +77,6 @@ namespace ui {
                 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
 
                 void measure_screen();
-                void get_rss_feed_data();
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
                 void clear(Fl_Group*);

@@ -53,7 +53,15 @@ int _text_h = 0;
 
 const int _text_wh_plus = 20;
 
+bool _feed_articles_requested = false;
+
 vector<material> feed_articles;
+Fl_Pack* _workarea_region;
+cls* _self;
+
+void feed_items_callback(Fl_Widget* widget);
+void feed_source_callback(Fl_Widget* widget);
+void display_feed_source_headlines(cls* generator, int feed_source_index);
 
 enum visual_index_rss_reader_region {
         header = 0,//RSS Reader Header
@@ -65,34 +73,34 @@ enum visual_index_rss_reader_region {
 };
 
 Fl_Output* get_visual_rss_header_display() {
-        Fl_Output* HeaderRegion = new Fl_Output(0, 0, 0, 0);
+        Fl_Output* header_region = new Fl_Output(0, 0, 0, 0);
 
-        HeaderRegion->box(FL_FLAT_BOX);
-        HeaderRegion->color(fl_rgb_color(212, 85, 0));
-        HeaderRegion->value("RSS Reader");
-        HeaderRegion->textfont(FL_HELVETICA);
-        HeaderRegion->textsize(72);
-        HeaderRegion->textcolor(fl_rgb_color(213, 255, 246));
+        header_region->box(FL_FLAT_BOX);
+        header_region->color(fl_rgb_color(212, 85, 0));
+        header_region->value("RSS Reader");
+        header_region->textfont(FL_HELVETICA);
+        header_region->textsize(72);
+        header_region->textcolor(fl_rgb_color(213, 255, 246));
 
-        return HeaderRegion;
+        return header_region;
 }
 
 Fl_Hold_Browser* get_visual_rss_headlines_display() {
-        Fl_Hold_Browser* HeadlinesRegion = new Fl_Hold_Browser(0, 0, 0, 0);
+        Fl_Hold_Browser* headlines_region = new Fl_Hold_Browser(0, 0, 0, 0);
 
-        return HeadlinesRegion;
+        return headlines_region;
 }
 
 Fl_Help_View* get_visual_rss_article_contents_display() {
-        Fl_Help_View* ArticleContentsRegion = new Fl_Help_View(0, 0, 0, 0);
+        Fl_Help_View* article_contents_region = new Fl_Help_View(0, 0, 0, 0);
 
-        return ArticleContentsRegion;
+        return article_contents_region;
 }
 
 Fl_Pack* get_visual_rss_control_bar_display() {
-        Fl_Pack* RSSControlBarRegion = new Fl_Pack(0, 0, 0, 0);
+        Fl_Pack* rss_control_bar_region = new Fl_Pack(0, 0, 0, 0);
 
-        RSSControlBarRegion->type(Fl_Pack::HORIZONTAL);
+        rss_control_bar_region->type(Fl_Pack::HORIZONTAL);
         
         fl_font(FL_HELVETICA, 12);
 
@@ -103,15 +111,15 @@ Fl_Pack* get_visual_rss_control_bar_display() {
         Fl_Button* enlarge_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
         enlarge_button->copy_label((new string(enlarge_button_label_text))->data());
 
-        RSSControlBarRegion->add(enlarge_button);
+        rss_control_bar_region->add(enlarge_button);
 
-        return RSSControlBarRegion;
+        return rss_control_bar_region;
 }
 
 Fl_Pack* get_visual_rss_change_bar_display() {
-        Fl_Pack* RSSChangeBarRegion = new Fl_Pack(0, 0, 0, 0);
+        Fl_Pack* rss_change_bar_region = new Fl_Pack(0, 0, 0, 0);
 
-        RSSChangeBarRegion->type(Fl_Pack::HORIZONTAL);
+        rss_change_bar_region->type(Fl_Pack::HORIZONTAL);
 
         fl_font(FL_HELVETICA, 12);
 
@@ -122,67 +130,30 @@ Fl_Pack* get_visual_rss_change_bar_display() {
         Fl_Button* update_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
         update_button->copy_label(update_button_label_text.data());
 
-        RSSChangeBarRegion->add(update_button);
+        rss_change_bar_region->add(update_button);
 
-        return RSSChangeBarRegion;
+        return rss_change_bar_region;
 }
 
 Fl_Pack* get_visual_rss_choice_display() {
-        Fl_Pack* RSSFeedChoiceRegion = new Fl_Pack(0, 0, 0, 0);
+        Fl_Pack* rss_feed_choice_region = new Fl_Pack(0, 0, 0, 0);
 
-        RSSFeedChoiceRegion->type(Fl_Pack::HORIZONTAL);
+        rss_feed_choice_region->type(Fl_Pack::HORIZONTAL);
 
-        return RSSFeedChoiceRegion;
-}
-
-void feed_items_callback(Fl_Widget* widget) {
-        try{
-                if(widget) {
-                        Fl_Hold_Browser* HeadlinesRegion = (Fl_Hold_Browser*)widget;
-
-                        if(HeadlinesRegion) {
-                                auto WorkAreaRegion = (Fl_Pack*)HeadlinesRegion->parent();
-
-                                if(WorkAreaRegion) {
-                                        const int headline_index = HeadlinesRegion->value();
-                                        
-                                        material article_info = feed_articles[headline_index];
-                                        
-                                        Fl_Help_View* ArticleContentsRegion = (Fl_Help_View*)WorkAreaRegion->child(visual_index_rss_reader_region::article_content);
-                                        
-                                        if(ArticleContentsRegion) {
-                                                //FLTK has issues with memory involving strings. This approach is a little more stable.
-                                                //user_data function in FLTK is not 100% reliable
-                                                //Had to switch to global data for stability.
-                                                //feed_articles is now global -> article_info is copied from that global object
-                                                const char* src = article_info.description.data();
-                                                const int str_sz = strlen(src)+1;
-
-                                                char* dest = new char[str_sz];
-                  
-                                                strcpy(dest, src);
-                                                
-                                                ArticleContentsRegion->value(dest);
-                                        }
-                                }
-                        }
-                }
-        }
-        catch(...) {}
-
-        return;
+        return rss_feed_choice_region;
 }
 
 void cls::generate() {
+        _self = this;
         measure_screen();
 
         _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _w_lo, _h_lo, "RSS Reader");
 	
-        Fl_Pack WorkAreaRegion(0, 0, _workarea_w, _workarea_h);
+        _workarea_region = new Fl_Pack(0, 0, _workarea_w, _workarea_h);
 
-        WorkAreaRegion.type(Fl_Pack::VERTICAL);
+        _workarea_region->type(Fl_Pack::VERTICAL);
 
-        _visual_window->add(WorkAreaRegion);
+        _visual_window->add(_workarea_region);
 
         show();
 
@@ -201,7 +172,7 @@ void cls::generate() {
 
                         const int callable_size = callables.size();
                         
-                        bool children_count_matches = (WorkAreaRegion.children() == callable_size);
+                        bool children_count_matches = (_workarea_region->children() == callable_size);
 
                         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
                                 visualcallable callable = callables[callable_index];
@@ -220,98 +191,98 @@ void cls::generate() {
                                 switch(callable_index) {
                                         case visual_index_rss_reader_region::header://RSS Reader Header
                                         {
-                                                Fl_Output* HeaderRegion = nullptr;
+                                                Fl_Output* header_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        HeaderRegion = (decltype(HeaderRegion))WorkAreaRegion.child(callable_index);
+                                                        header_region = (decltype(header_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        HeaderRegion = get_visual_rss_header_display();
+                                                        header_region = get_visual_rss_header_display();
 
-                                                        WorkAreaRegion.add(HeaderRegion);
+                                                        _workarea_region->add(header_region);
                                                 }
 
-                                                HeaderRegion->size(w, h);
+                                                header_region->size(w, h);
                                         }
                                         break;
                                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                                         {
-                                                Fl_Hold_Browser* HeadlinesRegion = nullptr;
+                                                Fl_Hold_Browser* headlines_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        HeadlinesRegion = (decltype(HeadlinesRegion))WorkAreaRegion.child(callable_index);
+                                                        headlines_region = (decltype(headlines_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        HeadlinesRegion = get_visual_rss_headlines_display();
+                                                        headlines_region = get_visual_rss_headlines_display();
 
-                                                        WorkAreaRegion.add(HeadlinesRegion);
+                                                        _workarea_region->add(headlines_region);
                                                 }
 
-                                                HeadlinesRegion->size(w, h);
+                                                headlines_region->size(w, h);
                                         }
                                         break;
                                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                                         {
-                                                Fl_Help_View* ArticleContentsRegion = nullptr;
+                                                Fl_Help_View* article_contents_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        ArticleContentsRegion = (decltype(ArticleContentsRegion))WorkAreaRegion.child(callable_index);
+                                                        article_contents_region = (decltype(article_contents_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        ArticleContentsRegion = get_visual_rss_article_contents_display();
+                                                        article_contents_region = get_visual_rss_article_contents_display();
 
-                                                        WorkAreaRegion.add(ArticleContentsRegion);
+                                                        _workarea_region->add(article_contents_region);
                                                 }
 
-                                                ArticleContentsRegion->size(w, h);
+                                                article_contents_region->size(w, h);
                                         }
                                         break;
                                         case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
                                         {
-                                                Fl_Pack* RSSControlBarRegion = nullptr;
+                                                Fl_Pack* rss_control_bar_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        RSSControlBarRegion = (decltype(RSSControlBarRegion))WorkAreaRegion.child(callable_index);
+                                                        rss_control_bar_region = (decltype(rss_control_bar_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        RSSControlBarRegion = get_visual_rss_control_bar_display();
+                                                        rss_control_bar_region = get_visual_rss_control_bar_display();
 
-                                                        WorkAreaRegion.add(RSSControlBarRegion);
+                                                        _workarea_region->add(rss_control_bar_region);
                                                 }
 
-                                                RSSControlBarRegion->size(w, h);
+                                                rss_control_bar_region->size(w, h);
                                         }
                                         break;
                                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
                                         {
-                                                Fl_Pack* RSSChangeBarRegion = nullptr;
+                                                Fl_Pack* rss_change_bar_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        RSSChangeBarRegion = (decltype(RSSChangeBarRegion))WorkAreaRegion.child(callable_index);
+                                                        rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        RSSChangeBarRegion = get_visual_rss_change_bar_display();
+                                                        rss_change_bar_region = get_visual_rss_change_bar_display();
 
-                                                        WorkAreaRegion.add(RSSChangeBarRegion);
+                                                        _workarea_region->add(rss_change_bar_region);
                                                 }
 
-                                                RSSChangeBarRegion->size(w, h);
+                                                rss_change_bar_region->size(w, h);
                                         }
                                         break;
                                         case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                                         {
-                                                Fl_Pack* RSSFeedChoiceRegion = nullptr;
+                                                Fl_Pack* rss_feed_choice_region = nullptr;
 
                                                 if(children_count_matches) {
-                                                        RSSFeedChoiceRegion = (decltype(RSSFeedChoiceRegion))WorkAreaRegion.child(callable_index);
+                                                        rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(callable_index);
                                                 }
                                                 else {
-                                                        RSSFeedChoiceRegion = get_visual_rss_choice_display();
+                                                        rss_feed_choice_region = get_visual_rss_choice_display();
 
-                                                        WorkAreaRegion.add(RSSFeedChoiceRegion);
+                                                        _workarea_region->add(rss_feed_choice_region);
                                                 }
 
-                                                RSSFeedChoiceRegion->size(w, h);
+                                                rss_feed_choice_region->size(w, h);
                                         }
                                         break;
                                 }
@@ -320,35 +291,20 @@ void cls::generate() {
 		        _visual_window->redraw();
 	        }
 
-                if(WorkAreaRegion.children() > 5 && feed_articles.size() == 0) {
-                        Fl_Hold_Browser* HeadlinesRegion = (decltype(HeadlinesRegion))WorkAreaRegion.child(visual_index_rss_reader_region::headlines);
+                if(_workarea_region->children() > 5 && !_feed_articles_requested) {
+                        display_feed_source_headlines(this, 0);
 
-                        if(HeadlinesRegion && HeadlinesRegion->size() == 0) {
-                                //cout << "get_rss_feed_data()\n";
-                                get_rss_feed_data();
+                        Fl_Pack* rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(visual_index_rss_reader_region::choice_bar);
 
-                                if(feed_articles.size() > 0) {
-                                        //cout << "headlines\n";
-
-                                        const int articles_size = feed_articles.size();
-
-                                        for(int article_index = 0; article_index < articles_size; article_index++) {
-                                                auto feed_article_entry = feed_articles[article_index];
-
-                                                HeadlinesRegion->add(string(feed_article_entry.headline).data());
-                                        }
-                                }
-
-                                HeadlinesRegion->callback(feed_items_callback);
-                        }
-
-                        Fl_Pack* RSSFeedChoiceRegion = (decltype(RSSFeedChoiceRegion))WorkAreaRegion.child(visual_index_rss_reader_region::choice_bar);
-
-                        if(RSSFeedChoiceRegion && RSSFeedChoiceRegion->children() == 0) {
+                        if(rss_feed_choice_region && rss_feed_choice_region->children() == 0) {
                                 fl_font(FL_HELVETICA, 12);
 
-                                for(auto feedsource : feed_parameters) {
-                                        auto feedname = feedsource.feedname;
+                                const int feed_source_size = feed_parameters.size();
+
+                                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
+                                        request feedsource = feed_parameters[feed_source_index];
+                                        
+                                        string feedname = feedsource.feedname;
 
                                         fl_text_extents(feedname.data(), _text_x, _text_y, _text_w, _text_h);
                                         //cout << "_text_w " << _text_w << "\n";
@@ -356,7 +312,10 @@ void cls::generate() {
                                         Fl_Button* feed_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
                                         feed_button->copy_label(feedname.data());
 
-                                        RSSFeedChoiceRegion->add(feed_button);
+                                        rss_feed_choice_region->add(feed_button);
+                                        
+                                        feed_button->user_data(new int(feed_source_index));
+                                        feed_button->callback(feed_source_callback);
                                 }
                         }
                 }
@@ -367,8 +326,91 @@ void cls::generate() {
         if(_visual_window) {
                 clear(_visual_window->as_group());
 
+                if(_workarea_region) {
+                        delete _workarea_region;
+                }
+
                 delete _visual_window;
         }
+
+        return;
+}
+
+void display_feed_source_headlines(cls* generator, int feed_source_index) {
+        Fl_Hold_Browser* headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
+
+        if(headlines_region && headlines_region->size() == 0) {
+                //cout << "get_rss_feed_data()\n";
+                generator->get_rss_feed_data(feed_source_index);
+
+                if(feed_articles.size() > 0) {
+                        //cout << "headlines\n";
+
+                        const int articles_size = feed_articles.size();
+
+                        for(int article_index = 0; article_index < articles_size; article_index++) {
+                                auto feed_article_entry = feed_articles[article_index];
+
+                                headlines_region->add(string(feed_article_entry.headline).data());
+                        }
+                }
+                else {
+                        headlines_region->clear();
+                }
+
+                headlines_region->callback(feed_items_callback);
+        }
+
+        return;
+}
+
+void feed_items_callback(Fl_Widget* widget) {
+        try{
+                if(widget) {
+                        Fl_Hold_Browser* headlines_region = (Fl_Hold_Browser*)widget;
+
+                        if(headlines_region) {
+                                const int headline_index = headlines_region->value();
+                                
+                                material article_info = feed_articles[headline_index];
+                                
+                                Fl_Help_View* article_contents_region = (Fl_Help_View*)_workarea_region->child(visual_index_rss_reader_region::article_content);
+                                
+                                if(article_contents_region) {
+                                        const char* src = article_info.description.data();
+                                        
+                                        article_contents_region->value(src);
+                                }
+                        }
+                }
+        }
+        catch(...) {}
+
+        return;
+}
+
+void feed_source_callback(Fl_Widget* widget) {
+        try{
+                if(widget) {
+                        Fl_Button* feed_button = (Fl_Button*)widget;
+
+                        if(feed_button) {
+                                const int feed_source_index = *((int*)feed_button->user_data());
+
+                                Fl_Hold_Browser* headlines_region = nullptr;
+                                Fl_Help_View* article_contents_region = nullptr;
+
+                                headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
+                                article_contents_region = (decltype(article_contents_region))_workarea_region->child(visual_index_rss_reader_region::article_content);
+
+                                headlines_region->clear();
+                                article_contents_region->value("");
+
+                                display_feed_source_headlines(_self, feed_source_index);
+                        }
+                }
+        }
+        catch(...) {}
 
         return;
 }
@@ -423,51 +465,20 @@ void cls::measure_screen() {
         return;
 }
 
-void cls::get_rss_feed_data() {
+void cls::get_rss_feed_data(int feed_source_index) {
 	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
 
-	//When starting up, just get the first one.
 	if(feed_parameters.size() > 0) {
-	        feedsource = feed_parameters[0];
+	        feedsource = feed_parameters[feed_source_index];
+
+                //cout << "feedsource " << feedsource.feedname << "\n";
 
 	        feed_articles = rss_requestor.pull(feedsource);
+	        
+	        _feed_articles_requested = true;
+	        
+	        //cout << "feed_articles.size() " << feed_articles.size() << "\n";
 	}
-	
-	/*
-	 links section and content sections
-	 
-	        when auto feedsource = feed_parameters[index];
-	        
-	        then 
-	 
-	        vector<material> feed_articles = rss_requestor.pull(feedsource);
-	
-	        for(auto feed_article_entry : feed_articles) {
-	                show the headline in the links section
-	        
-		                string headline = feed_article_entry.headline;
-	
-	
-	                hold onto the vector, when a headline is clicked, simply match by headline
-	
-		                string url = feed_article_entry.url;
-		                string description = feed_article_entry.description;
-		                string article_date = feed_article_entry.article_date;
-	        }
-	*/
-
-        /*top bottom bar ... when the enlarge button is clicked, expand the content*/
-
-        /*middle bottom bar ... just a feed adder ... later on*/
-
-        /*bottom bar
-        
-	for(auto feedsource : feed_parameters) {
-	        render a button for each of:
-	        
-	                feedsource.feedname
-	}
-        */
 
         return;
 }
