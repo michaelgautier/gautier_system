@@ -16,19 +16,6 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <iostream>
 #include <cstring>
 
-#include <FL/Fl_Widget.H>
-#include <FL/Fl.H>
-#include <FL/Enumerations.H>
-#include <FL/fl_draw.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Group.H>
-#include <FL/Fl_Help_View.H>
-#include <FL/Fl_Hold_Browser.H>
-#include <FL/Fl_Pack.H>
-#include <FL/Fl_Scroll.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Output.H>
-
 #include "mainscreengenerator.hxx"
 
 #include "visualcallable.hxx"
@@ -56,7 +43,7 @@ const int _text_wh_plus = 20;
 bool _feed_articles_requested = false;
 
 vector<material> feed_articles;
-Fl_Pack* _workarea_region;
+visual_type_work_area_region _workarea_region;
 cls* _self;
 
 void feed_items_callback(Fl_Widget* widget);
@@ -72,8 +59,8 @@ enum visual_index_rss_reader_region {
         choice_bar = 5//RSS Reader Feed Choice Bar
 };
 
-Fl_Output* get_visual_rss_header_display() {
-        Fl_Output* header_region = new Fl_Output(0, 0, 0, 0);
+visual_type_rss_header get_visual_rss_header_display() {
+        visual_type_rss_header header_region = new Fl_Output(0, 0, 0, 0);
 
         header_region->box(FL_FLAT_BOX);
         header_region->color(fl_rgb_color(212, 85, 0));
@@ -85,23 +72,27 @@ Fl_Output* get_visual_rss_header_display() {
         return header_region;
 }
 
-Fl_Hold_Browser* get_visual_rss_headlines_display() {
-        Fl_Hold_Browser* headlines_region = new Fl_Hold_Browser(0, 0, 0, 0);
+visual_type_rss_headlines get_visual_rss_headlines_display() {
+        visual_type_rss_headlines headlines_region = new Fl_Hold_Browser(0, 0, 0, 0);
+        headlines_region->textfont(FL_HELVETICA);
+        headlines_region->textsize(32);
 
         return headlines_region;
 }
 
-Fl_Help_View* get_visual_rss_article_contents_display() {
-        Fl_Help_View* article_contents_region = new Fl_Help_View(0, 0, 0, 0);
+visual_type_rss_article_content get_visual_rss_article_contents_display() {
+        visual_type_rss_article_content article_contents_region = new Fl_Help_View(0, 0, 0, 0);
+        article_contents_region->textfont(FL_HELVETICA);
+        article_contents_region->textsize(36);
 
         return article_contents_region;
 }
 
-Fl_Pack* get_visual_rss_control_bar_display() {
-        Fl_Pack* rss_control_bar_region = new Fl_Pack(0, 0, 0, 0);
+visual_type_rss_control_bar get_visual_rss_control_bar_display() {
+        visual_type_rss_control_bar rss_control_bar_region = new Fl_Pack(0, 0, 0, 0);
 
         rss_control_bar_region->type(Fl_Pack::HORIZONTAL);
-        
+
         fl_font(FL_HELVETICA, 12);
 
         string enlarge_button_label_text = "Enlarge";
@@ -116,8 +107,8 @@ Fl_Pack* get_visual_rss_control_bar_display() {
         return rss_control_bar_region;
 }
 
-Fl_Pack* get_visual_rss_change_bar_display() {
-        Fl_Pack* rss_change_bar_region = new Fl_Pack(0, 0, 0, 0);
+visual_type_rss_change_bar get_visual_rss_change_bar_display() {
+        visual_type_rss_change_bar rss_change_bar_region = new Fl_Pack(0, 0, 0, 0);
 
         rss_change_bar_region->type(Fl_Pack::HORIZONTAL);
 
@@ -135,10 +126,11 @@ Fl_Pack* get_visual_rss_change_bar_display() {
         return rss_change_bar_region;
 }
 
-Fl_Pack* get_visual_rss_choice_display() {
-        Fl_Pack* rss_feed_choice_region = new Fl_Pack(0, 0, 0, 0);
+visual_type_rss_choice_bar get_visual_rss_choice_display() {
+        visual_type_rss_choice_bar rss_feed_choice_region = new Fl_Group(0, 0, 0, 0);
 
         rss_feed_choice_region->type(Fl_Pack::HORIZONTAL);
+        //rss_feed_choice_region->spacing(24);
 
         return rss_feed_choice_region;
 }
@@ -148,6 +140,7 @@ void cls::generate() {
         measure_screen();
 
         _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _w_lo, _h_lo, "RSS Reader");
+        _visual_window->color(fl_rgb_color(255, 153, 85));
 	
         _workarea_region = new Fl_Pack(0, 0, _workarea_w, _workarea_h);
 
@@ -191,7 +184,7 @@ void cls::generate() {
                                 switch(callable_index) {
                                         case visual_index_rss_reader_region::header://RSS Reader Header
                                         {
-                                                Fl_Output* header_region = nullptr;
+                                                visual_type_rss_header header_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         header_region = (decltype(header_region))_workarea_region->child(callable_index);
@@ -207,7 +200,7 @@ void cls::generate() {
                                         break;
                                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                                         {
-                                                Fl_Hold_Browser* headlines_region = nullptr;
+                                                visual_type_rss_headlines headlines_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         headlines_region = (decltype(headlines_region))_workarea_region->child(callable_index);
@@ -223,7 +216,7 @@ void cls::generate() {
                                         break;
                                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                                         {
-                                                Fl_Help_View* article_contents_region = nullptr;
+                                                visual_type_rss_article_content article_contents_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         article_contents_region = (decltype(article_contents_region))_workarea_region->child(callable_index);
@@ -239,7 +232,7 @@ void cls::generate() {
                                         break;
                                         case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
                                         {
-                                                Fl_Pack* rss_control_bar_region = nullptr;
+                                                visual_type_rss_control_bar rss_control_bar_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         rss_control_bar_region = (decltype(rss_control_bar_region))_workarea_region->child(callable_index);
@@ -255,7 +248,7 @@ void cls::generate() {
                                         break;
                                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
                                         {
-                                                Fl_Pack* rss_change_bar_region = nullptr;
+                                                visual_type_rss_change_bar rss_change_bar_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(callable_index);
@@ -271,7 +264,7 @@ void cls::generate() {
                                         break;
                                         case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                                         {
-                                                Fl_Pack* rss_feed_choice_region = nullptr;
+                                                visual_type_rss_choice_bar rss_feed_choice_region = nullptr;
 
                                                 if(children_count_matches) {
                                                         rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(callable_index);
@@ -294,28 +287,69 @@ void cls::generate() {
                 if(_workarea_region->children() > 5 && !_feed_articles_requested) {
                         display_feed_source_headlines(this, 0);
 
-                        Fl_Pack* rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(visual_index_rss_reader_region::choice_bar);
+                        visual_type_rss_choice_bar 
+                        rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(visual_index_rss_reader_region::choice_bar);
 
                         if(rss_feed_choice_region && rss_feed_choice_region->children() == 0) {
-                                fl_font(FL_HELVETICA, 12);
-
                                 const int feed_source_size = feed_parameters.size();
+
+                                int next_x = 0;
+                                const int button_spacing = 12;
+                                
+                                int button_text_h = 0;
 
                                 for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
                                         request feedsource = feed_parameters[feed_source_index];
                                         
                                         string feedname = feedsource.feedname;
 
-                                        fl_text_extents(feedname.data(), _text_x, _text_y, _text_w, _text_h);
-                                        //cout << "_text_w " << _text_w << "\n";
+                                        cout << feedname << "\n";
 
-                                        Fl_Button* feed_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
-                                        feed_button->copy_label(feedname.data());
+                                        int extent_x = 0;
+                                        int extent_y = 0;
+                                        int extent_w = 0;
+                                        int extent_h = 0;
+
+                                        const char* label_text = (new string(feedname))->data();
+                                        
+                                        fl_font(FL_HELVETICA, 12);
+                                        fl_text_extents(label_text, extent_x, extent_y, extent_w, extent_h);
+                                        cout << "extent text w/h " << extent_w << "/" << extent_h << "\n";
+                                        
+                                        int text_measure_w = 0;
+                                        int text_measure_h = 0;
+                                        
+                                        fl_font(FL_HELVETICA, 12);
+                                        fl_measure(label_text, text_measure_w, text_measure_h);
+                                        cout << "measure text w/h " << text_measure_w << "/" << text_measure_h << "\n";
+
+                                        int text_w_diff = abs(text_measure_h - extent_h);
+                                        cout << "text_w_diff " << text_w_diff << "\n";
+
+                                        //FLTK does not consistently measure text width. Found a pattern in which the count is missing another 1/4th pixels.
+                                        int text_w = text_measure_w + (text_measure_w/4) + button_spacing;
+                                        int text_h = extent_h + button_spacing;
+
+                                        if(button_text_h == 0) {
+                                                if(extent_h > text_measure_h) {
+                                                        button_text_h = extent_h;
+                                                }
+                                                else {
+                                                        button_text_h = text_measure_h;
+                                                }
+                                                
+                                                button_text_h = button_text_h + button_spacing;
+                                        }
+
+                                        Fl_Button* feed_button = new Fl_Button(next_x, 0, text_w, button_text_h);
+                                        feed_button->copy_label(label_text);
 
                                         rss_feed_choice_region->add(feed_button);
                                         
                                         feed_button->user_data(new int(feed_source_index));
                                         feed_button->callback(feed_source_callback);
+                                        
+                                        next_x = next_x + text_w + button_spacing;
                                 }
                         }
                 }
@@ -337,7 +371,8 @@ void cls::generate() {
 }
 
 void display_feed_source_headlines(cls* generator, int feed_source_index) {
-        Fl_Hold_Browser* headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
+        visual_type_rss_headlines 
+        headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
 
         if(headlines_region && headlines_region->size() == 0) {
                 //cout << "get_rss_feed_data()\n";
@@ -367,14 +402,15 @@ void display_feed_source_headlines(cls* generator, int feed_source_index) {
 void feed_items_callback(Fl_Widget* widget) {
         try{
                 if(widget) {
-                        Fl_Hold_Browser* headlines_region = (Fl_Hold_Browser*)widget;
+                        visual_type_rss_headlines headlines_region = (Fl_Hold_Browser*)widget;
 
                         if(headlines_region) {
                                 const int headline_index = headlines_region->value();
                                 
                                 material article_info = feed_articles[headline_index];
                                 
-                                Fl_Help_View* article_contents_region = (Fl_Help_View*)_workarea_region->child(visual_index_rss_reader_region::article_content);
+                                visual_type_rss_article_content 
+                                article_contents_region = (Fl_Help_View*)_workarea_region->child(visual_index_rss_reader_region::article_content);
                                 
                                 if(article_contents_region) {
                                         const char* src = article_info.description.data();
@@ -397,8 +433,8 @@ void feed_source_callback(Fl_Widget* widget) {
                         if(feed_button) {
                                 const int feed_source_index = *((int*)feed_button->user_data());
 
-                                Fl_Hold_Browser* headlines_region = nullptr;
-                                Fl_Help_View* article_contents_region = nullptr;
+                                visual_type_rss_headlines headlines_region = nullptr;
+                                visual_type_rss_article_content article_contents_region = nullptr;
 
                                 headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
                                 article_contents_region = (decltype(article_contents_region))_workarea_region->child(visual_index_rss_reader_region::article_content);
@@ -416,7 +452,7 @@ void feed_source_callback(Fl_Widget* widget) {
 }
 
 Fl_Double_Window* cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
-        Fl_Double_Window* visual_window = new Fl_Double_Window(x, y, w, h);
+        visual_type_window visual_window = new Fl_Double_Window(x, y, w, h);
         visual_window->end();
 
 	visual_window->size_range(w_lo, h_lo, w, h);

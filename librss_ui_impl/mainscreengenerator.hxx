@@ -25,7 +25,14 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <FL/Fl_Widget.H>
 #include <FL/fl_draw.H>
 #include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Box.H>
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Help_View.H>
+#include <FL/Fl_Hold_Browser.H>
+#include <FL/Fl_Pack.H>
+#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Output.H>
 
 #include "mainscreengenerator.hxx"
 
@@ -34,6 +41,15 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "request.hxx"
 #include "material.hxx"
 #include "feedscycle.hxx"
+
+using visual_type_window = Fl_Double_Window*;
+using visual_type_rss_header = Fl_Output*;
+using visual_type_rss_headlines = Fl_Hold_Browser*;
+using visual_type_rss_article_content = Fl_Help_View*;
+using visual_type_rss_control_bar = Fl_Pack*;
+using visual_type_rss_change_bar = Fl_Pack*;
+using visual_type_rss_choice_bar = Fl_Group*;
+using visual_type_work_area_region = Fl_Pack*;
 
 namespace rss {
 namespace ui {
@@ -44,6 +60,7 @@ namespace ui {
                 void get_rss_feed_data(int feed_source_index);
 
                 private:
+
                 /*Data*/
                 vector<rss::request> feed_parameters;
 
@@ -71,9 +88,9 @@ namespace ui {
                 const int _w_lo = 320;
                 const int _h_lo = 480;
 
-	        Fl_Double_Window* _visual_window;
+	        visual_type_window _visual_window;
 
-                Fl_Double_Window* get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
+                visual_type_window get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
                 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
 
                 void measure_screen();
