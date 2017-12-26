@@ -33,6 +33,7 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Output.H>
+#include <FL/Fl_Input.H>
 
 #include "mainscreengenerator.hxx"
 

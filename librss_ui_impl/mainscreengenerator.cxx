@@ -369,13 +369,41 @@ void cls::resize_workarea() {
                                         rss_change_bar_region->size(w, h);
 
                                         if(rss_change_bar_region->children() == 0) {
-                                                string label_text = "Update";
+                                                const int region_w = rss_change_bar_region->w();
+                                                const int region_h = rss_change_bar_region->h();
+                                                const int region_h_half = (region_h/2);
+                                                const int region_w_thrd = (region_w/3);
 
                                                 const int button_spacing = 12;
 
-                                                int button_x = 20;
+                                                int widget_x = 20;
+                                                int widget_y = measure_button_y(region_h_half, 32);
+                                                int widget_w = region_w_thrd;
+                                                int widget_h = 0;
+
+                                                fl_font(FL_HELVETICA, 12);
+                                                fl_measure("TEST WORD", widget_w, widget_h);
+
+                                                widget_w = region_w_thrd;
+                                                widget_h = widget_h + button_spacing;
+
+                                                Fl_Input* feed_name_input = new Fl_Input(widget_x, widget_y, widget_w, widget_h);
+                                                feed_name_input->maximum_size(1000);
+                                                feed_name_input->value("name a new feed");
+
+                                                widget_x = widget_x + widget_w + button_spacing;
+
+                                                Fl_Input* feed_url_input = new Fl_Input(widget_x, widget_y, widget_w, widget_h);
+                                                feed_url_input->maximum_size(100000);
+                                                feed_url_input->value("new feed url");
+
+                                                widget_x = widget_x + widget_w + button_spacing;                                        
+
+                                                int button_x = widget_x;
                                                 int button_w = 0;
                                                 int button_h = 0;
+
+                                                string label_text = "Update";
 
                                                 fl_font(FL_HELVETICA, 12);
                                                 fl_measure((new string(label_text))->data(), button_w, button_h);
@@ -383,13 +411,13 @@ void cls::resize_workarea() {
                                                 button_w = measure_button_w(button_w, button_spacing);
                                                 button_h = button_h + button_spacing;
 
-                                                const int region_h = rss_change_bar_region->h();
-                                                const int region_h_half = (region_h/2);
                                                 const int button_y = measure_button_y(region_h_half, button_h);
 
                                                 Fl_Button* update_button = new Fl_Button(button_x, button_y, button_w, button_h);
                                                 update_button->copy_label((new string(label_text))->data());
 
+                                                rss_change_bar_region->add(feed_name_input);
+                                                rss_change_bar_region->add(feed_url_input);
                                                 rss_change_bar_region->add(update_button);
                                                 
                                                 update_button->callback(feed_setup_callback);
@@ -524,6 +552,21 @@ void feed_contents_enlarge_callback(Fl_Widget* widget) {
 }
 
 void feed_setup_callback(Fl_Widget* widget) {
+        visual_type_rss_change_bar rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(visual_index_rss_reader_region::change_bar);
+
+        if(rss_change_bar_region->children() > 2) {
+                Fl_Input* feed_name_input = (Fl_Input*)rss_change_bar_region->child(0);
+                Fl_Input* feed_url_input = (Fl_Input*)rss_change_bar_region->child(1);
+
+                string feedname(feed_name_input->value());
+                string feedurl(feed_url_input->value());
+
+                if(feedname != "name a new feed" && feedurl != "new feed url") {
+                }
+                else {
+                }
+        }
+        
         return;
 }
 
