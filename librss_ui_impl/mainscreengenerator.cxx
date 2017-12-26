@@ -51,6 +51,7 @@ cls* _self;
 void feed_items_callback(Fl_Widget* widget);
 void feed_source_callback(Fl_Widget* widget);
 void feed_contents_enlarge_callback(Fl_Widget* widget);
+void feed_setup_callback(Fl_Widget* widget);
 
 void display_feed_source_headlines(cls* generator, int feed_source_index);
 
@@ -156,8 +157,6 @@ void cls::generate() {
                         resize_workarea();
 	        }
 
-                _visual_window->redraw();
-
                 if(_workarea_region->children() >= callable_size && !_feed_articles_requested) {
                         display_feed_source_headlines(this, 0);
 
@@ -167,7 +166,6 @@ void cls::generate() {
                         if(rss_feed_choice_region && rss_feed_choice_region->children() == 0) {
                                 const int feed_source_size = feed_parameters.size();
 
-                                int next_x = 0;
                                 const int button_spacing = 12;
 
                                 const int region_h = rss_feed_choice_region->h();
@@ -211,6 +209,8 @@ void cls::generate() {
                                         button_x = (button_x + button_w) + button_spacing;
                                 }
                         }
+
+                        _visual_window->redraw();
                 }
 	        
 	        Fl::flush();
@@ -373,7 +373,7 @@ void cls::resize_workarea() {
 
                                                 const int button_spacing = 12;
 
-                                                const int button_x = 20;
+                                                int button_x = 20;
                                                 int button_w = 0;
                                                 int button_h = 0;
 
@@ -387,10 +387,12 @@ void cls::resize_workarea() {
                                                 const int region_h_half = (region_h/2);
                                                 const int button_y = measure_button_y(region_h_half, button_h);
 
-                                                Fl_Button* enlarge_button = new Fl_Button(button_x, button_y, button_w, button_h);
-                                                enlarge_button->copy_label((new string(label_text))->data());
+                                                Fl_Button* update_button = new Fl_Button(button_x, button_y, button_w, button_h);
+                                                update_button->copy_label((new string(label_text))->data());
 
-                                                rss_change_bar_region->add(enlarge_button);
+                                                rss_change_bar_region->add(update_button);
+                                                
+                                                update_button->callback(feed_setup_callback);
                                         }
                                 }
                                 break;
@@ -412,6 +414,8 @@ void cls::resize_workarea() {
                                 break;
                         }
                 }
+
+                _visual_window->redraw();
         }
 
         return;
@@ -516,6 +520,10 @@ void feed_contents_enlarge_callback(Fl_Widget* widget) {
 
         _self->resize_workarea();
 
+        return;
+}
+
+void feed_setup_callback(Fl_Widget* widget) {
         return;
 }
 
