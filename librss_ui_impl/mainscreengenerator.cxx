@@ -41,6 +41,8 @@ int _text_h = 0;
 const int _text_wh_plus = 20;
 
 bool _feed_articles_requested = false;
+bool _article_contents_enlarge = false;
+bool _article_contents_enlarge_click = false;
 
 vector<material> feed_articles;
 visual_type_work_area_region _workarea_region;
@@ -48,6 +50,8 @@ cls* _self;
 
 void feed_items_callback(Fl_Widget* widget);
 void feed_source_callback(Fl_Widget* widget);
+void feed_contents_enlarge_callback(Fl_Widget* widget);
+
 void display_feed_source_headlines(cls* generator, int feed_source_index);
 
 enum visual_index_rss_reader_region {
@@ -58,6 +62,19 @@ enum visual_index_rss_reader_region {
         change_bar = 4,//RSS Reader RSS Change Bar
         choice_bar = 5//RSS Reader Feed Choice Bar
 };
+
+constexpr int measure_button_y(const int region_h_half, const int button_h) {
+        return (region_h_half - (button_h/2));
+}
+
+constexpr int measure_button_w(const int text_w, const int button_spacing) {
+        /*
+                FLTK does not properly measure text width in all cases.
+                On the machine I tested this on, 15.6" screen, 4K resolution,
+                I detected a pattern in which the count is missing another 1/4th pixels.
+        */
+        return (text_w + (text_w/4)) + button_spacing;
+}
 
 visual_type_rss_header get_visual_rss_header_display() {
         visual_type_rss_header header_region = new Fl_Output(0, 0, 0, 0);
@@ -76,6 +93,7 @@ visual_type_rss_headlines get_visual_rss_headlines_display() {
         visual_type_rss_headlines headlines_region = new Fl_Hold_Browser(0, 0, 0, 0);
         headlines_region->textfont(FL_HELVETICA);
         headlines_region->textsize(32);
+        headlines_region->has_scrollbar(7);
 
         return headlines_region;
 }
@@ -89,48 +107,22 @@ visual_type_rss_article_content get_visual_rss_article_contents_display() {
 }
 
 visual_type_rss_control_bar get_visual_rss_control_bar_display() {
-        visual_type_rss_control_bar rss_control_bar_region = new Fl_Pack(0, 0, 0, 0);
-
-        rss_control_bar_region->type(Fl_Pack::HORIZONTAL);
-
-        fl_font(FL_HELVETICA, 12);
-
-        string enlarge_button_label_text = "Enlarge";
-        fl_text_extents((new string(enlarge_button_label_text))->data(), _text_x, _text_y, _text_w, _text_h);
-        //cout << "_text_w " << _text_w << "\n";
-
-        Fl_Button* enlarge_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
-        enlarge_button->copy_label((new string(enlarge_button_label_text))->data());
-
-        rss_control_bar_region->add(enlarge_button);
+        visual_type_rss_control_bar rss_control_bar_region = new Fl_Group(0, 0, 0, 0);
+        rss_control_bar_region->resizable(nullptr);
 
         return rss_control_bar_region;
 }
 
 visual_type_rss_change_bar get_visual_rss_change_bar_display() {
-        visual_type_rss_change_bar rss_change_bar_region = new Fl_Pack(0, 0, 0, 0);
-
-        rss_change_bar_region->type(Fl_Pack::HORIZONTAL);
-
-        fl_font(FL_HELVETICA, 12);
-
-        string update_button_label_text = "Update";
-        fl_text_extents((new string(update_button_label_text))->data(), _text_x, _text_y, _text_w, _text_h);
-        //cout << "_text_w " << _text_w << "\n";
-
-        Fl_Button* update_button = new Fl_Button(0, 0, _text_w+_text_wh_plus, _text_h+_text_wh_plus);
-        update_button->copy_label(update_button_label_text.data());
-
-        rss_change_bar_region->add(update_button);
+        visual_type_rss_change_bar rss_change_bar_region = new Fl_Group(0, 0, 0, 0);
+        rss_change_bar_region->resizable(nullptr);
 
         return rss_change_bar_region;
 }
 
 visual_type_rss_choice_bar get_visual_rss_choice_display() {
         visual_type_rss_choice_bar rss_feed_choice_region = new Fl_Group(0, 0, 0, 0);
-
-        rss_feed_choice_region->type(Fl_Pack::HORIZONTAL);
-        //rss_feed_choice_region->spacing(24);
+        rss_feed_choice_region->resizable(nullptr);
 
         return rss_feed_choice_region;
 }
@@ -139,7 +131,7 @@ void cls::generate() {
         _self = this;
         measure_screen();
 
-        _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _w_lo, _h_lo, "RSS Reader");
+        _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _workarea_w/2, _workarea_h/2, "RSS Reader");
         _visual_window->color(fl_rgb_color(255, 153, 85));
 	
         _workarea_region = new Fl_Pack(0, 0, _workarea_w, _workarea_h);
@@ -150,141 +142,23 @@ void cls::generate() {
 
         show();
 
-        vector<visualcallable> callables;
+        int callable_size = 0;
 
+        vector<visualcallable> callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
+
+        callable_size = callables.size();
+                        
 	while(Fl::wait()) {
 	        const int new_w = _visual_window->w();
 	        const int new_h = _visual_window->h();
 
 	        if(_last_h != new_h || _last_w != new_w) {
-                        //cout << " last w/h " << last_w << "/" << last_h << "\n";
-		        _last_h = new_h;
-		        _last_w = new_w;
-
-                        callables = get_visual_definitions(_workarea_x, _screen_y, new_w, new_h);
-
-                        const int callable_size = callables.size();
-                        
-                        bool children_count_matches = (_workarea_region->children() == callable_size);
-
-                        for(int callable_index = 0; callable_index < callable_size; callable_index++) {
-                                visualcallable callable = callables[callable_index];
-
-                                string* label = new string(callable.label());
-
-                                const char* label_text = label->data();
-
-                                delete label;
-
-                                const int x = callable.x();
-                                const int y = callable.y();
-                                const int w = callable.w();
-                                const int h = callable.h();
-
-                                switch(callable_index) {
-                                        case visual_index_rss_reader_region::header://RSS Reader Header
-                                        {
-                                                visual_type_rss_header header_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        header_region = (decltype(header_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        header_region = get_visual_rss_header_display();
-
-                                                        _workarea_region->add(header_region);
-                                                }
-
-                                                header_region->size(w, h);
-                                        }
-                                        break;
-                                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
-                                        {
-                                                visual_type_rss_headlines headlines_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        headlines_region = (decltype(headlines_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        headlines_region = get_visual_rss_headlines_display();
-
-                                                        _workarea_region->add(headlines_region);
-                                                }
-
-                                                headlines_region->size(w, h);
-                                        }
-                                        break;
-                                        case visual_index_rss_reader_region::article_content://RSS Reader article content
-                                        {
-                                                visual_type_rss_article_content article_contents_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        article_contents_region = (decltype(article_contents_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        article_contents_region = get_visual_rss_article_contents_display();
-
-                                                        _workarea_region->add(article_contents_region);
-                                                }
-
-                                                article_contents_region->size(w, h);
-                                        }
-                                        break;
-                                        case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
-                                        {
-                                                visual_type_rss_control_bar rss_control_bar_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        rss_control_bar_region = (decltype(rss_control_bar_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        rss_control_bar_region = get_visual_rss_control_bar_display();
-
-                                                        _workarea_region->add(rss_control_bar_region);
-                                                }
-
-                                                rss_control_bar_region->size(w, h);
-                                        }
-                                        break;
-                                        case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
-                                        {
-                                                visual_type_rss_change_bar rss_change_bar_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        rss_change_bar_region = get_visual_rss_change_bar_display();
-
-                                                        _workarea_region->add(rss_change_bar_region);
-                                                }
-
-                                                rss_change_bar_region->size(w, h);
-                                        }
-                                        break;
-                                        case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
-                                        {
-                                                visual_type_rss_choice_bar rss_feed_choice_region = nullptr;
-
-                                                if(children_count_matches) {
-                                                        rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(callable_index);
-                                                }
-                                                else {
-                                                        rss_feed_choice_region = get_visual_rss_choice_display();
-
-                                                        _workarea_region->add(rss_feed_choice_region);
-                                                }
-
-                                                rss_feed_choice_region->size(w, h);
-                                        }
-                                        break;
-                                }
-                        }
-
-		        _visual_window->redraw();
+                        resize_workarea();
 	        }
 
-                if(_workarea_region->children() > 5 && !_feed_articles_requested) {
+                _visual_window->redraw();
+
+                if(_workarea_region->children() >= callable_size && !_feed_articles_requested) {
                         display_feed_source_headlines(this, 0);
 
                         visual_type_rss_choice_bar 
@@ -295,61 +169,46 @@ void cls::generate() {
 
                                 int next_x = 0;
                                 const int button_spacing = 12;
+
+                                const int region_h = rss_feed_choice_region->h();
+                                const int region_h_half = (region_h/2);
                                 
-                                int button_text_h = 0;
+                                int button_x = 20;
+                                int button_w = 0;
+                                int button_h = 0;
+
+                                fl_font(FL_HELVETICA, 12);
+                                fl_measure("TEST WORD", button_w, button_h);
+
+                                button_h = button_h + button_spacing;
+                                const int button_y = measure_button_y(region_h_half, button_h);
 
                                 for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
                                         request feedsource = feed_parameters[feed_source_index];
-                                        
+
                                         string feedname = feedsource.feedname;
 
-                                        cout << feedname << "\n";
-
-                                        int extent_x = 0;
-                                        int extent_y = 0;
-                                        int extent_w = 0;
-                                        int extent_h = 0;
+                                        //cout << feedname << "\n";
 
                                         const char* label_text = (new string(feedname))->data();
-                                        
-                                        fl_font(FL_HELVETICA, 12);
-                                        fl_text_extents(label_text, extent_x, extent_y, extent_w, extent_h);
-                                        cout << "extent text w/h " << extent_w << "/" << extent_h << "\n";
-                                        
+
                                         int text_measure_w = 0;
                                         int text_measure_h = 0;
-                                        
-                                        fl_font(FL_HELVETICA, 12);
+
                                         fl_measure(label_text, text_measure_w, text_measure_h);
-                                        cout << "measure text w/h " << text_measure_w << "/" << text_measure_h << "\n";
+                                        //cout << "measure text w/h " << text_measure_w << "/" << text_measure_h << "\n";
 
-                                        int text_w_diff = abs(text_measure_h - extent_h);
-                                        cout << "text_w_diff " << text_w_diff << "\n";
+                                        button_w = measure_button_w(text_measure_w, button_spacing);
 
-                                        //FLTK does not consistently measure text width. Found a pattern in which the count is missing another 1/4th pixels.
-                                        int text_w = text_measure_w + (text_measure_w/4) + button_spacing;
-                                        int text_h = extent_h + button_spacing;
-
-                                        if(button_text_h == 0) {
-                                                if(extent_h > text_measure_h) {
-                                                        button_text_h = extent_h;
-                                                }
-                                                else {
-                                                        button_text_h = text_measure_h;
-                                                }
-                                                
-                                                button_text_h = button_text_h + button_spacing;
-                                        }
-
-                                        Fl_Button* feed_button = new Fl_Button(next_x, 0, text_w, button_text_h);
+                                        Fl_Button* feed_button = new Fl_Button(button_x, button_y, button_w, button_h);
                                         feed_button->copy_label(label_text);
 
                                         rss_feed_choice_region->add(feed_button);
-                                        
+
                                         feed_button->user_data(new int(feed_source_index));
                                         feed_button->callback(feed_source_callback);
-                                        
-                                        next_x = next_x + text_w + button_spacing;
+
+                                        button_x = (button_x + button_w) + button_spacing;
                                 }
                         }
                 }
@@ -365,6 +224,194 @@ void cls::generate() {
                 }
 
                 delete _visual_window;
+        }
+
+        return;
+}
+
+void cls::resize_workarea() {
+        const int new_w = _visual_window->w();
+        const int new_h = _visual_window->h();
+
+        const bool workarea_size_changed = (_last_h != new_h || _last_w != new_w);
+
+        if(workarea_size_changed || _article_contents_enlarge_click) {
+                //cout << " last w/h " << last_w << "/" << last_h << "\n";
+	        _last_h = new_h;
+	        _last_w = new_w;
+
+                vector<visualcallable> callables = get_visual_definitions(_workarea_x, _screen_y, new_w, new_h);
+
+                const int callable_size = callables.size();
+
+                bool children_count_matches = (_workarea_region->children() == callable_size);
+
+                for(int callable_index = 0; callable_index < callable_size; callable_index++) {
+                        visualcallable callable = callables[callable_index];
+
+                        string* label = new string(callable.label());
+
+                        const char* label_text = label->data();
+
+                        delete label;
+
+                        const int x = callable.x();
+                        const int y = callable.y();
+                        const int w = callable.w();
+                        const int h = callable.h();
+
+                        switch(callable_index) {
+                                case visual_index_rss_reader_region::header://RSS Reader Header
+                                {
+                                        visual_type_rss_header header_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                header_region = (decltype(header_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                header_region = get_visual_rss_header_display();
+
+                                                _workarea_region->add(header_region);
+                                        }
+
+                                        _workarea_region->size(w, h);
+
+                                        header_region->size(w, h);
+                                }
+                                break;
+                                case visual_index_rss_reader_region::headlines://RSS Reader Headlines
+                                {
+                                        visual_type_rss_headlines headlines_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                headlines_region = (decltype(headlines_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                headlines_region = get_visual_rss_headlines_display();
+
+                                                _workarea_region->add(headlines_region);
+                                        }
+
+                                        headlines_region->size(w, h);
+                                }
+                                break;
+                                case visual_index_rss_reader_region::article_content://RSS Reader article content
+                                {
+                                        visual_type_rss_article_content article_contents_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                article_contents_region = (decltype(article_contents_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                article_contents_region = get_visual_rss_article_contents_display();
+
+                                                _workarea_region->add(article_contents_region);
+                                        }
+
+                                        article_contents_region->size(w, h);
+                                }
+                                break;
+                                case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
+                                {
+                                        visual_type_rss_control_bar rss_control_bar_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                rss_control_bar_region = (decltype(rss_control_bar_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                rss_control_bar_region = get_visual_rss_control_bar_display();
+
+                                                _workarea_region->add(rss_control_bar_region);
+                                        }
+
+                                        rss_control_bar_region->size(w, h);
+                                        
+                                        if(rss_control_bar_region->children() == 0) {
+                                                string label_text = "Enlarge";
+
+                                                const int button_spacing = 12;
+
+                                                const int button_x = 20;
+                                                int button_w = 0;
+                                                int button_h = 0;
+
+                                                fl_font(FL_HELVETICA, 12);
+                                                fl_measure((new string(label_text))->data(), button_w, button_h);
+
+                                                button_w = measure_button_w(button_w, button_spacing);
+                                                button_h = button_h + button_spacing;
+
+                                                const int region_h = rss_control_bar_region->h();
+                                                const int region_h_half = (region_h/2);
+                                                const int button_y = measure_button_y(region_h_half, button_h);
+
+                                                Fl_Button* enlarge_button = new Fl_Button(button_x, button_y, button_w, button_h);
+                                                enlarge_button->copy_label((new string(label_text))->data());
+
+                                                rss_control_bar_region->add(enlarge_button);
+                                                enlarge_button->callback(feed_contents_enlarge_callback);
+                                        }
+                                }
+                                break;
+                                case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
+                                {
+                                        visual_type_rss_change_bar rss_change_bar_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                rss_change_bar_region = get_visual_rss_change_bar_display();
+
+                                                _workarea_region->add(rss_change_bar_region);
+                                        }
+
+                                        rss_change_bar_region->size(w, h);
+
+                                        if(rss_change_bar_region->children() == 0) {
+                                                string label_text = "Update";
+
+                                                const int button_spacing = 12;
+
+                                                const int button_x = 20;
+                                                int button_w = 0;
+                                                int button_h = 0;
+
+                                                fl_font(FL_HELVETICA, 12);
+                                                fl_measure((new string(label_text))->data(), button_w, button_h);
+
+                                                button_w = measure_button_w(button_w, button_spacing);
+                                                button_h = button_h + button_spacing;
+
+                                                const int region_h = rss_change_bar_region->h();
+                                                const int region_h_half = (region_h/2);
+                                                const int button_y = measure_button_y(region_h_half, button_h);
+
+                                                Fl_Button* enlarge_button = new Fl_Button(button_x, button_y, button_w, button_h);
+                                                enlarge_button->copy_label((new string(label_text))->data());
+
+                                                rss_change_bar_region->add(enlarge_button);
+                                        }
+                                }
+                                break;
+                                case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
+                                {
+                                        visual_type_rss_choice_bar rss_feed_choice_region = nullptr;
+
+                                        if(children_count_matches) {
+                                                rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(callable_index);
+                                        }
+                                        else {
+                                                rss_feed_choice_region = get_visual_rss_choice_display();
+
+                                                _workarea_region->add(rss_feed_choice_region);
+                                        }
+
+                                        rss_feed_choice_region->size(w, h);
+                                }
+                                break;
+                        }
+                }
         }
 
         return;
@@ -451,7 +498,28 @@ void feed_source_callback(Fl_Widget* widget) {
         return;
 }
 
-Fl_Double_Window* cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
+void feed_contents_enlarge_callback(Fl_Widget* widget) {
+        _article_contents_enlarge = !_article_contents_enlarge;
+        _article_contents_enlarge_click = true;
+
+        Fl_Button* button = (Fl_Button*)widget;
+        string label_text = "";
+
+        if(_article_contents_enlarge) {
+                label_text = "Shrink";
+        }
+        else {
+                label_text = "Enlarge";
+        }
+
+        widget->copy_label(label_text.data());
+
+        _self->resize_workarea();
+
+        return;
+}
+
+visual_type_window cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
         visual_type_window visual_window = new Fl_Double_Window(x, y, w, h);
         visual_window->end();
 
@@ -542,7 +610,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
 
                 x = 0;
                 y = next_y;
-                w = _screen_w;
+                w = screen_w;
 
                 switch(index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
@@ -614,6 +682,16 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 //cout << "\n";
 
                 callables.push_back(callable);
+        }
+
+        if(_article_contents_enlarge) {
+                const int region_h = callables[1].h() + callables[2].h();
+                
+                const int headlines_h = region_h/4;
+                const int article_contents_h = region_h - headlines_h;
+                
+                callables[1].h(headlines_h);
+                callables[2].h(article_contents_h);
         }
         
         return callables;

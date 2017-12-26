@@ -46,8 +46,8 @@ using visual_type_window = Fl_Double_Window*;
 using visual_type_rss_header = Fl_Output*;
 using visual_type_rss_headlines = Fl_Hold_Browser*;
 using visual_type_rss_article_content = Fl_Help_View*;
-using visual_type_rss_control_bar = Fl_Pack*;
-using visual_type_rss_change_bar = Fl_Pack*;
+using visual_type_rss_control_bar = Fl_Group*;
+using visual_type_rss_change_bar = Fl_Group*;
 using visual_type_rss_choice_bar = Fl_Group*;
 using visual_type_work_area_region = Fl_Pack*;
 
@@ -58,6 +58,7 @@ namespace ui {
                 public:
                 void generate();
                 void get_rss_feed_data(int feed_source_index);
+                void resize_workarea();
 
                 private:
 
@@ -84,9 +85,6 @@ namespace ui {
 
 	        int _last_w = 0;
 	        int _last_h = 0;
-
-                const int _w_lo = 320;
-                const int _h_lo = 480;
 
 	        visual_type_window _visual_window;
 
