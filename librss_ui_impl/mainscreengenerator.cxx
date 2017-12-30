@@ -637,7 +637,7 @@ void cls::measure_screen() {
 }
 
 void cls::get_rss_feed_data(int feed_source_index) {
-	feeds_group.get_feed_namedaddresses(_feed_names_location, _feed_parameters);
+	feeds_group.get_feed_names_and_addresses(_feed_names_location, _feed_parameters);
 
 	if(_feed_parameters.size() > 0) {
 	        feedsource = _feed_parameters[feed_source_index];

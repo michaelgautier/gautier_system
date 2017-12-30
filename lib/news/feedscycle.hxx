@@ -24,8 +24,9 @@ namespace rss {
         using namespace std;
 	class feedscycle {
 		public:
-                void get_feed_namedaddresses(string& location, vector<request>& feed_parameters);
+                void get_feed_names_and_addresses(string& location, vector<request>& feed_parameters);
                 void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
+                bool set_feed_names_and_addresses(string& location, string& feed_name, string& feed_url);
 	};
 }
 #endif

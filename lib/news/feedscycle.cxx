@@ -13,7 +13,7 @@ using cls = rss::feedscycle;
 using material = rss::material;
 using request = rss::request;
 
-void cls::get_feed_namedaddresses(string& location, vector<request>& feed_parameters) {
+void cls::get_feed_names_and_addresses(string& location, vector<request>& feed_parameters) {
 	vector<string> feed_parameter_lines;
 
 	get_feed_parameter_lines_from_config(location, feed_parameter_lines);
@@ -42,6 +42,10 @@ void cls::get_feed_namedaddresses(string& location, vector<request>& feed_parame
 	}
 	
 	return;
+}
+
+bool cls::set_feed_names_and_addresses(string& location, string& feed_name, string& feed_url) {
+        return false;
 }
 
 void cls::get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines) {

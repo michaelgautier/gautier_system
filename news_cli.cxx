@@ -36,7 +36,7 @@ int main() {
 
         feedscycle feeds_group;
         
-	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
+	feeds_group.get_feed_names_and_addresses(feed_names_location, feed_parameters);
 	
 	for(auto feedsource : feed_parameters) {
 	        cout << "******** feed: \t " << feedsource.feedname << "\n\n\n";
