@@ -63,13 +63,6 @@ namespace ui {
 
                 private:
 
-                /*Data*/
-                rss::collector rss_requestor;
-
-                rss::feedscycle feeds_group;
-
-                rss::request feedsource;
-
                 visual_type_window _visual_window;
 
                 visual_type_window get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);

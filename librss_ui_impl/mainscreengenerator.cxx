@@ -569,19 +569,7 @@ void feed_contents_enlarge_callback(Fl_Widget* widget) {
 }
 
 void feed_setup_callback(Fl_Widget* widget) {
-        visual_type_rss_change_bar rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(visual_index_rss_reader_region::change_bar);
 
-        if(rss_change_bar_region->children() > 2) {
-                Fl_Input* feed_name_input = (Fl_Input*)rss_change_bar_region->child(0);
-                Fl_Input* feed_url_input = (Fl_Input*)rss_change_bar_region->child(1);
-
-                string feedname(feed_name_input->value());
-                string feedurl(feed_url_input->value());
-
-                if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
-                        //
-                }
-        }
         
         return;
 }
@@ -637,13 +625,15 @@ void cls::measure_screen() {
 }
 
 void cls::get_rss_feed_data(int feed_source_index) {
+        feedscycle feeds_group;
 	feeds_group.get_feed_names_and_addresses(_feed_names_location, _feed_parameters);
 
 	if(_feed_parameters.size() > 0) {
-	        feedsource = _feed_parameters[feed_source_index];
+	        request feedsource = _feed_parameters[feed_source_index];
 
                 //cout << "feedsource " << feedsource.feedname << "\n";
 
+                collector rss_requestor;
 	        _feed_articles = rss_requestor.pull(feedsource);
 	        
 	        _feed_articles_requested = true;
