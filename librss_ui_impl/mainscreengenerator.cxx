@@ -33,18 +33,35 @@ using visualcallable = visualfunc::formulation::visualcallable;
 using namespace std;
 using cls = rss::ui::mainscreengenerator;
 
+const int _text_wh_plus = 20;
+
 int _text_x = 0;
 int _text_y = 0;
 int _text_w = 0;
 int _text_h = 0;
 
-const int _text_wh_plus = 20;
+int _workarea_x = 0;
+int _workarea_y = 0;
+int _workarea_w = 0;
+int _workarea_h = 0;
+
+int _screen_x = 0;
+int _screen_y = 0;
+int _screen_w = 0;
+int _screen_h = 0;
+
+int _last_w = 0;
+int _last_h = 0;
 
 bool _feed_articles_requested = false;
 bool _article_contents_enlarge = false;
 bool _article_contents_enlarge_click = false;
 
-vector<material> feed_articles;
+string _feed_names_location = "feeds.txt";
+
+vector<request> _feed_parameters;
+vector<material> _feed_articles;
+
 visual_type_work_area_region _workarea_region;
 cls* _self;
 
@@ -164,7 +181,7 @@ void cls::generate() {
                         rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(visual_index_rss_reader_region::choice_bar);
 
                         if(rss_feed_choice_region && rss_feed_choice_region->children() == 0) {
-                                const int feed_source_size = feed_parameters.size();
+                                const int feed_source_size = _feed_parameters.size();
 
                                 const int button_spacing = 12;
 
@@ -182,7 +199,7 @@ void cls::generate() {
                                 const int button_y = measure_button_y(region_h_half, button_h);
 
                                 for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                                        request feedsource = feed_parameters[feed_source_index];
+                                        request feedsource = _feed_parameters[feed_source_index];
 
                                         string feedname = feedsource.feedname;
 
@@ -457,13 +474,13 @@ void display_feed_source_headlines(cls* generator, int feed_source_index) {
                 //cout << "get_rss_feed_data()\n";
                 generator->get_rss_feed_data(feed_source_index);
 
-                if(feed_articles.size() > 0) {
+                if(_feed_articles.size() > 0) {
                         //cout << "headlines\n";
 
-                        const int articles_size = feed_articles.size();
+                        const int articles_size = _feed_articles.size();
 
                         for(int article_index = 0; article_index < articles_size; article_index++) {
-                                auto feed_article_entry = feed_articles[article_index];
+                                auto feed_article_entry = _feed_articles[article_index];
 
                                 headlines_region->add(string(feed_article_entry.headline).data());
                         }
@@ -486,7 +503,7 @@ void feed_items_callback(Fl_Widget* widget) {
                         if(headlines_region) {
                                 const int headline_index = headlines_region->value();
                                 
-                                material article_info = feed_articles[headline_index];
+                                material article_info = _feed_articles[headline_index];
                                 
                                 visual_type_rss_article_content 
                                 article_contents_region = (Fl_Help_View*)_workarea_region->child(visual_index_rss_reader_region::article_content);
@@ -561,9 +578,8 @@ void feed_setup_callback(Fl_Widget* widget) {
                 string feedname(feed_name_input->value());
                 string feedurl(feed_url_input->value());
 
-                if(feedname != "name a new feed" && feedurl != "new feed url") {
-                }
-                else {
+                if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
+                        //
                 }
         }
         
@@ -621,18 +637,18 @@ void cls::measure_screen() {
 }
 
 void cls::get_rss_feed_data(int feed_source_index) {
-	feeds_group.get_feed_namedaddresses(feed_names_location, feed_parameters);
+	feeds_group.get_feed_namedaddresses(_feed_names_location, _feed_parameters);
 
-	if(feed_parameters.size() > 0) {
-	        feedsource = feed_parameters[feed_source_index];
+	if(_feed_parameters.size() > 0) {
+	        feedsource = _feed_parameters[feed_source_index];
 
                 //cout << "feedsource " << feedsource.feedname << "\n";
 
-	        feed_articles = rss_requestor.pull(feedsource);
+	        _feed_articles = rss_requestor.pull(feedsource);
 	        
 	        _feed_articles_requested = true;
 	        
-	        //cout << "feed_articles.size() " << feed_articles.size() << "\n";
+	        //cout << "_feed_articles.size() " << _feed_articles.size() << "\n";
 	}
 
         return;

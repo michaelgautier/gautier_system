@@ -64,30 +64,13 @@ namespace ui {
                 private:
 
                 /*Data*/
-                vector<rss::request> feed_parameters;
-
-                string feed_names_location = "feeds.txt";
-
                 rss::collector rss_requestor;
 
                 rss::feedscycle feeds_group;
 
                 rss::request feedsource;
 
-                int _workarea_x = 0;
-                int _workarea_y = 0;
-                int _workarea_w = 0;
-                int _workarea_h = 0;
-
-                int _screen_x = 0;
-                int _screen_y = 0;
-                int _screen_w = 0;
-                int _screen_h = 0;
-
-	        int _last_w = 0;
-	        int _last_h = 0;
-
-	        visual_type_window _visual_window;
+                visual_type_window _visual_window;
 
                 visual_type_window get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
                 vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
