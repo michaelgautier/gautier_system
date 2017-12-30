@@ -21,3 +21,5 @@ clang++ -lfltk -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_pa
 echo "	bin"
 ls -gGh bin/
 
+#Note 12/29/2017 - clang compile does not result in a working executable.
+
