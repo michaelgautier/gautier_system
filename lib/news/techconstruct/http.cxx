@@ -54,7 +54,8 @@ void cls::get_stream(string url, string& output) {
 		filehandler.read_istream_into_string(temp_http_response_stream, output);
 	}
 	catch(const exception e) {
-		if(e.what() == "Host not found") {
+	        const string exception_explanation(e.what());
+		if(exception_explanation == "Host not found") {
 			cout << e.what() << " " << "reverting to offline copy if available.\n";
 		}
 	}
