@@ -569,7 +569,20 @@ void feed_contents_enlarge_callback(Fl_Widget* widget) {
 }
 
 void feed_setup_callback(Fl_Widget* widget) {
+        visual_type_rss_change_bar rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(visual_index_rss_reader_region::change_bar);
 
+        if(rss_change_bar_region->children() > 2) {
+                Fl_Input* feed_name_input = (Fl_Input*)rss_change_bar_region->child(0);
+                Fl_Input* feed_url_input = (Fl_Input*)rss_change_bar_region->child(1);
+
+                string feedname(feed_name_input->value());
+                string feedurl(feed_url_input->value());
+
+                if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
+                        feedscycle feeds_group;
+	                feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
+                }
+        }
         
         return;
 }
