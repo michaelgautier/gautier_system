@@ -49,29 +49,31 @@ bool cls::set_feed_name_and_address(string& location, string& feed_name, string&
         
         get_feed_names_and_addresses(location, feed_parameters);
 
-        bool feed_name_exists = false;
-        bool feed_url_changed = false;
-        
-        for(request feed_request : feed_parameters) {
-                feed_name_exists = (feed_request.feedname == feed_name);
-
-                if (feed_name_exists) {
-                        feed_url_changed = (feed_request.webaddress != feed_url);
-                        
-                        break;
-                }
-        }
-
 	string feed_file_name(location.data(), ios_base::out | ios_base::trunc);
 
 	ofstream feed_offline_file(feed_file_name.data());
 
-        if(feed_name_exists && feed_url_changed) {
-                for(request feed_request : feed_parameters) {
-	                feed_offline_file << feed_request.feedname << "\t" << feed_request.webaddress << "\n";
+        bool feed_added = false;
+
+        for(request feed_request : feed_parameters) {
+                const bool feed_name_exists = (feed_request.feedname == feed_name);
+                bool feed_url_changed = false;
+
+                if (feed_name_exists) {
+                        feed_url_changed = (feed_request.webaddress != feed_url);
+                        
+                        feed_added = true;
+                }
+
+                if(feed_name_exists && feed_url_changed) {
+                        feed_offline_file << feed_name << "\t" << feed_url << "\n";
+                }
+                else {
+                        feed_offline_file << feed_request.feedname << "\t" << feed_request.webaddress << "\n";
                 }
         }
-        else {
+
+        if(!feed_added) {
                 feed_offline_file << feed_name << "\t" << feed_url << "\n";
         }
 
