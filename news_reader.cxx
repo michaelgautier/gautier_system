@@ -14,11 +14,13 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 #include "mainscreengenerator.hxx"
+#include <iostream>
 
 using namespace std;
 
 int main() {
         rss::ui::mainscreengenerator generator;
+        generator.init();
         generator.generate();
         
 	return 0;

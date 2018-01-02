@@ -44,7 +44,9 @@ void cls::get_feed_names_and_addresses(string& location, vector<request>& feed_p
 	return;
 }
 
-bool cls::set_feed_name_and_address(string& location, string& feed_name, string& feed_url) {
+vector<string> cls::set_feed_name_and_address(string& location, string& feed_name, string& feed_url) {
+        vector<string> added_feednames;
+
         vector<request> feed_parameters;
         
         get_feed_names_and_addresses(location, feed_parameters);
@@ -75,13 +77,15 @@ bool cls::set_feed_name_and_address(string& location, string& feed_name, string&
 
         if(!feed_added) {
                 feed_offline_file << feed_name << "\t" << feed_url << "\n";
+                
+                added_feednames.push_back(feed_name);
         }
 
 	feed_offline_file.flush();
 
 	feed_offline_file.close();
 
-        return false;
+        return added_feednames;
 }
 
 void cls::get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines) {
