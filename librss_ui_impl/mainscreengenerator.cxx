@@ -732,6 +732,60 @@ dlib::drectangle cls::MeasureLineHeight(const char* str) {
         return rect;
 }
 
+void cls::build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, const double bdr_width, const double scrollbar_width) {
+        /*scrollbar aligned to the right.*/
+
+        const double vertical_scrollbar_border_line_width = bdr_width;
+
+        const double vertical_scrollbar_h = y2;
+        const double vertical_scrollbar_w = x2;
+
+        const double vertical_scrollbar_x = (x2 - scrollbar_width);
+        const double vertical_scrollbar_y = y1;
+
+        return;
+}
+
+void cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, const double bdr_width, string label_text) {
+        const double widget_border_line_width = bdr_width;
+
+        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
+
+        /*Widgets aligned to the left.*/
+
+        const double widget_h = (widget_dimensions.bottom() + y1);
+
+        const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
+        const double widget_x_offset = x_offset;
+
+        const double widget_x = (next_x + widget_x_offset);
+        const double widget_y = (widget_y_offset + y1);
+        const double widget_w = widget_x + widget_dimensions.right();
+
+        next_x = widget_w;
+
+        return;
+}
+
+void cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, const double bdr_width, string label_text) {
+        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+
+        /*Button aligned to the right.*/
+
+        const double button_border_line_width = bdr_width;
+
+        const double button_h = (button_dimensions.bottom() + y1);
+
+        const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
+        const double button_x_offset = (x2 - 20);
+
+        const double button_x = (button_x_offset - button_dimensions.right());
+        const double button_y = (button_y_offset + y1);
+        const double button_w = button_x_offset;
+
+        return;
+}
+
 vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
@@ -754,6 +808,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
 
         for(int index = 0; index < max_elems; index++) {
                 visualcallable callable(index);
+                callable.type_id(visual_index_rss_reader_widget_type::squared_region);
 
                 x = 0;
                 y = next_y;

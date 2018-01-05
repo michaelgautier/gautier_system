@@ -132,6 +132,13 @@ namespace ui {
                         choice_bar = 5//RSS Reader Feed Choice Bar
                 };
 
+                enum visual_index_rss_reader_widget_type {
+                        squared_region = 0,
+                        left_aligned_button = 0,
+                        right_aligned_button = 1,
+                        text_field = 2
+                };
+
                 bool _article_contents_enlarge = false;
                 bool _article_contents_enlarge_click = false;
                 bool _feed_articles_requested = false;
@@ -174,6 +181,15 @@ namespace ui {
 
                 void measure_screen(interactionstate& interaction_ctx);
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
+
+                void build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
+                const double bdr_width, const double scrollbar_width);
+
+                void build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+                const double x_offset, double& next_x, const double bdr_width, string label_text);
+
+                void build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+                const double bdr_width, string label_text);
         };
 }
 }
