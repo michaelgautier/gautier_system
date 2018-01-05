@@ -145,3 +145,14 @@ void cls::label(string v) {
         
         return;
 }
+
+vector<cls> cls::callables() {
+        return _callables;
+}
+
+void cls::callables(vector<cls> v) {
+        _callables = v;
+        
+        return;
+}
+

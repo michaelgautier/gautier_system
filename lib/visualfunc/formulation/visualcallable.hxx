@@ -18,6 +18,7 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #define __visualfunc_formulation_visualcallable__
 
 #include <string>
+#include <vector>
 
 namespace visualfunc {
 namespace formulation {
@@ -36,6 +37,8 @@ namespace formulation {
                         double _line_stroke_width_bottom = 1;
                         
                         string _label;
+                        
+                        vector<visualcallable> _callables;
                 public:
                         visualcallable(const int id) {
                                 _id = id;
@@ -82,6 +85,9 @@ namespace formulation {
                         string label();
                         
                         void label(string v);
+                        
+                        vector<visualcallable> callables();
+                        void callables(vector<visualcallable> v);
         };
 }
 }
