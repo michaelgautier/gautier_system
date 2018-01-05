@@ -20,8 +20,8 @@ echo "Building rss reader"
 #g++ -lfltk -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -Wl,-rpath,. -o bin/newsreader obj/newsreader.o 
 
 #shared libraries - manual
-g++ -std=c++14 -c -g -I$HOME/Code/lib_gcc/fltk/include/ -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx
-g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -Wl,-rpath,. -o bin/newsreader obj/newsreader.o $HOME/Code/lib_gcc/fltk/lib/libfltk.so
+g++ -std=c++14 -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx
+g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -ldlib -lallegro -lallegro_font -lallegro_ttf -lallegro_primitives -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -Wl,-rpath,. -o bin/newsreader obj/newsreader.o
 
 #static compile FLTK
 #g++ -std=c++14 -c -g -I$HOME/Code/lib_gcc/fltk/include/ -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx

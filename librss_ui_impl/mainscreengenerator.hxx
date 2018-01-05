@@ -18,46 +18,103 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #define __rss_ui_mainscreengenerator__
 
 #include <vector>
-#include <memory>
 
-#include <FL/Fl_Widget.H>
-#include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Group.H>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_color.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
-#include <FL/Fl_Output.H>
-#include <FL/Fl_Input.H>
-#include <FL/Fl_Help_View.H>
-#include <FL/Fl_Hold_Browser.H>
-#include <FL/Fl_Pack.H>
-
-#include "mainscreengenerator.hxx"
+#include <dlib/geometry.h>
 
 #include "visualcallable.hxx"
 #include "request.hxx"
 #include "material.hxx"
 
-using visual_type_window = Fl_Double_Window*;
-using visual_type_rss_header = Fl_Output*;
-using visual_type_rss_headlines = Fl_Hold_Browser*;
-using visual_type_rss_article_content = Fl_Help_View*;
-using visual_type_rss_control_bar = Fl_Group*;
-using visual_type_rss_change_bar = Fl_Group*;
-using visual_type_rss_choice_bar = Fl_Group*;
-using visual_type_work_area_region = Fl_Pack*;
+#include "interactionstate.hxx"
 
 namespace rss {
 namespace ui {
         using namespace std;
         class mainscreengenerator {
                 public:
+	        using interactionstate = visualfunc::formulation::InteractionState;
+	        using InteractionCallBackType = void(*)(interactionstate);
+
+                mainscreengenerator();
+                ~mainscreengenerator();
                 void init();
                 void generate();
                 vector<rss::request> get_rss_feed_data(int feed_source_index);
-                void resize_workarea();
-                void update_screen();
-                vector<rss::request> display_feed_source_headlines(int feed_source_index);
-                void display_feed_buttons(const vector<string> feednames);
 
+                /*Application Logic*/
+
+                void ProcessUpdates(const interactionstate& interactionState);
+
+                private:
+
+                /*Graphics Engine*/
+                ALLEGRO_DISPLAY* 
+                        _WinCtx = nullptr;
+
+                ALLEGRO_MONITOR_INFO 
+                        _WinScreenInfo;
+
+                ALLEGRO_EVENT_SOURCE* 
+                        _WinMsgEvtSrc = nullptr;
+
+                ALLEGRO_EVENT_SOURCE* 
+                        _MouseEvtSrc = nullptr;
+
+                ALLEGRO_EVENT_QUEUE* 
+                        _WinMsgEvtQueue = nullptr;
+
+                ALLEGRO_EVENT 
+                        _winmsg_event;
+
+                ALLEGRO_FONT* _Font = nullptr;
+
+                interactionstate 
+                        _InteractionState, 
+                        _InteractionStateLast;
+
+                InteractionCallBackType 
+                        _InteractionCallBack;
+
+                bool 
+                        _IsAllegroInitialized, 
+                        _IsAllegroUnInitialized,
+                        _IsScreenDPICached;
+                        
+                int 
+                        _FontBoxX, 
+                        _FontBoxW, 
+                        _FontBoxY, 
+                        _FontBoxH;
+
+                double 
+                        _FontSize, 
+                        _ScreenDPI;
+                        
+                const char* _FontPath = nullptr;
+
+	        void Activate(InteractionCallBackType);
+                void StartRenderGraphics();
+                void EndRenderGraphics();
+                void GetScreenDpi(double& screenDpi);
+
+                bool GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now);
+                bool GetIsFontLoaded();
+                void SetFontParameters(const char* fontPath, double const& fontSize);
+                void GetFont(ALLEGRO_FONT*& font, int& fontBoxX, int& fontBoxY, int& fontBoxW, int& fontBoxH);
+
+	        void Initialize();
+	        void Release();
+
+                void LoadFont();
+                void MeasureLineHeight(const char* str);
+
+                /*Application Logic Implementation*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header
                         headlines = 1,//RSS Reader Headlines
@@ -69,18 +126,18 @@ namespace ui {
 
                 bool _article_contents_enlarge = false;
                 bool _article_contents_enlarge_click = false;
+                bool _feed_articles_requested = false;
+
                 string _feed_names_location = "feeds.txt";
 
                 vector<rss::material> _feed_articles;
-                visual_type_work_area_region _workarea_region;
-                int _feed_index = 0;
+                
+                void BuildVisualModel(const interactionstate& interaction_ctx);
+                void ProcessInteractions(const interactionstate& interaction_ctx);
+                void UpdateVisualOutput(const interactionstate& interaction_ctx);
 
-                void feed_items_callback(Fl_Widget* widget);
-                void feed_source_callback(Fl_Widget* widget);
-                void feed_contents_enlarge_callback(Fl_Widget* widget);
-                void feed_setup_callback(Fl_Widget* widget);
-
-                private:
+                /*Widget geometry*/
+                vector<visualfunc::formulation::visualcallable> callables;
 
                 const int _text_wh_plus = 20;
 
@@ -101,15 +158,7 @@ namespace ui {
 
                 int _last_w = 0;
                 int _last_h = 0;
-
-
-                bool _feed_articles_requested = false;
-
-                visual_type_window _visual_window;
-
-                visual_type_window get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label);
-                vector<shared_ptr<Fl_Widget>> get_widgets(const vector<visualfunc::formulation::visualcallable> & callables);
-
+      
                 constexpr int measure_button_y(const int region_h_half, const int button_h) {
                         return (region_h_half - (button_h/2));
                 }
@@ -119,22 +168,13 @@ namespace ui {
                                 FLTK does not properly measure text width in all cases.
                                 On the machine I tested this on, 15.6" screen, 4K resolution,
                                 I detected a pattern in which the count is missing another 1/4th pixels.
+                Since switching to Allegro, this may be unnecessary.
                         */
                         return (text_w + (text_w/4)) + button_spacing;
                 }
 
-                visual_type_rss_header get_visual_rss_header_display();
-                visual_type_rss_headlines get_visual_rss_headlines_display();
-                visual_type_rss_article_content get_visual_rss_article_contents_display();
-                visual_type_rss_control_bar get_visual_rss_control_bar_display();
-                visual_type_rss_change_bar get_visual_rss_change_bar_display();
-                visual_type_rss_choice_bar get_visual_rss_choice_display();
-
-                void measure_screen();
+                void measure_screen(const interactionstate& interaction_ctx);
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
-
-                void clear(Fl_Group*);
-                void show();
         };
 }
 }

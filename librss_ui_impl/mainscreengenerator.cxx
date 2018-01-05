@@ -14,14 +14,6 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 #include <iostream>
-#include <cstring>
-
-#include <FL/Fl.H>
-#include <FL/Enumerations.H>
-#include <FL/fl_draw.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Scroll.H>
-#include <FL/Fl_Button.H>
 
 #include "mainscreengenerator.hxx"
 
@@ -37,639 +29,193 @@ using request = rss::request;
 using feedscycle = rss::feedscycle;
 using visualcallable = visualfunc::formulation::visualcallable;
 
+using interactionstate = visualfunc::formulation::InteractionState;
+
 using namespace std;
 using cls = rss::ui::mainscreengenerator;
 
+static std::string 
+        _DefaultWindowTitle = "Gautier RSS";
+
+static constexpr double 
+        _AvgPhysicalScreenSize = 13.667, _PrintPointSize = 72.0;
+
+static double 
+        _ScreenDpiLast = 96;
+
 cls* _self = nullptr;
 
-void feed_items_callback_l(Fl_Widget* widget) {
-        _self->feed_items_callback(widget);
-
-        return;
-}
-
-void feed_source_callback_l(Fl_Widget* widget) {
-        _self->feed_source_callback(widget);
-
-        return;
-}
-
-void feed_contents_enlarge_callback_l(Fl_Widget* widget) {
-        _self->feed_contents_enlarge_callback(widget);
-
-        return;
-}
-
-void feed_setup_callback_l(Fl_Widget* widget) {
-        _self->feed_setup_callback(widget);
-
-        return;
-}
-
-visual_type_rss_header cls::get_visual_rss_header_display() {
-        visual_type_rss_header header_region = new Fl_Output(0, 0, 0, 0);
-
-        header_region->box(FL_FLAT_BOX);
-        header_region->color(fl_rgb_color(212, 85, 0));
-        header_region->value("RSS Reader");
-        header_region->textfont(FL_HELVETICA);
-        header_region->textsize(72);
-        header_region->textcolor(fl_rgb_color(213, 255, 246));
-
-        return header_region;
-}
-
-visual_type_rss_headlines cls::get_visual_rss_headlines_display() {
-        visual_type_rss_headlines headlines_region = new Fl_Hold_Browser(0, 0, 0, 0);
-        headlines_region->textfont(FL_HELVETICA);
-        headlines_region->textsize(32);
-        headlines_region->has_scrollbar(7);
-
-        return headlines_region;
-}
-
-visual_type_rss_article_content cls::get_visual_rss_article_contents_display() {
-        visual_type_rss_article_content article_contents_region = new Fl_Help_View(0, 0, 0, 0);
-        article_contents_region->textfont(FL_HELVETICA);
-        article_contents_region->textsize(36);
-
-        return article_contents_region;
-}
-
-visual_type_rss_control_bar cls::get_visual_rss_control_bar_display() {
-        visual_type_rss_control_bar rss_control_bar_region = new Fl_Group(0, 0, 0, 0);
-        rss_control_bar_region->resizable(nullptr);
-
-        return rss_control_bar_region;
-}
-
-visual_type_rss_change_bar cls::get_visual_rss_change_bar_display() {
-        visual_type_rss_change_bar rss_change_bar_region = new Fl_Group(0, 0, 0, 0);
-        rss_change_bar_region->resizable(nullptr);
-
-        return rss_change_bar_region;
-}
-
-visual_type_rss_choice_bar cls::get_visual_rss_choice_display() {
-        visual_type_rss_choice_bar rss_feed_choice_region = new Fl_Group(0, 0, 0, 0);
-        rss_feed_choice_region->resizable(nullptr);
-
-        return rss_feed_choice_region;
-}
-
-void cls::update_screen() {
-        _visual_window->redraw();
-
-        Fl::flush();
-
-        return;
-}
+void UpdateDisplay(interactionstate interactionState);
+void clear_to_background_color();
 
 void cls::init() {
-        _self = this;
-        measure_screen();
-
-        _visual_window = get_window(0, 0, _workarea_w, _workarea_h, _workarea_w/2, _workarea_h/2, "RSS Reader");
-        _visual_window->color(fl_rgb_color(255, 153, 85));
-	
-        _workarea_region = new Fl_Pack(0, 0, _workarea_w, _workarea_h);
-
-        _workarea_region->type(Fl_Pack::VERTICAL);
-
-        _visual_window->add(_workarea_region);
-
-        vector<visualcallable> callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
-
-        const int callable_size = callables.size();
-
-        for(int callable_index; callable_index < callable_size; callable_index++) {
-                switch(callable_index) {
-                        case visual_index_rss_reader_region::header://RSS Reader Header
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_header_display());
-                        }
-                        break;
-                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_headlines_display());
-                        }
-                        break;
-                        case visual_index_rss_reader_region::article_content://RSS Reader article content
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_article_contents_display());
-                        }
-                        break;
-                        case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_control_bar_display());
-                        }
-                        break;
-                        case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_change_bar_display());
-                        }
-                        break;
-                        case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
-                        {
-                                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                _workarea_region->add(get_visual_rss_choice_display());
-                        }
-                        break;
-                }
-        }
-
-        show();
 
         return;
 }
 
 void cls::generate() {
-	while(Fl::wait()) {
-                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-	        const int new_w = _visual_window->w();
-	        const int new_h = _visual_window->h();
+        Activate(UpdateDisplay);
+        
+        return;
+}
 
-	        if(_last_h != new_h || _last_w != new_w) {
-                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                        resize_workarea();
-	        }
+void UpdateDisplay(interactionstate interactionState) {
+        _self->ProcessUpdates(interactionState);
+
+	return;
+}
+
+void cls::ProcessUpdates(const interactionstate& interactionState) {
+        bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionState, interactionState);
+
+        if(IsVisualModelChanged) {
+                if(!_Font) {
+                        if(!GetIsFontLoaded()) {
+                                cout << "loading font\n";
+                                SetFontParameters("NotoSans-Regular.ttf", 10);
+                                cout << "font loaded with size w/h " << _FontBoxW << "/" << _FontBoxH << "\n";
+                        }
+                }
+
+                BuildVisualModel(interactionState);
+                ProcessInteractions(interactionState);
+                UpdateVisualOutput(interactionState);
 	}
 
-        if(_visual_window) {
-                //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                clear(_visual_window->as_group());
-
-                if(_workarea_region) {
-                        delete _workarea_region;
-                }
-
-                delete _visual_window;
-        }
+        _InteractionState = interactionState;
 
         return;
 }
 
-void cls::resize_workarea() {
-        measure_screen();
-
-        const int new_w = _visual_window->w();
-        const int new_h = _visual_window->h();
-
-        const bool workarea_size_changed = (_last_h != new_h || _last_w != new_w);
-
-        if(workarea_size_changed || _article_contents_enlarge_click) {
-                //cout << " last w/h " << last_w << "/" << last_h << "\n";
-	        _last_h = new_h;
-	        _last_w = new_w;
-
-                vector<visualcallable> callables = get_visual_definitions(_workarea_x, _screen_y, new_w, new_h);
-
-                const int callable_size = callables.size();
-
-                bool children_count_matches = (_workarea_region->children() == callable_size);
-
-                for(int callable_index = 0; callable_index < callable_size; callable_index++) {
-                        visualcallable callable = callables[callable_index];
-
-                        string* label = new string(callable.label());
-
-                        const char* label_text = label->data();
-
-                        delete label;
-
-                        const int x = callable.x();
-                        const int y = callable.y();
-                        const int w = callable.w();
-                        const int h = callable.h();
-
-                        switch(callable_index) {
-                                case visual_index_rss_reader_region::header://RSS Reader Header
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        _workarea_region->size(w, h);
-
-                                        visual_type_rss_header
-                                        header_region = (decltype(header_region))_workarea_region->child(callable_index);
-
-                                        if(header_region) {
-                                                header_region->size(w, h);
-                                        }
-                                }
-                                break;
-                                case visual_index_rss_reader_region::headlines://RSS Reader Headlines
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        visual_type_rss_headlines 
-                                        headlines_region = (decltype(headlines_region))_workarea_region->child(callable_index);
-
-                                        if(headlines_region) {
-                                                headlines_region->size(w, h);
-                                        }
-                                }
-                                break;
-                                case visual_index_rss_reader_region::article_content://RSS Reader article content
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        visual_type_rss_article_content
-                                        article_contents_region = (decltype(article_contents_region))_workarea_region->child(callable_index);
-
-                                        if(article_contents_region){
-                                                article_contents_region->size(w, h);
-                                        }
-                                }
-                                break;
-                                case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        visual_type_rss_control_bar 
-                                        rss_control_bar_region = (decltype(rss_control_bar_region))_workarea_region->child(callable_index);
-
-                                        if(rss_control_bar_region){
-                                                rss_control_bar_region->size(w, h);
-                                        }
-
-                                        if(rss_control_bar_region && rss_control_bar_region->children() == 0) {
-                                                string label_text = "Enlarge";
-
-                                                const int button_spacing = 12;
-
-                                                const int button_x = 20;
-                                                int button_w = 0;
-                                                int button_h = 0;
-
-                                                fl_font(FL_HELVETICA, 12);
-                                                fl_measure((new string(label_text))->data(), button_w, button_h);
-
-                                                button_w = measure_button_w(button_w, button_spacing);
-                                                button_h = button_h + button_spacing;
-
-                                                const int region_h = rss_control_bar_region->h();
-                                                const int region_h_half = (region_h/2);
-                                                const int button_y = measure_button_y(region_h_half, button_h);
-
-                                                Fl_Button* enlarge_button = new Fl_Button(button_x, button_y, button_w, button_h);
-                                                enlarge_button->copy_label((new string(label_text))->data());
-
-                                                rss_control_bar_region->add(enlarge_button);
-                                                enlarge_button->callback(feed_contents_enlarge_callback_l);
-                                        }
-                                }
-                                break;
-                                case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        visual_type_rss_change_bar 
-                                        rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(callable_index);
-
-                                        if(rss_change_bar_region){
-                                                rss_change_bar_region->size(w, h);
-                                        }
-
-                                        if(rss_change_bar_region && rss_change_bar_region->children() == 0) {
-                                                const int region_w = rss_change_bar_region->w();
-                                                const int region_h = rss_change_bar_region->h();
-                                                const int region_h_half = (region_h/2);
-                                                const int region_w_thrd = (region_w/3);
-
-                                                const int button_spacing = 12;
-
-                                                int widget_x = 20;
-                                                int widget_y = measure_button_y(region_h_half, 32);
-                                                int widget_w = region_w_thrd;
-                                                int widget_h = 0;
-
-                                                fl_font(FL_HELVETICA, 12);
-                                                fl_measure("TEST WORD", widget_w, widget_h);
-
-                                                widget_w = region_w_thrd;
-                                                widget_h = widget_h + button_spacing;
-
-                                                Fl_Input* feed_name_input = new Fl_Input(widget_x, widget_y, widget_w, widget_h);
-                                                feed_name_input->maximum_size(1000);
-                                                feed_name_input->value("name a new feed");
-
-                                                widget_x = widget_x + widget_w + button_spacing;
-
-                                                Fl_Input* feed_url_input = new Fl_Input(widget_x, widget_y, widget_w, widget_h);
-                                                feed_url_input->maximum_size(100000);
-                                                feed_url_input->value("new feed url");
-
-                                                widget_x = widget_x + widget_w + button_spacing;                                        
-
-                                                int button_x = widget_x;
-                                                int button_w = 0;
-                                                int button_h = 0;
-
-                                                string label_text = "Update";
-
-                                                fl_font(FL_HELVETICA, 12);
-                                                fl_measure((new string(label_text))->data(), button_w, button_h);
-
-                                                button_w = measure_button_w(button_w, button_spacing);
-                                                button_h = button_h + button_spacing;
-
-                                                const int button_y = measure_button_y(region_h_half, button_h);
-
-                                                Fl_Button* update_button = new Fl_Button(button_x, button_y, button_w, button_h);
-                                                update_button->copy_label((new string(label_text))->data());
-
-                                                rss_change_bar_region->add(feed_name_input);
-                                                rss_change_bar_region->add(feed_url_input);
-                                                rss_change_bar_region->add(update_button);
-                                                
-                                                update_button->callback(feed_setup_callback_l);
-                                        }
-                                }
-                                break;
-                                case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
-                                {
-                                        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-                                        visual_type_rss_choice_bar 
-                                        rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(callable_index);
-
-                                        if(rss_feed_choice_region) {
-                                                rss_feed_choice_region->size(w, h);
-
-                                                vector<request> feed_parameters = get_rss_feed_data(_feed_index);
-                                                vector<string> feednames;
-                                                
-                                                const int feed_source_size = feed_parameters.size();
-
-                                                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                                                        request feedsource = feed_parameters[feed_source_index];
-
-                                                        feednames.push_back(feedsource.feedname);
-                                                }
-                                                
-                                                display_feed_buttons(feednames);
-                                        }
-                                }
-                                break;
-                        }
-                }
-        }
+void cls::measure_screen(const interactionstate& interaction_ctx) {
+        _workarea_x = interaction_ctx.WindowDimensions.left();
+        _workarea_y = interaction_ctx.WindowDimensions.top();
+        _workarea_w = interaction_ctx.WindowDimensions.right();
+        _workarea_h = interaction_ctx.WindowDimensions.bottom();
 
         return;
 }
 
-vector<request> cls::display_feed_source_headlines(int feed_source_index) {
-        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-        visual_type_rss_headlines 
-        headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
+void cls::BuildVisualModel(const interactionstate& interaction_ctx) {
+        measure_screen(interaction_ctx);
 
-        vector<request> feed_parameters;
-        
-        if(headlines_region && headlines_region->size() == 0) {
-                //cout << "get_rss_feed_data()\n";
-                feed_parameters = get_rss_feed_data(feed_source_index);
-
-                if(_feed_articles.size() > 0) {
-                        //cout << "headlines\n";
-
-                        const int articles_size = _feed_articles.size();
-
-                        for(int article_index = 0; article_index < articles_size; article_index++) {
-                                auto feed_article_entry = _feed_articles[article_index];
-
-                                headlines_region->add(string(feed_article_entry.headline).data());
-                        }
-                }
-                else {
-                        headlines_region->clear();
-                }
-
-                headlines_region->callback(feed_items_callback_l);
-        }
-
-        return feed_parameters;
-}
-
-void cls::feed_items_callback(Fl_Widget* widget) {
-        if(widget) {
-                visual_type_rss_headlines headlines_region = (Fl_Hold_Browser*)widget;
-
-                if(headlines_region) {
-                        const int headline_index = headlines_region->value();
-                        
-                        material article_info = _feed_articles[headline_index];
-                        
-                        visual_type_rss_article_content 
-                        article_contents_region = (Fl_Help_View*)_workarea_region->child(visual_index_rss_reader_region::article_content);
-                        
-                        if(article_contents_region) {
-                                const char* src = article_info.description.data();
-                                
-                                article_contents_region->value(src);
-                        }
-                }
-        }
+        callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
 
         return;
 }
 
-void cls::feed_source_callback(Fl_Widget* widget) {
-        if(widget) {
-                Fl_Button* feed_button = (Fl_Button*)widget;
-
-                if(feed_button) {
-                        const int feed_source_index = *((int*)feed_button->user_data());
-
-                        _feed_index = feed_source_index;
-
-                        visual_type_rss_headlines headlines_region = nullptr;
-                        visual_type_rss_article_content article_contents_region = nullptr;
-
-                        headlines_region = (decltype(headlines_region))_workarea_region->child(visual_index_rss_reader_region::headlines);
-                        article_contents_region = (decltype(article_contents_region))_workarea_region->child(visual_index_rss_reader_region::article_content);
-
-                        headlines_region->clear();
-                        article_contents_region->value("");
-
-                        display_feed_source_headlines(feed_source_index);
-                }
-        }
-
+void cls::ProcessInteractions(const interactionstate& interaction_ctx) {
         return;
 }
 
-void cls::feed_contents_enlarge_callback(Fl_Widget* widget) {
-        _article_contents_enlarge = !_article_contents_enlarge;
-        _article_contents_enlarge_click = true;
+void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
+        const int callable_size = callables.size();
 
-        Fl_Button* button = (Fl_Button*)widget;
-        string label_text = "";
+        clear_to_background_color();
 
-        if(_article_contents_enlarge) {
-                label_text = "Shrink";
-        }
-        else {
-                label_text = "Enlarge";
-        }
+        for(int callable_index = 0; callable_index < callable_size; callable_index++) {
+                visualcallable callable = callables[callable_index];
 
-        button->copy_label(label_text.data());
+                string* label = new string(callable.label());
 
-        resize_workarea();
+                const char* label_text = label->data();
 
-        return;
-}
+                delete label;
 
-void cls::feed_setup_callback(Fl_Widget* widget) {
-        visual_type_rss_change_bar 
-        rss_change_bar_region = (decltype(rss_change_bar_region))_workarea_region->child(visual_index_rss_reader_region::change_bar);
+                const int x = callable.x();
+                const int y = callable.y();
+                const int w = callable.w();
+                const int h = callable.h();
 
-        if(rss_change_bar_region->children() > 2) {
-                Fl_Input* feed_name_input = (Fl_Input*)rss_change_bar_region->child(0);
-                Fl_Input* feed_url_input = (Fl_Input*)rss_change_bar_region->child(1);
-
-                string feedname(feed_name_input->value());
-                string feedurl(feed_url_input->value());
-
-                feed_name_input->value("");
-                feed_url_input->value("");
-
-                if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
-                        feedscycle feeds_group;
-	                vector<string> added_feednames = feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
-
-                        if(added_feednames.size() > 0) {
-                                //cout << "clear rss_feed_choice_region\n";
-                                //cout << "added_feednames" << added_feednames.size() << "\n";
-                                //display_feed_buttons(feednames, rss_feed_choice_region);
-                                vector<request> feed_parameters = get_rss_feed_data(_feed_index);
-                                vector<string> feednames;
-                                
-                                const int feed_source_size = feed_parameters.size();
-
-                                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                                        request feedsource = feed_parameters[feed_source_index];
-
-                                        feednames.push_back(feedsource.feedname);
-                                }
-                                
-                                display_feed_buttons(feednames);
-                        }
-                }
-        }
-        
-        return;
-}
-
-void cls::display_feed_buttons(const vector<string> feednames) {
-        //cout << __FILE__ << " " << __func__ << ":" << __LINE__ << "\n";
-        if(_workarea_region->children() > 4) {
-                _workarea_region->remove(visual_index_rss_reader_region::choice_bar);
+                //Allegro uses a x1/x2, y1,y2 coordinate pairs for some draw calls.
+                const int x1 = x;
+                const int x2 = w;
                 
-                visual_type_rss_change_bar 
-                widget = get_visual_rss_choice_display();
+                const int y1 = y;
+                const int y2 = y+h;
 
-                _workarea_region->add(widget);
-        }
+                //cout << "callable " << callable_index << " " << x << "/" << y << "/" << w << "/" << h << "\n";
 
-        visual_type_rss_change_bar 
-        rss_feed_choice_region = (decltype(rss_feed_choice_region))_workarea_region->child(visual_index_rss_reader_region::choice_bar);
+                switch(callable_index) {
+                        case visual_index_rss_reader_region::header://RSS Reader Header
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(212, 85, 0);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
 
-        if(feednames.size() > 0) {
-                const int button_spacing = 12;
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
 
-                const int region_h = rss_feed_choice_region->h();
-                const int region_h_half = (region_h/2);
-                
-                int button_x = 20;
-                int button_w = 0;
-                int button_h = 0;
-
-                fl_font(FL_HELVETICA, 12);
-                fl_measure("TEST WORD", button_w, button_h);
-
-                button_h = button_h + button_spacing;
-                const int button_y = measure_button_y(region_h_half, button_h);
-
-                const int feed_source_size = feednames.size();
-
-                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                        string feedname = feednames[feed_source_index];
-                        //cout << feedname << "\n";
-
-                        const char* label_text = (new string(feedname))->data();
-
-                        int text_measure_w = 0;
-                        int text_measure_h = 0;
-
-                        fl_measure(label_text, text_measure_w, text_measure_h);
-                        //cout << "measure text w/h " << text_measure_w << "/" << text_measure_h << "\n";
-
-                        button_w = measure_button_w(text_measure_w, button_spacing);
-
-                        Fl_Button* feed_button = new Fl_Button(button_x, button_y, button_w, button_h);
-                        feed_button->copy_label(label_text);
-
-                        rss_feed_choice_region->add(feed_button);
-
-                        feed_button->user_data(new int(feed_source_index));
-                        feed_button->callback(feed_source_callback_l);
-
-                        button_x = (button_x + button_w) + button_spacing;
-                }
-        }
-        
-        return;
-}
-
-visual_type_window cls::get_window(int x, int y, int w, int h, int w_lo, int h_lo, string label) {
-        visual_type_window visual_window = new Fl_Double_Window(x, y, w, h);
-        visual_window->end();
-
-	visual_window->size_range(w_lo, h_lo, w, h);
-        visual_window->label(label.data());
-
-        return visual_window;
-}
-
-void cls::show() {
-        _visual_window->show();
-
-        _last_w = _visual_window->w();
-        _last_h = _visual_window->h();
-        
-        return;
-}
-
-void cls::clear(Fl_Group* grp) {
-        const int widgetcount = grp->children();
-        
-        for(int index = 0; index < widgetcount; index++) {
-                grp->remove(index);
-                
-                auto widget_sub = grp->child(index);
-
-                if(widget_sub) {
-                        auto widget_grp = widget_sub->as_group();
-
-                        if(widget_grp) {
-                                clear(widget_grp);
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
                         }
+                        break;
+                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(255, 255, 255);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
+
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::article_content://RSS Reader article content
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(255, 255, 255);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
+
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(80, 68, 22);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
+
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(128, 51, 0);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
+
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
+                        {
+                                ALLEGRO_COLOR background_color = al_map_rgb(170, 68, 0);
+                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
+                                double const  border_line_width = 1;
+
+                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+
+	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
+	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                        }
+                        break;
                 }
         }
 
         return;
 }
 
-void cls::measure_screen() {
-        Fl::screen_xywh(_screen_x, _screen_y, _screen_w, _screen_h);
-        //cout << "screen x/y/w/h " << screen_x << "/" << screen_y << "/" << screen_w << "/" << screen_h << "\n";
-
-        Fl::screen_work_area(_workarea_x, _workarea_y, _workarea_w, _workarea_h);
-        //cout << "workarea x/y/w/h " << workarea_x << "/" << workarea_y << "/" << workarea_w << "/" << workarea_h << "\n";
-
-        return;
-}
-
-vector<request> cls::get_rss_feed_data(int feed_source_index) {
+vector<rss::request> cls::get_rss_feed_data(int feed_source_index) {
         feedscycle feeds_group;
         
         vector<request> feed_parameters;
@@ -691,12 +237,312 @@ vector<request> cls::get_rss_feed_data(int feed_source_index) {
         return feed_parameters;
 }
 
+
+/*private member implementation*/
+cls::mainscreengenerator() {
+        _self = this;
+        Initialize();
+        
+        return;
+}
+
+cls::~mainscreengenerator() {
+        Release();
+        
+        return;
+}
+
+void cls::Initialize() {
+        _InteractionState.WindowPosition = dlib::dpoint(0, 0);
+        _InteractionState.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
+
+	_IsAllegroInitialized = al_init();
+
+	if(_IsAllegroInitialized) {
+		al_init_font_addon();
+		al_init_ttf_addon();
+
+		al_set_new_display_flags(ALLEGRO_RESIZABLE | ALLEGRO_MAXIMIZED | ALLEGRO_GENERATE_EXPOSE_EVENTS);
+		al_set_new_display_option(ALLEGRO_FLOAT_COLOR, true, ALLEGRO_SUGGEST);
+		
+		bool IsMonitorInfoAvailable = al_get_monitor_info(0, &_WinScreenInfo);
+
+		if(IsMonitorInfoAvailable) {
+			_InteractionState.MonitorWidth = _WinScreenInfo.x2-_WinScreenInfo.x1;
+			_InteractionState.MonitorHeight = _WinScreenInfo.y2-_WinScreenInfo.y1;
+
+			_WinCtx = al_create_display(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
+
+                        if(_WinCtx) {
+			        _InteractionState.WindowWidth = al_get_display_width(_WinCtx);		
+			        _InteractionState.WindowHeight = al_get_display_height(_WinCtx);
+
+                                _InteractionState.WindowDimensions = dlib::drectangle(0,0,_InteractionState.WindowWidth, _InteractionState.WindowHeight);
+
+			        al_set_window_title(_WinCtx, _DefaultWindowTitle.data());
+			        al_set_window_position(_WinCtx, _InteractionState.WindowPosition.x(), _InteractionState.WindowPosition.y());
+
+			        _WinMsgEvtSrc = al_get_display_event_source(_WinCtx);
+			        _WinMsgEvtQueue = al_create_event_queue();
+
+			        al_register_event_source(_WinMsgEvtQueue, _WinMsgEvtSrc);
+
+		                if(!al_is_mouse_installed()) {
+			                al_install_mouse();
+
+			                _MouseEvtSrc = al_get_mouse_event_source();
+
+			                al_register_event_source(_WinMsgEvtQueue, _MouseEvtSrc);
+		                }
+                        }
+                        else {
+                                std::cout << __FILE__ " " << __func__ << " " << "(" << __LINE__ << ") ";
+                                std::cout << "window could not be created.\r\n";
+                        }
+		}
+		
+		if(_WinCtx) {
+			_InteractionState.IsWindowOpen = true;
+			_InteractionState.IsVisualModelChanged = true;
+			_InteractionStateLast = _InteractionState;
+		}
+	}
+
+	return;
+}
+void cls::Activate(InteractionCallBackType interactionCallBack) {
+        if(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
+                StartRenderGraphics();
+        }
+
+        _InteractionCallBack = interactionCallBack;
+	while(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
+                _InteractionStateLast = _InteractionState;
+
+		ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
+
+		switch (window_event_type) {
+			case ALLEGRO_EVENT_DISPLAY_CLOSE:
+				_InteractionState.IsWindowOpen = false;
+			        break;
+			case ALLEGRO_EVENT_DISPLAY_RESIZE:
+			        clear_to_background_color();
+			        EndRenderGraphics();//Will make this smoother later.
+				al_acknowledge_resize(_WinCtx);
+				
+				_InteractionState.WindowWidth = _winmsg_event.display.width;
+				_InteractionState.WindowHeight = _winmsg_event.display.height;
+                                _InteractionState.WindowDimensions = dlib::drectangle(0,0,_InteractionState.WindowWidth, _InteractionState.WindowHeight);
+
+				_InteractionState.IsWindowResized = true;	
+			        break;
+	                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+	                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+	                        _InteractionState.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
+	                        _InteractionState.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
+	                        break;
+	                case ALLEGRO_EVENT_MOUSE_AXES:
+	                        _InteractionState.MouseDirection = _winmsg_event.mouse.dz;
+	                        break;
+                }
+
+                _InteractionState.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
+                _InteractionState.MouseButton = _winmsg_event.mouse.button;
+
+                if(_InteractionState.IsWindowOpen) {
+                        if(_WinCtx) {
+                                al_flush_event_queue(_WinMsgEvtQueue);
+
+                                bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionStateLast, _InteractionState);
+
+                                if(IsVisualModelChanged) {
+                                        interactionCallBack(_InteractionState);
+
+                                        EndRenderGraphics();
+                                }
+	                }
+
+                        _InteractionStateLast = _InteractionState;
+
+                        al_wait_for_event_timed(_WinMsgEvtQueue, &_winmsg_event, 0.3);
+                }
+                else {
+		        Release();
+                }
+	}
+	
+	return;
+}
+void cls::Release() {
+        if(!_IsAllegroUnInitialized) {
+                if(_WinMsgEvtQueue) {
+                        if(_MouseEvtSrc) {
+	                        al_unregister_event_source(_WinMsgEvtQueue, _MouseEvtSrc);
+	                }
+
+                        if(_WinMsgEvtSrc) {
+	                        al_unregister_event_source(_WinMsgEvtQueue, _WinMsgEvtSrc);
+	                }
+
+	                al_destroy_event_queue(_WinMsgEvtQueue);
+	        }
+
+                if(_WinCtx) {
+	                al_destroy_display(_WinCtx);
+	        }
+
+	        _IsAllegroUnInitialized = true;
+	        _IsAllegroInitialized = false;
+	}
+	
+	return;
+}
+void cls::GetScreenDpi(double& screenDpi) {
+	double scrdpi = 0;
+	/*
+	 * 	Calculate true screen resolution, PPI  (see wikipedia  Pixel Density
+	 * 
+	 * 		diagonal resolution in pixels   =   square root of ( (screen_w)^2  +  (screen_h)^2  )
+	 * 
+	 * 		diag_res / diagonal screen size in inches (the average of (11, 12, 13.3, 14, 15.6, and 17) )
+	 */		
+	if(_IsScreenDPICached) {
+		scrdpi = _ScreenDpiLast;
+	}
+	else {
+		double diagres = std::hypot(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
+		double scrtmp = diagres/_AvgPhysicalScreenSize; 
+
+		scrdpi = _ScreenDpiLast = scrtmp;
+
+		_IsScreenDPICached = true;
+	}
+	
+	screenDpi = scrdpi;
+	
+	return;
+}
+bool cls::GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now) {
+        bool IsChanged = (now.IsVisualModelChanged || now.IsWindowResized || now.IsMouseDown || now.IsMouseUp);
+
+        if(!IsChanged) {
+                IsChanged = (old != now);
+        }
+        
+        return IsChanged;
+}
+
+void clear_to_background_color() {
+        al_clear_to_color(al_map_rgb(255, 153, 85));
+
+        return;
+}
+
+void cls::StartRenderGraphics() {
+        clear_to_background_color();
+        al_flip_display();
+
+        return;
+}
+void cls::EndRenderGraphics() {
+        al_flip_display();
+
+        return;
+}
+bool cls::GetIsFontLoaded() {
+        return _Font != nullptr;
+}
+void cls::SetFontParameters(const char* fontPath, double const& fontSize) {
+        _FontPath = fontPath;
+        _FontSize = fontSize;
+
+        LoadFont();
+
+        return;
+}
+void cls::GetFont(ALLEGRO_FONT*& font, int& fontBoxX, int& fontBoxY, int& fontBoxW, int& fontBoxH) {
+        font = _Font;
+        fontBoxX = _FontBoxX;
+        fontBoxY = _FontBoxY;
+        fontBoxW = _FontBoxW;
+        fontBoxH = _FontBoxH;
+
+        return;
+}
+void cls::LoadFont() {
+        if(!_Font) {
+                cout << "font load\n";
+                /*
+                        Font scaling based on Paragraph #4 in the Article DPI and Device-Independent Pixels at: 
+                        https://msdn.microsoft.com/en-us/library/windows/desktop/ff684173(v=vs.85).aspx
+                */
+                double ScreenDpi;
+
+                GetScreenDpi(ScreenDpi);
+
+                const double ScaledFontSizeD = (_FontSize/_PrintPointSize) * ScreenDpi;
+
+                _Font = al_load_font(_FontPath, ScaledFontSizeD, 0);
+
+                if(_Font) {
+                        char
+                                TextToMeasure[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','z','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','Z','Y','Z','1','2','3','4','5','6','8','9','0','~','!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','[',']','|','\\',':',';','<','>','?',',','.','/','\0'}; 
+
+                        const char* 
+                                SampleText = TextToMeasure;
+
+                        MeasureLineHeight(SampleText);
+
+                        int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
+
+                        std::vector<double>
+                                FontBoxWs;
+
+                        double FontBoxWm = 0;
+
+                        for(auto txt : TextToMeasure) {
+                                char Letter[] = {txt, '\0'};
+
+                                al_get_text_dimensions(_Font, Letter, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
+
+                                FontBoxWm += FontBoxW;
+
+                                FontBoxWs.push_back(FontBoxW);
+                        }
+
+                        _FontBoxW = FontBoxWm/FontBoxWs.size();
+                }
+                else {
+                        std::cout << __FILE__ " " << __func__ << " " << "(" << __LINE__ << ") ";
+                        std::cout << "could not load font\r\n";
+                }
+        }
+        else {
+                cout << "font already loaded\n";
+        }
+
+        return;
+}
+
+void cls::MeasureLineHeight(const char* str) {
+        if(_Font) {
+                int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
+                
+                al_get_text_dimensions(_Font, str, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
+
+                _FontBoxX = FontBoxX; _FontBoxW = FontBoxW;
+                _FontBoxY = FontBoxY; _FontBoxH = FontBoxH;
+        }
+
+        return;
+}
+
 vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
         int next_y = 0;
         int text_w = 0;
-        int text_h = 0;
+        int text_h = _FontBoxH;
         int accumulated_h = 0;
         int remaining_h = 0;
 
@@ -719,15 +565,14 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 switch(index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
                         {
-                                fl_font(FL_HELVETICA, 72);
-                                
-                                /*
-                                        Usually results in a bounding box larger than  
-                                        the text based on the same font size.
-                                */
-                                fl_measure("W", text_w, text_h, 1);
-
                                 callable.label("RSS Reader");
+
+                                if(_FontBoxH < 1) {
+                                        cout << "measuring text for text_h which is at size: " << text_h << "\n";
+                                        MeasureLineHeight("RSS Reader");
+                                }
+
+                                text_h = _FontBoxH;
 
                                 h = text_h;
                         }
@@ -773,22 +618,31 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 callable.y(y);
                 callable.w(w);
                 callable.h(h);
-                
+
                 accumulated_h = (accumulated_h + callable.h());
                 next_y = (next_y + callable.h());
                 //remaining_h = ((workarea_h - window_chrome_offset) - accumulated_h);
                 remaining_h = (screen_h - accumulated_h);
 
-                //cout << "index: " << index << " ";
-                //cout << " h: " << h;
-                //cout << " accumulated_h: " << accumulated_h;
-                //cout << " remaining_h: " << remaining_h;
-                //cout << "\n";
+                /*cout << "index: " << index << " ";
+                cout << " h: " << h;
+                cout << " accumulated_h: " << accumulated_h;
+                cout << " remaining_h: " << remaining_h;
+                cout << "\n";*/
 
                 callables.push_back(callable);
+
+                /*cout << "index: " << index << " x/y/w/h";
+                cout << " : " << callable.x();
+                cout << " / " << callable.y();
+                cout << " / " << callable.w();
+                cout << " / " << callable.h();
+                cout << "\n";*/
         }
 
         if(_article_contents_enlarge) {
+                cout << "enlarge content - adjusting callable\n";
+
                 const int region_h = callables[1].h() + callables[2].h();
                 
                 const int headlines_h = region_h/4;
