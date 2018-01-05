@@ -26,6 +26,8 @@ namespace formulation {
         class visualcallable {
                 private:
                         int _id = 0;
+                        int _type_id = 0;
+
                         double _x = 0;
                         double _y = 0;
                         double _w = 0;
@@ -48,6 +50,9 @@ namespace formulation {
                         
                         int id();
                         void id(const int v);
+                        
+                        int type_id();
+                        void type_id(const int v);
                         
                         double x();
                         void x(const double v);

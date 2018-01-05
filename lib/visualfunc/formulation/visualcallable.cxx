@@ -15,6 +15,16 @@ void cls::id(const int v) {
         return;
 }
 
+int cls::type_id() {
+        return _type_id;
+}
+
+void cls::type_id(const int v) {
+        _type_id = v;
+        
+        return;
+}
+
 double cls::x() {
         return _x;
 }
