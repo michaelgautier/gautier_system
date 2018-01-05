@@ -136,7 +136,8 @@ namespace ui {
                         squared_region = 0,
                         left_aligned_button = 0,
                         right_aligned_button = 1,
-                        text_field = 2
+                        text_field = 2,
+                        vertical_scrollbar = 3
                 };
 
                 bool _article_contents_enlarge = false;
@@ -182,13 +183,13 @@ namespace ui {
                 void measure_screen(interactionstate& interaction_ctx);
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
-                void build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
+                visualfunc::formulation::visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
                 const double bdr_width, const double scrollbar_width);
 
-                void build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+                visualfunc::formulation::visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
                 const double x_offset, double& next_x, const double bdr_width, string label_text);
 
-                void build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+                visualfunc::formulation::visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
                 const double bdr_width, string label_text);
         };
 }

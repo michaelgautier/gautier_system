@@ -122,6 +122,8 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
 
         _callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
 
+        const int callable_size = _callables.size();
+
         if(_article_contents_enlarge) {
                 cout << __func__ << " enlarge button click implementation, line: " << __LINE__ << "\n";
 
@@ -136,6 +138,95 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                 headline_region.h(headlines_h);
                 article_content.h(article_contents_h);
         }
+
+        double previous_line_stroke_width = 0;
+
+        double const scrollbar_width = 42;
+
+        for(int callable_index = 0; callable_index < callable_size; callable_index++) {
+                visualcallable callable = _callables[callable_index];
+
+                string* label = new string(callable.label());
+
+                const char* label_text = label->data();
+
+                delete label;
+
+                const double x = callable.x();
+                const double y = callable.y();
+                const double w = callable.w();
+                const double h = callable.h();
+
+                //Allegro uses a x1/x2, y1,y2 coordinate pairs for some draw calls.
+                const double x1 = callable.x1();
+                const double x2 = callable.x2();
+                
+                const double y1 = callable.y1();
+                const double y2 = callable.y2();
+
+                //cout << "callable " << callable_index << " " << x << "/" << y << "/" << w << "/" << h << "\n";
+
+                double const  border_line_width = callable.line_stroke_width();
+
+                switch(callable_index) {
+                        case visual_index_rss_reader_region::header://RSS Reader Header
+                        {
+                        }
+                        break;
+                        case visual_index_rss_reader_region::headlines://RSS Reader Headlines
+                        {
+                                build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::article_content://RSS Reader article content
+                        {
+                                build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                        }
+                        break;
+                        case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
+                        {
+                                const double button_border_line_width = 1;
+
+                                build_visual_right_aligned_button(x1, y1, x2, y2, button_border_line_width, callable.label());
+                        }
+                        break;
+                        case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
+                        {
+                                vector<string> widget_texts = {"THE LONGEST FEED NAME EVER WWWWWWWWWWWWWWW", "HTTPS://WWWWWWWWWWWWWWWWWWWWWWWW.COM", "Update"};
+
+                                double next_x = 20;
+                                const double x_offset = 20;
+                                
+                                const double widget_border_line_width = 1;
+
+                                for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
+                                        string label_text = widget_texts[widget_index];
+
+                                        build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, widget_border_line_width, label_text);
+                                }
+                        }
+                        break;
+                        case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
+                        {
+                                vector<string> button_texts = {"TEST BUTTON 1", "TEST BUTTON 2", "TEST BUTTON 3", "TEST BUTTON 4"};
+
+                                double next_x = 20;
+                                const double x_offset = 20;
+                                
+                                const double button_border_line_width = 1;
+
+                                for(int button_index = 0; button_index < button_texts.size(); button_index++) {
+                                        string label_text = button_texts[button_index];
+
+                                        build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, button_border_line_width, label_text);
+                                }
+                        }
+                        break;
+                }
+
+                previous_line_stroke_width = border_line_width;
+        }
+
 
         return;
 }
@@ -732,7 +823,7 @@ dlib::drectangle cls::MeasureLineHeight(const char* str) {
         return rect;
 }
 
-void cls::build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, const double bdr_width, const double scrollbar_width) {
+visualcallable cls::build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, const double bdr_width, const double scrollbar_width) {
         /*scrollbar aligned to the right.*/
 
         const double vertical_scrollbar_border_line_width = bdr_width;
@@ -743,10 +834,17 @@ void cls::build_visual_vertical_scrollbar(const double x1, const double y1, cons
         const double vertical_scrollbar_x = (x2 - scrollbar_width);
         const double vertical_scrollbar_y = y1;
 
-        return;
+        visualcallable callable(0);
+        callable.type_id(visual_index_rss_reader_widget_type::vertical_scrollbar);
+        callable.x(vertical_scrollbar_x);
+        callable.y(vertical_scrollbar_y);
+        callable.w(vertical_scrollbar_w);
+        callable.h(vertical_scrollbar_h);
+
+        return callable;
 }
 
-void cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, const double bdr_width, string label_text) {
+visualcallable cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, const double bdr_width, string label_text) {
         const double widget_border_line_width = bdr_width;
 
         dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
@@ -764,10 +862,17 @@ void cls::build_visual_left_aligned_widget(const double x1, const double y1, con
 
         next_x = widget_w;
 
-        return;
+        visualcallable callable(0);
+        callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+        callable.x(widget_x);
+        callable.y(widget_y);
+        callable.w(widget_w);
+        callable.h(widget_h);
+
+        return callable;
 }
 
-void cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, const double bdr_width, string label_text) {
+visualcallable cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, const double bdr_width, string label_text) {
         dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
 
         /*Button aligned to the right.*/
@@ -783,7 +888,14 @@ void cls::build_visual_right_aligned_button(const double x1, const double y1, co
         const double button_y = (button_y_offset + y1);
         const double button_w = button_x_offset;
 
-        return;
+        visualcallable callable(0);
+        callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
+        callable.x(button_x);
+        callable.y(button_y);
+        callable.w(button_w);
+        callable.h(button_h);
+
+        return callable;
 }
 
 vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
