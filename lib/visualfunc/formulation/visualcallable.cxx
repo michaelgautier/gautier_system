@@ -166,3 +166,8 @@ void cls::callables(vector<cls> v) {
         return;
 }
 
+void cls::add_descendant(visualcallable v) {
+        _callables.push_back(v);
+
+        return;
+}

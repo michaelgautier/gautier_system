@@ -93,6 +93,7 @@ namespace formulation {
                         
                         vector<visualcallable> callables();
                         void callables(vector<visualcallable> v);
+                        void add_descendant(visualcallable v);
         };
 }
 }

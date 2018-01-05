@@ -134,10 +134,10 @@ namespace ui {
 
                 enum visual_index_rss_reader_widget_type {
                         squared_region = 0,
-                        left_aligned_button = 0,
-                        right_aligned_button = 1,
-                        text_field = 2,
-                        vertical_scrollbar = 3
+                        left_aligned_button = 1,
+                        right_aligned_button = 2,
+                        text_field = 3,
+                        vertical_scrollbar = 4
                 };
 
                 bool _article_contents_enlarge = false;

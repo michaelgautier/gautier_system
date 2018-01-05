@@ -104,7 +104,7 @@ void cls::ProcessUpdates(interactionstate& interaction_ctx) {
                 
                 if(_render_is_requested) {
                         _render_is_requested = false;
-                        cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
+                        //cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
                         UpdateVisualOutput(interaction_ctx);
                         UpdateVisualOutput(interaction_ctx);
                 }
@@ -144,29 +144,18 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
         double const scrollbar_width = 42;
 
         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
-                visualcallable callable = _callables[callable_index];
-
-                string* label = new string(callable.label());
-
-                const char* label_text = label->data();
-
-                delete label;
-
-                const double x = callable.x();
-                const double y = callable.y();
-                const double w = callable.w();
-                const double h = callable.h();
+                visualcallable* callable = &_callables[callable_index];
 
                 //Allegro uses a x1/x2, y1,y2 coordinate pairs for some draw calls.
-                const double x1 = callable.x1();
-                const double x2 = callable.x2();
+                const double x1 = callable->x1();
+                const double x2 = callable->x2();
                 
-                const double y1 = callable.y1();
-                const double y2 = callable.y2();
+                const double y1 = callable->y1();
+                const double y2 = callable->y2();
 
                 //cout << "callable " << callable_index << " " << x << "/" << y << "/" << w << "/" << h << "\n";
 
-                double const  border_line_width = callable.line_stroke_width();
+                double const  border_line_width = callable->line_stroke_width();
 
                 switch(callable_index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
@@ -175,19 +164,28 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                         {
-                                build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                                visualcallable descendant_callable = build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                                descendant_callable.type_id(visual_index_rss_reader_widget_type::vertical_scrollbar);
+                                
+                                callable->add_descendant(descendant_callable);
                         }
                         break;
                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                         {
-                                build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                                visualcallable descendant_callable = build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
+                                descendant_callable.type_id(visual_index_rss_reader_widget_type::vertical_scrollbar);
+                                
+                                callable->add_descendant(descendant_callable);
                         }
                         break;
                         case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
                         {
                                 const double button_border_line_width = 1;
 
-                                build_visual_right_aligned_button(x1, y1, x2, y2, button_border_line_width, callable.label());
+                                visualcallable descendant_callable = build_visual_right_aligned_button(x1, y1, x2, y2, 1, callable->label());
+                                descendant_callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
+                                
+                                callable->add_descendant(descendant_callable);
                         }
                         break;
                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
@@ -202,7 +200,16 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
                                         string label_text = widget_texts[widget_index];
 
-                                        build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, widget_border_line_width, label_text);
+                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x,
+                                                 widget_border_line_width, label_text);
+
+                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
+
+                                        if(widget_index == 2) {
+                                                descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+                                        }
+
+                                        callable->add_descendant(descendant_callable);
                                 }
                         }
                         break;
@@ -218,7 +225,12 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 for(int button_index = 0; button_index < button_texts.size(); button_index++) {
                                         string label_text = button_texts[button_index];
 
-                                        build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, button_border_line_width, label_text);
+                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x,
+                                                 button_border_line_width, label_text);
+
+                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+
+                                        callable->add_descendant(descendant_callable);
                                 }
                         }
                         break;
@@ -226,7 +238,6 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
 
                 previous_line_stroke_width = border_line_width;
         }
-
 
         return;
 }
@@ -262,16 +273,8 @@ void cls::draw_scrollbar_right_background(const double x1, const double y1, cons
 
         /*scrollbar aligned to the right.*/
 
-        const double vertical_scrollbar_border_line_width = bdr_width;
-
-        const double vertical_scrollbar_h = y2;
-        const double vertical_scrollbar_w = x2;
-
-        const double vertical_scrollbar_x = (x2 - scrollbar_width);
-        const double vertical_scrollbar_y = y1;
-
-        draw_region_background(vertical_scrollbar_x, vertical_scrollbar_y, vertical_scrollbar_w, vertical_scrollbar_h, 
-                vertical_scrollbar_background_color, vertical_scrollbar_border_color, vertical_scrollbar_border_line_width);
+        draw_region_background(x1, y1, x2, y2, 
+                vertical_scrollbar_background_color, vertical_scrollbar_border_color, bdr_width);
 
         return;
 }
@@ -281,25 +284,8 @@ void cls::draw_left_aligned_widget(const double x1, const double y1, const doubl
         ALLEGRO_COLOR widget_border_color = bdr_clr;
         ALLEGRO_COLOR widget_text_color = label_color;
 
-        const double widget_border_line_width = bdr_width;
-
-        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
-
-        /*Widgets aligned to the left.*/
-
-        const double widget_h = (widget_dimensions.bottom() + y1);
-
-        const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
-        const double widget_x_offset = x_offset;
-
-        const double widget_x = (next_x + widget_x_offset);
-        const double widget_y = (widget_y_offset + y1);
-        const double widget_w = widget_x + widget_dimensions.right();
-
-        next_x = widget_w;
-
-        draw_region_background(widget_x, widget_y, widget_w, widget_h, 
-                widget_background_color, widget_border_color, widget_border_line_width);
+        draw_region_background(x1, y1, x2, y2, 
+                widget_background_color, widget_border_color, bdr_width);
 
         return;
 }
@@ -314,19 +300,8 @@ void cls::draw_right_aligned_button(const double x1, const double y1, const doub
 
         /*Button aligned to the right.*/
 
-        const double button_border_line_width = bdr_width;
-
-        const double button_h = (button_dimensions.bottom() + y1);
-
-        const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
-        const double button_x_offset = (x2 - 20);
-
-        const double button_x = (button_x_offset - button_dimensions.right());
-        const double button_y = (button_y_offset + y1);
-        const double button_w = button_x_offset;
-
-        draw_region_background(button_x, button_y, button_w, button_h, 
-                button_background_color, button_border_color, button_border_line_width);
+        draw_region_background(x1, y1, x2, y2, 
+                button_background_color, button_border_color, bdr_width);
 
         return;
 }
@@ -340,7 +315,7 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
         ALLEGRO_COLOR border_color = al_map_rgb(0, 0, 0);
         ALLEGRO_COLOR text_color = al_map_rgb(0, 0, 0);
 
-        double const scrollbar_width = 42;
+        double const scrollbar_width = 38;
 
         clear_to_background_color();
 
@@ -387,11 +362,27 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(0, 0, 0);
-                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(244, 227, 215);
+                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(222, 170, 135);
 
-                                draw_scrollbar_right_background(x1, y1, x2, y2, 
-                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color, 1, scrollbar_width);
+                                vector<visualcallable> descendant_callables = callable.callables();
+
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
+
+                                        if(descendant_type == visual_index_rss_reader_widget_type::vertical_scrollbar) {
+                                                const double vertical_scrollbar_border_line_width = descendant_callable.line_stroke_width();
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                draw_scrollbar_right_background(c_x1, c_y1, c_x2, c_y2, 
+                                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color,
+                                                        vertical_scrollbar_border_line_width, scrollbar_width);
+                                        }
+                                }
                         }
                         break;
                         case visual_index_rss_reader_region::article_content://RSS Reader article content
@@ -402,11 +393,27 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(0, 0, 0);
-                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(244, 227, 215);
+                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(222, 170, 135);
 
-                                draw_scrollbar_right_background(x1, y1, x2, y2, 
-                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color, 1, scrollbar_width);
+                                vector<visualcallable> descendant_callables = callable.callables();
+
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
+
+                                        if(descendant_type == visual_index_rss_reader_widget_type::vertical_scrollbar) {
+                                                const double vertical_scrollbar_border_line_width = descendant_callable.line_stroke_width();
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                draw_scrollbar_right_background(c_x1, c_y1, c_x2, c_y2, 
+                                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color,
+                                                        vertical_scrollbar_border_line_width, scrollbar_width);
+                                        }
+                                }
                         }
                         break;
                         case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
@@ -417,16 +424,27 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                ALLEGRO_COLOR button_background_color = al_map_rgb(0,0,0);
+                                ALLEGRO_COLOR button_background_color = al_map_rgb(222, 170, 135);
                                 ALLEGRO_COLOR button_border_color = al_map_rgb(0,0,0);
                                 ALLEGRO_COLOR button_text_color = al_map_rgb(0,0,0);
 
-                                const double button_border_line_width = 1;
+                                vector<visualcallable> descendant_callables = callable.callables();
 
-                                string label_text = "Enlarge";
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
 
-                                draw_right_aligned_button(x1, y1, x2, y2, 
-                                        button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
+                                        if(descendant_type == visual_index_rss_reader_widget_type::right_aligned_button) {
+                                                const double button_border_line_width = descendant_callable.line_stroke_width();
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                draw_right_aligned_button(c_x1, c_y1, c_x2, c_y2, 
+                                                        button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
+                                        }
+                                }
                         }
                         break;
                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
@@ -437,22 +455,38 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                vector<string> widget_texts = {"THE LONGEST FEED NAME EVER WWWWWWWWWWWWWWW", "HTTPS://WWWWWWWWWWWWWWWWWWWWWWWW.COM", "Update"};
-
-                                double next_x = 20;
-                                const double x_offset = 20;
-                                
                                 ALLEGRO_COLOR widget_background_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR widget_border_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR widget_text_color = al_map_rgb(0, 0, 0);
 
-                                const double widget_border_line_width = 1;
+                                vector<visualcallable> descendant_callables = callable.callables();
 
-                                for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
-                                        string label_text = widget_texts[widget_index];
+                                double next_x = 20;
+                                const double x_offset = 20;
 
-                                        draw_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, 
-                                                widget_background_color, widget_border_color, widget_border_line_width, label_text, widget_text_color);
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
+
+                                        if(descendant_type == visual_index_rss_reader_widget_type::left_aligned_button ||
+                                                descendant_type == visual_index_rss_reader_widget_type::text_field) {
+                                                const double widget_border_line_width = descendant_callable.line_stroke_width();
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                if(descendant_type == visual_index_rss_reader_widget_type::text_field) {
+                                                        widget_background_color = al_map_rgb(255, 255, 255);
+                                                }
+                                                else if(descendant_type == visual_index_rss_reader_widget_type::left_aligned_button) {
+                                                        widget_background_color = al_map_rgb(222, 170, 135);
+                                                }
+
+                                                draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
+                                                        x_offset, next_x, 
+                                                        widget_background_color, widget_border_color, widget_border_line_width, label_text, widget_text_color);
+                                        }
                                 }
                         }
                         break;
@@ -463,23 +497,31 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                 text_color = al_map_rgb(213, 255, 246);
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
-
-                                vector<string> button_texts = {"TEST BUTTON 1", "TEST BUTTON 2", "TEST BUTTON 3", "TEST BUTTON 4"};
-
-                                double next_x = 20;
-                                const double x_offset = 20;
                                 
-                                ALLEGRO_COLOR button_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR button_background_color = al_map_rgb(222, 170, 135);
                                 ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR button_text_color = al_map_rgb(0, 0, 0);
 
-                                const double button_border_line_width = 1;
+                                vector<visualcallable> descendant_callables = callable.callables();
 
-                                for(int button_index = 0; button_index < button_texts.size(); button_index++) {
-                                        string label_text = button_texts[button_index];
+                                double next_x = 20;
+                                const double x_offset = 20;
 
-                                        draw_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, 
-                                                button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
+
+                                        if(descendant_type == visual_index_rss_reader_widget_type::left_aligned_button) {
+                                                const double button_border_line_width = descendant_callable.line_stroke_width();
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
+                                                        x_offset, next_x, 
+                                                        button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
+                                        }
                                 }
                         }
                         break;
@@ -709,21 +751,21 @@ bool cls::GetIsVisualModelChanged(interactionstate const& old, interactionstate 
 }
 
 void clear_to_background_color() {
-        cout << __func__ << " line: " << __LINE__ << "\n";
+        //cout << __func__ << " line: " << __LINE__ << "\n";
         al_clear_to_color(al_map_rgb(255, 153, 85));
 
         return;
 }
 
 void cls::StartRenderGraphics() {
-        cout << __func__ << " line: " << __LINE__ << "\n";
+        //cout << __func__ << " line: " << __LINE__ << "\n";
         clear_to_background_color();
         al_flip_display();
 
         return;
 }
 void cls::EndRenderGraphics() {
-        cout << __func__ << " line: " << __LINE__ << "\n";
+        //cout << __func__ << " line: " << __LINE__ << "\n";
         al_flip_display();
 
         std::chrono::time_point<std::chrono::system_clock> current_clock_time = std::chrono::system_clock::now();
@@ -845,12 +887,12 @@ visualcallable cls::build_visual_vertical_scrollbar(const double x1, const doubl
 }
 
 visualcallable cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, const double bdr_width, string label_text) {
-        const double widget_border_line_width = bdr_width;
-
-        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
-
         /*Widgets aligned to the left.*/
 
+        const double widget_border_line_width = bdr_width;
+//cout << label_text.data() << "\n";
+        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
+//cout << " label w/h " << widget_dimensions.right() << " / " << widget_dimensions.bottom() << "\n";
         const double widget_h = (widget_dimensions.bottom() + y1);
 
         const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
@@ -869,15 +911,17 @@ visualcallable cls::build_visual_left_aligned_widget(const double x1, const doub
         callable.w(widget_w);
         callable.h(widget_h);
 
+        //cout << "built callable x/y/w/h " << callable.x() << "/" << callable.y() << "/" << callable.w() << "/" << callable.h() << "\n";
+
         return callable;
 }
 
 visualcallable cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, const double bdr_width, string label_text) {
-        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
-
         /*Button aligned to the right.*/
 
         const double button_border_line_width = bdr_width;
+
+        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
 
         const double button_h = (button_dimensions.bottom() + y1);
 
