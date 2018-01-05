@@ -108,10 +108,48 @@ void cls::ProcessInteractions(const interactionstate& interaction_ctx) {
         return;
 }
 
+void draw_region_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width) {
+        const double rect_x1 = x1 + 0.5;
+        const double rect_x2 = x2 + 0.5;
+        const double rect_y1 = y1 + 0.5;
+        const double rect_y2 = y2 + 0.5;
+
+        al_draw_filled_rectangle(rect_x1, rect_y1, rect_x2, rect_y2, bkg_clr);
+        al_draw_rectangle(rect_x1, rect_y1, rect_x2, rect_y2, bdr_clr, bdr_width);
+
+        return;
+}
+
+void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width) {
+        ALLEGRO_COLOR vertical_scrollbar_background_color = bkg_clr;
+        ALLEGRO_COLOR vertical_scrollbar_border_color = bdr_clr;
+
+        /*scrollbar aligned to the right.*/
+
+        const double vertical_scrollbar_border_line_width = bdr_width;
+
+        const double vertical_scrollbar_h = y2;
+        const double vertical_scrollbar_w = x2;
+
+        const double vertical_scrollbar_x = (x2 - scrollbar_width);
+        const double vertical_scrollbar_y = y1;
+
+        draw_region_background(vertical_scrollbar_x, vertical_scrollbar_y, vertical_scrollbar_w, vertical_scrollbar_h, 
+                vertical_scrollbar_background_color, vertical_scrollbar_border_color, vertical_scrollbar_border_line_width);
+        return;
+}
+
 void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
         const int callable_size = callables.size();
 
         clear_to_background_color();
+        double previous_line_stroke_width = 0;
+
+        ALLEGRO_COLOR background_color = al_map_rgb(0, 0, 0);
+        ALLEGRO_COLOR border_color = al_map_rgb(0, 0, 0);
+        ALLEGRO_COLOR text_color = al_map_rgb(0, 0, 0);
+
+        double const scrollbar_width = 42;
 
         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
                 visualcallable callable = callables[callable_index];
@@ -122,94 +160,180 @@ void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
 
                 delete label;
 
-                const int x = callable.x();
-                const int y = callable.y();
-                const int w = callable.w();
-                const int h = callable.h();
+                const double x = callable.x();
+                const double y = callable.y();
+                const double w = callable.w();
+                const double h = callable.h();
 
                 //Allegro uses a x1/x2, y1,y2 coordinate pairs for some draw calls.
-                const int x1 = x;
-                const int x2 = w;
+                const double x1 = callable.x1();
+                const double x2 = callable.x2();
                 
-                const int y1 = y;
-                const int y2 = y+h;
+                const double y1 = callable.y1();
+                const double y2 = callable.y2();
 
                 //cout << "callable " << callable_index << " " << x << "/" << y << "/" << w << "/" << h << "\n";
+
+                double const  border_line_width = callable.line_stroke_width();
 
                 switch(callable_index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(212, 85, 0);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(212, 85, 0);
+                                border_color = al_map_rgb(255, 127, 42);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
-
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
                         }
                         break;
                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(255, 255, 255);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(255, 255, 255);
+                                border_color = al_map_rgb(160, 44, 44);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(0, 0, 0);
+
+                                draw_scrollbar_right_background(x1, y1, x2, y2, 
+                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color, 1, scrollbar_width);
                         }
                         break;
                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(255, 255, 255);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(255, 255, 255);
+                                border_color = al_map_rgb(160, 44, 44);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(0, 0, 0);
+
+                                draw_scrollbar_right_background(x1, y1, x2, y2, 
+                                        vertical_scrollbar_background_color, vertical_scrollbar_border_color, 1, scrollbar_width);
                         }
                         break;
                         case visual_index_rss_reader_region::control_bar://RSS Reader Control Bar
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(80, 68, 22);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(80, 68, 22);
+                                border_color = al_map_rgb(128, 102, 0);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                string label_text = "Enlarge";
+
+                                dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+
+                                ALLEGRO_COLOR button_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR button_text_color = al_map_rgb(0, 0, 0);
+
+                                /*Button aligned to the right.*/
+
+                                const double button_border_line_width = 1;
+
+                                const double button_h = (button_dimensions.bottom() + y1);
+
+                                const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
+                                const double button_x_offset = (x2 - 20);
+
+                                const double button_x = (button_x_offset - button_dimensions.right());
+                                const double button_y = (button_y_offset + y1);
+                                const double button_w = button_x_offset;
+
+                                draw_region_background(button_x, button_y, button_w, button_h, 
+                                        button_background_color, button_border_color, button_border_line_width);
                         }
                         break;
                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(128, 51, 0);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(128, 51, 0);
+                                border_color = al_map_rgb(170, 68, 0);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                vector<string> widget_texts = {"THE LONGEST FEED NAME EVER WWWWWWWWWWWWWWW", "HTTPS://WWWWWWWWWWWWWWWWWWWWWWWW.COM", "Update"};
+
+                                double next_x = 20;
+                                
+                                ALLEGRO_COLOR widget_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR widget_border_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR widget_text_color = al_map_rgb(0, 0, 0);
+
+                                const double widget_border_line_width = 1;
+
+                                for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
+                                        string label_text = widget_texts[widget_index];
+
+                                        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
+
+                                        /*Widgets aligned to the left.*/
+
+                                        const double widget_h = (widget_dimensions.bottom() + y1);
+
+                                        const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
+                                        const double widget_x_offset = (20);
+
+                                        const double widget_x = (next_x + widget_x_offset);
+                                        const double widget_y = (widget_y_offset + y1);
+                                        const double widget_w = widget_x + widget_dimensions.right();
+
+                                        next_x = widget_w;
+
+                                        draw_region_background(widget_x, widget_y, widget_w, widget_h, 
+                                                widget_background_color, widget_border_color, widget_border_line_width);
+                                }
                         }
                         break;
                         case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                         {
-                                ALLEGRO_COLOR background_color = al_map_rgb(170, 68, 0);
-                                ALLEGRO_COLOR border_color = al_map_rgb(160, 44, 44);
-                                double const  border_line_width = 1;
+                                background_color = al_map_rgb(170, 68, 0);
+                                border_color = al_map_rgb(255, 102, 0);
+                                text_color = al_map_rgb(213, 255, 246);
 
-                                ALLEGRO_COLOR text_color = al_map_rgb(213, 255, 246);
+                                draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-	                        al_draw_filled_rectangle(x1, y1, x2, y2, background_color);
-	                        al_draw_rectangle(x1, y1, x2, y2, border_color, border_line_width);
+                                vector<string> button_texts = {"TEST BUTTON 1", "TEST BUTTON 2", "TEST BUTTON 3", "TEST BUTTON 4"};
+
+                                double next_x = 20;
+                                
+                                ALLEGRO_COLOR button_background_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
+                                ALLEGRO_COLOR button_text_color = al_map_rgb(0, 0, 0);
+
+                                const double button_border_line_width = 1;
+
+                                for(int button_index = 0; button_index < button_texts.size(); button_index++) {
+                                        string label_text = button_texts[button_index];
+
+                                        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+
+                                        /*Button aligned to the left.*/
+
+                                        const double button_h = (button_dimensions.bottom() + y1);
+
+                                        const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
+                                        const double button_x_offset = (20);
+
+                                        const double button_x = (next_x + button_x_offset);
+                                        const double button_y = (button_y_offset + y1);
+                                        const double button_w = button_x + button_dimensions.right();
+
+                                        next_x = button_w;
+
+                                        draw_region_background(button_x, button_y, button_w, button_h, 
+                                                button_background_color, button_border_color, button_border_line_width);
+                                }
                         }
                         break;
                 }
+
+                previous_line_stroke_width = border_line_width;
         }
 
         return;
@@ -259,6 +383,7 @@ void cls::Initialize() {
 	_IsAllegroInitialized = al_init();
 
 	if(_IsAllegroInitialized) {
+	        al_init_primitives_addon();
 		al_init_font_addon();
 		al_init_ttf_addon();
 
@@ -524,34 +649,37 @@ void cls::LoadFont() {
         return;
 }
 
-void cls::MeasureLineHeight(const char* str) {
+dlib::drectangle cls::MeasureLineHeight(const char* str) {
+        dlib::drectangle rect;
+
         if(_Font) {
                 int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
                 
                 al_get_text_dimensions(_Font, str, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
 
-                _FontBoxX = FontBoxX; _FontBoxW = FontBoxW;
-                _FontBoxY = FontBoxY; _FontBoxH = FontBoxH;
+                rect = dlib::drectangle(FontBoxX, FontBoxY, FontBoxW, FontBoxH);
         }
 
-        return;
+        return rect;
 }
 
 vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
-        int next_y = 0;
-        int text_w = 0;
-        int text_h = _FontBoxH;
-        int accumulated_h = 0;
-        int remaining_h = 0;
+        double next_y = 0;
+        double text_w = 0;
+        double text_h = _FontBoxH;
+        double accumulated_h = 0;
+        double remaining_h = 0;
 
-        int x = 0;
-        int y = 0;
-        int w = 0;
-        int h = 0;
+        double x = 0;
+        double y = 0;
+        double w = 0;
+        double h = 0;
 
-        int rh = 0;
+        double stroke_width = 1;
+
+        double rh = 0;
 
         const int max_elems = 6;
 
@@ -565,31 +693,35 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 switch(index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
                         {
-                                callable.label("RSS Reader");
+                                stroke_width = 1;
+                                
+                                string label_text = "RSS Reader";
+                                
+                                callable.label(label_text);
 
-                                if(_FontBoxH < 1) {
-                                        cout << "measuring text for text_h which is at size: " << text_h << "\n";
-                                        MeasureLineHeight("RSS Reader");
-                                }
+                                dlib::drectangle text_dimensions = MeasureLineHeight(label_text.data());
 
-                                text_h = _FontBoxH;
+                                text_h = text_dimensions.bottom();
 
                                 h = text_h;
                         }
                         break;
                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                         {
+                                stroke_width = 4;
                                 h = remaining_h / 2;
                         }
                         break;
                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                         {
+                                stroke_width = 4;
                                 double dv = 1.4;
                                 h = remaining_h / dv;
                         }
                         break;
                         case visual_index_rss_reader_region::control_bar:
                         {
+                                stroke_width = 2;
                                 double dv = 3;
                                 rh = remaining_h / dv;
 
@@ -600,6 +732,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                         break;
                         case visual_index_rss_reader_region::change_bar:
                         {
+                                stroke_width = 1.5;
                                 h = rh;
 
                                 callable.label("test 2");
@@ -607,6 +740,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                         break;
                         case visual_index_rss_reader_region::choice_bar:
                         {
+                                stroke_width = 1;
                                 h = rh;
                                 
                                 callable.label("test 3");
@@ -618,6 +752,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 callable.y(y);
                 callable.w(w);
                 callable.h(h);
+                callable.line_stroke_width(stroke_width);
 
                 accumulated_h = (accumulated_h + callable.h());
                 next_y = (next_y + callable.h());

@@ -7,8 +7,8 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
-rm obj/libnews_visual*.o
-rm bin/libnews_visual*.so
+rm obj/librssui_*.o
+rm bin/librssui_*.so
 
 echo "	build"
 ls -gGhU

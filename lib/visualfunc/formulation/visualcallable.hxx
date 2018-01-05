@@ -25,38 +25,60 @@ namespace formulation {
         class visualcallable {
                 private:
                         int _id = 0;
-                        int _x = 0;
-                        int _y = 0;
-                        int _w = 0;
-                        int _h = 0;
+                        double _x = 0;
+                        double _y = 0;
+                        double _w = 0;
+                        double _h = 0;
+
+                        double _line_stroke_width_left = 1;
+                        double _line_stroke_width_top = 1;
+                        double _line_stroke_width_right = 1;
+                        double _line_stroke_width_bottom = 1;
+                        
                         string _label;
                 public:
-                        visualcallable(int id) {
+                        visualcallable(const int id) {
                                 _id = id;
                                 
                                 return;
                         }
                         
                         int id();
+                        void id(const int v);
                         
-                        void id(int v);
+                        double x();
+                        void x(const double v);
                         
-                        int x();
+                        double y();
+                        void y(const double v);
                         
-                        void x(int v);
+                        double w();
+                        void w(const double v);
                         
-                        int y();
-                        
-                        void y(int v);
-                        
-                        int w();
-                        
-                        void w(int v);
-                        
-                        int h();
-                        
-                        void h(int v);
-                        
+                        double h();
+                        void h(const double v);
+
+                        double line_stroke_width_left();
+                        void line_stroke_width_left(const double v);
+
+                        double line_stroke_width_top();
+                        void line_stroke_width_top(const double v);
+
+                        double line_stroke_width_right();
+                        void line_stroke_width_right(const double v);
+
+                        double line_stroke_width_bottom();
+                        void line_stroke_width_bottom(const double v);
+
+                        void line_stroke_width(const double v);
+                        double line_stroke_width();
+
+                        double x1();
+                        double x2();
+
+                        double y1();
+                        double y2();
+
                         string label();
                         
                         void label(string v);

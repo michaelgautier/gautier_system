@@ -112,7 +112,7 @@ namespace ui {
 	        void Release();
 
                 void LoadFont();
-                void MeasureLineHeight(const char* str);
+                dlib::drectangle MeasureLineHeight(const char* str);
 
                 /*Application Logic Implementation*/
                 enum visual_index_rss_reader_region {
@@ -159,18 +159,8 @@ namespace ui {
                 int _last_w = 0;
                 int _last_h = 0;
       
-                constexpr int measure_button_y(const int region_h_half, const int button_h) {
-                        return (region_h_half - (button_h/2));
-                }
-
-                constexpr int measure_button_w(const int text_w, const int button_spacing) {
-                        /*
-                                FLTK does not properly measure text width in all cases.
-                                On the machine I tested this on, 15.6" screen, 4K resolution,
-                                I detected a pattern in which the count is missing another 1/4th pixels.
-                Since switching to Allegro, this may be unnecessary.
-                        */
-                        return (text_w + (text_w/4)) + button_spacing;
+                constexpr double measure_widget_y(const double region_h_half, const double button_h) {
+                        return (region_h_half - (button_h / 2));
                 }
 
                 void measure_screen(const interactionstate& interaction_ctx);
