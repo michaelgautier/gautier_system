@@ -153,7 +153,7 @@ void cls::ProcessInteractions(interactionstate& interaction_ctx) {
         return;
 }
 
-void draw_region_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width) {
+void cls::draw_region_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width) {
         const double rect_x1 = x1 + 0.5;
         const double rect_x2 = x2 + 0.5;
         const double rect_y1 = y1 + 0.5;
@@ -165,7 +165,7 @@ void draw_region_background(const double x1, const double y1, const double x2, c
         return;
 }
 
-void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width) {
+void cls::draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width) {
         ALLEGRO_COLOR vertical_scrollbar_background_color = bkg_clr;
         ALLEGRO_COLOR vertical_scrollbar_border_color = bdr_clr;
 
@@ -181,6 +181,62 @@ void draw_scrollbar_right_background(const double x1, const double y1, const dou
 
         draw_region_background(vertical_scrollbar_x, vertical_scrollbar_y, vertical_scrollbar_w, vertical_scrollbar_h, 
                 vertical_scrollbar_background_color, vertical_scrollbar_border_color, vertical_scrollbar_border_line_width);
+
+        return;
+}
+
+void cls::draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color) {
+        ALLEGRO_COLOR widget_background_color = bkg_clr;
+        ALLEGRO_COLOR widget_border_color = bdr_clr;
+        ALLEGRO_COLOR widget_text_color = label_color;
+
+        const double widget_border_line_width = bdr_width;
+
+        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
+
+        /*Widgets aligned to the left.*/
+
+        const double widget_h = (widget_dimensions.bottom() + y1);
+
+        const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
+        const double widget_x_offset = x_offset;
+
+        const double widget_x = (next_x + widget_x_offset);
+        const double widget_y = (widget_y_offset + y1);
+        const double widget_w = widget_x + widget_dimensions.right();
+
+        next_x = widget_w;
+
+        draw_region_background(widget_x, widget_y, widget_w, widget_h, 
+                widget_background_color, widget_border_color, widget_border_line_width);
+
+        return;
+}
+
+void cls::draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color) {
+
+        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+
+        ALLEGRO_COLOR button_background_color = bkg_clr;
+        ALLEGRO_COLOR button_border_color = bdr_clr;
+        ALLEGRO_COLOR button_text_color = label_color;
+
+        /*Button aligned to the right.*/
+
+        const double button_border_line_width = bdr_width;
+
+        const double button_h = (button_dimensions.bottom() + y1);
+
+        const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
+        const double button_x_offset = (x2 - 20);
+
+        const double button_x = (button_x_offset - button_dimensions.right());
+        const double button_y = (button_y_offset + y1);
+        const double button_w = button_x_offset;
+
+        draw_region_background(button_x, button_y, button_w, button_h, 
+                button_background_color, button_border_color, button_border_line_width);
+
         return;
 }
 
@@ -270,29 +326,16 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                string label_text = "Enlarge";
-
-                                dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
-
-                                ALLEGRO_COLOR button_background_color = al_map_rgb(0, 0, 0);
-                                ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
-                                ALLEGRO_COLOR button_text_color = al_map_rgb(0, 0, 0);
-
-                                /*Button aligned to the right.*/
+                                ALLEGRO_COLOR button_background_color = al_map_rgb(0,0,0);
+                                ALLEGRO_COLOR button_border_color = al_map_rgb(0,0,0);
+                                ALLEGRO_COLOR button_text_color = al_map_rgb(0,0,0);
 
                                 const double button_border_line_width = 1;
 
-                                const double button_h = (button_dimensions.bottom() + y1);
+                                string label_text = "Enlarge";
 
-                                const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
-                                const double button_x_offset = (x2 - 20);
-
-                                const double button_x = (button_x_offset - button_dimensions.right());
-                                const double button_y = (button_y_offset + y1);
-                                const double button_w = button_x_offset;
-
-                                draw_region_background(button_x, button_y, button_w, button_h, 
-                                        button_background_color, button_border_color, button_border_line_width);
+                                draw_right_aligned_button(x1, y1, x2, y2, 
+                                        button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
                         }
                         break;
                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
@@ -306,6 +349,7 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                 vector<string> widget_texts = {"THE LONGEST FEED NAME EVER WWWWWWWWWWWWWWW", "HTTPS://WWWWWWWWWWWWWWWWWWWWWWWW.COM", "Update"};
 
                                 double next_x = 20;
+                                const double x_offset = 20;
                                 
                                 ALLEGRO_COLOR widget_background_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR widget_border_color = al_map_rgb(0, 0, 0);
@@ -316,23 +360,8 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                 for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
                                         string label_text = widget_texts[widget_index];
 
-                                        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
-
-                                        /*Widgets aligned to the left.*/
-
-                                        const double widget_h = (widget_dimensions.bottom() + y1);
-
-                                        const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
-                                        const double widget_x_offset = (20);
-
-                                        const double widget_x = (next_x + widget_x_offset);
-                                        const double widget_y = (widget_y_offset + y1);
-                                        const double widget_w = widget_x + widget_dimensions.right();
-
-                                        next_x = widget_w;
-
-                                        draw_region_background(widget_x, widget_y, widget_w, widget_h, 
-                                                widget_background_color, widget_border_color, widget_border_line_width);
+                                        draw_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, 
+                                                widget_background_color, widget_border_color, widget_border_line_width, label_text, widget_text_color);
                                 }
                         }
                         break;
@@ -347,6 +376,7 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                 vector<string> button_texts = {"TEST BUTTON 1", "TEST BUTTON 2", "TEST BUTTON 3", "TEST BUTTON 4"};
 
                                 double next_x = 20;
+                                const double x_offset = 20;
                                 
                                 ALLEGRO_COLOR button_background_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
@@ -357,23 +387,8 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                 for(int button_index = 0; button_index < button_texts.size(); button_index++) {
                                         string label_text = button_texts[button_index];
 
-                                        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
-
-                                        /*Button aligned to the left.*/
-
-                                        const double button_h = (button_dimensions.bottom() + y1);
-
-                                        const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
-                                        const double button_x_offset = (20);
-
-                                        const double button_x = (next_x + button_x_offset);
-                                        const double button_y = (button_y_offset + y1);
-                                        const double button_w = button_x + button_dimensions.right();
-
-                                        next_x = button_w;
-
-                                        draw_region_background(button_x, button_y, button_w, button_h, 
-                                                button_background_color, button_border_color, button_border_line_width);
+                                        draw_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x, 
+                                                button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
                                 }
                         }
                         break;
