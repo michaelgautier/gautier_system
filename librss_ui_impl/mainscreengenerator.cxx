@@ -14,6 +14,8 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2017, Ap
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 #include <iostream>
+#include <chrono>
+#include <ctime>
 
 #include "mainscreengenerator.hxx"
 
@@ -45,10 +47,11 @@ static double
 
 cls* _self = nullptr;
 
-void UpdateDisplay(interactionstate interactionState);
+void UpdateDisplay(interactionstate& interactionState);
 void clear_to_background_color();
 
 void cls::init() {
+        _render_is_requested = true;
 
         return;
 }
@@ -59,14 +62,33 @@ void cls::generate() {
         return;
 }
 
-void UpdateDisplay(interactionstate interactionState) {
+void UpdateDisplay(interactionstate& interactionState) {
         _self->ProcessUpdates(interactionState);
 
 	return;
 }
 
-void cls::ProcessUpdates(const interactionstate& interactionState) {
-        bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionState, interactionState);
+void cls::measure_screen(interactionstate& interaction_ctx) {
+        _workarea_x = interaction_ctx.WindowDimensions.left();
+        _workarea_y = interaction_ctx.WindowDimensions.top();
+        _workarea_w = interaction_ctx.WindowDimensions.right();
+        _workarea_h = interaction_ctx.WindowDimensions.bottom();
+
+        return;
+}
+
+void clear_interaction_state_events(interactionstate& interaction_ctx) {
+        interaction_ctx.IsWindowResized = false;
+        interaction_ctx.IsMouseDown = false;
+        interaction_ctx.IsMouseUp = false;
+        interaction_ctx.IsVisualModelChanged = false;
+        interaction_ctx.IsDisplayUpdated = false;
+
+        return;
+}
+
+void cls::ProcessUpdates(interactionstate& interaction_ctx) {
+        bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionState, interaction_ctx);
 
         if(IsVisualModelChanged) {
                 if(!_Font) {
@@ -77,34 +99,57 @@ void cls::ProcessUpdates(const interactionstate& interactionState) {
                         }
                 }
 
-                BuildVisualModel(interactionState);
-                ProcessInteractions(interactionState);
-                UpdateVisualOutput(interactionState);
+                BuildVisualModel(interaction_ctx);
+                ProcessInteractions(interaction_ctx);
+                
+                if(_render_is_requested) {
+                        _render_is_requested = false;
+                        cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
+                        UpdateVisualOutput(interaction_ctx);
+                        UpdateVisualOutput(interaction_ctx);
+                }
+                
+                clear_interaction_state_events(interaction_ctx);
+                _InteractionState = interaction_ctx;
+                _InteractionStateLast = _InteractionState;
 	}
 
-        _InteractionState = interactionState;
-
         return;
 }
 
-void cls::measure_screen(const interactionstate& interaction_ctx) {
-        _workarea_x = interaction_ctx.WindowDimensions.left();
-        _workarea_y = interaction_ctx.WindowDimensions.top();
-        _workarea_w = interaction_ctx.WindowDimensions.right();
-        _workarea_h = interaction_ctx.WindowDimensions.bottom();
-
-        return;
-}
-
-void cls::BuildVisualModel(const interactionstate& interaction_ctx) {
+void cls::BuildVisualModel(interactionstate& interaction_ctx) {
         measure_screen(interaction_ctx);
 
-        callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
+        _callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
+
+        if(_article_contents_enlarge) {
+                cout << __func__ << " enlarge button click implementation, line: " << __LINE__ << "\n";
+
+                visualcallable headline_region = _callables[visual_index_rss_reader_region::headlines];
+                visualcallable article_content = _callables[visual_index_rss_reader_region::article_content];
+
+                const int region_h = headline_region.h() + article_content.h();
+                
+                const int headlines_h = region_h/4;
+                const int article_contents_h = region_h - headlines_h;
+                
+                headline_region.h(headlines_h);
+                article_content.h(article_contents_h);
+        }
 
         return;
 }
 
-void cls::ProcessInteractions(const interactionstate& interaction_ctx) {
+void cls::ProcessInteractions(interactionstate& interaction_ctx) {
+        bool visual_model_changed = GetIsVisualModelChanged(_InteractionStateLast, interaction_ctx);
+        bool window_resized = interaction_ctx.IsWindowResized;
+        bool display_updated = interaction_ctx.IsDisplayUpdated;
+
+        if(visual_model_changed && window_resized) {
+                _render_is_requested = true;
+                cout << "window_resized " << window_resized << "\n";
+        }
+
         return;
 }
 
@@ -139,10 +184,9 @@ void draw_scrollbar_right_background(const double x1, const double y1, const dou
         return;
 }
 
-void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
-        const int callable_size = callables.size();
+void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
+        const int callable_size = _callables.size();
 
-        clear_to_background_color();
         double previous_line_stroke_width = 0;
 
         ALLEGRO_COLOR background_color = al_map_rgb(0, 0, 0);
@@ -151,8 +195,10 @@ void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
 
         double const scrollbar_width = 42;
 
+        clear_to_background_color();
+
         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
-                visualcallable callable = callables[callable_index];
+                visualcallable callable = _callables[callable_index];
 
                 string* label = new string(callable.label());
 
@@ -336,6 +382,9 @@ void cls::UpdateVisualOutput(const interactionstate& interaction_ctx) {
                 previous_line_stroke_width = border_line_width;
         }
 
+        EndRenderGraphics();
+        interaction_ctx.IsDisplayUpdated = true;
+
         return;
 }
 
@@ -436,14 +485,13 @@ void cls::Initialize() {
 	return;
 }
 void cls::Activate(InteractionCallBackType interactionCallBack) {
+        cout << __func__ << " line: " << __LINE__ << "\n";
         if(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
                 StartRenderGraphics();
         }
 
         _InteractionCallBack = interactionCallBack;
 	while(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
-                _InteractionStateLast = _InteractionState;
-
 		ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
 
 		switch (window_event_type) {
@@ -451,15 +499,21 @@ void cls::Activate(InteractionCallBackType interactionCallBack) {
 				_InteractionState.IsWindowOpen = false;
 			        break;
 			case ALLEGRO_EVENT_DISPLAY_RESIZE:
-			        clear_to_background_color();
-			        EndRenderGraphics();//Will make this smoother later.
 				al_acknowledge_resize(_WinCtx);
 				
 				_InteractionState.WindowWidth = _winmsg_event.display.width;
 				_InteractionState.WindowHeight = _winmsg_event.display.height;
                                 _InteractionState.WindowDimensions = dlib::drectangle(0,0,_InteractionState.WindowWidth, _InteractionState.WindowHeight);
 
-				_InteractionState.IsWindowResized = true;	
+                                /*Allegro will replay the same event over and over again.
+                                        You cannot merely set a flag based on the event.
+                                        You have to check the values since flushing the queue does not remove subsequent duplicate events.
+                                */
+                                //cout << "resize before w/h " << _InteractionStateLast.WindowWidth << "/" << _InteractionStateLast.WindowHeight << "\n";
+                                //cout << "resize after  w/h " << _InteractionState.WindowWidth << "/" << _InteractionState.WindowHeight << "\n";
+
+				_InteractionState.IsWindowResized = (   _InteractionState.WindowWidth != _InteractionStateLast.WindowWidth || 
+				                                        _InteractionState.WindowHeight != _InteractionStateLast.WindowHeight);
 			        break;
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
@@ -477,19 +531,10 @@ void cls::Activate(InteractionCallBackType interactionCallBack) {
                 if(_InteractionState.IsWindowOpen) {
                         if(_WinCtx) {
                                 al_flush_event_queue(_WinMsgEvtQueue);
-
-                                bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionStateLast, _InteractionState);
-
-                                if(IsVisualModelChanged) {
-                                        interactionCallBack(_InteractionState);
-
-                                        EndRenderGraphics();
-                                }
+                                interactionCallBack(_InteractionState);
 	                }
 
-                        _InteractionStateLast = _InteractionState;
-
-                        al_wait_for_event_timed(_WinMsgEvtQueue, &_winmsg_event, 0.3);
+                        al_wait_for_event_timed(_WinMsgEvtQueue, &_winmsg_event, 0.2);
                 }
                 else {
 		        Release();
@@ -558,19 +603,28 @@ bool cls::GetIsVisualModelChanged(interactionstate const& old, interactionstate 
 }
 
 void clear_to_background_color() {
+        cout << __func__ << " line: " << __LINE__ << "\n";
         al_clear_to_color(al_map_rgb(255, 153, 85));
 
         return;
 }
 
 void cls::StartRenderGraphics() {
+        cout << __func__ << " line: " << __LINE__ << "\n";
         clear_to_background_color();
         al_flip_display();
 
         return;
 }
 void cls::EndRenderGraphics() {
+        cout << __func__ << " line: " << __LINE__ << "\n";
         al_flip_display();
+
+        std::chrono::time_point<std::chrono::system_clock> current_clock_time = std::chrono::system_clock::now();
+        std::time_t end_time = std::chrono::system_clock::to_time_t(current_clock_time);
+        string end_time_text(std::ctime(&end_time));
+
+        cout << "display flipped " << end_time_text << "\n";
 
         return;
 }
@@ -773,18 +827,6 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                 cout << " / " << callable.w();
                 cout << " / " << callable.h();
                 cout << "\n";*/
-        }
-
-        if(_article_contents_enlarge) {
-                cout << "enlarge content - adjusting callable\n";
-
-                const int region_h = callables[1].h() + callables[2].h();
-                
-                const int headlines_h = region_h/4;
-                const int article_contents_h = region_h - headlines_h;
-                
-                callables[1].h(headlines_h);
-                callables[2].h(article_contents_h);
         }
         
         return callables;

@@ -15,7 +15,9 @@ struct InteractionState {
                 IsWindowResized, 
                 IsMouseDown, 
                 IsMouseUp,
-                IsVisualModelChanged;
+                IsVisualModelChanged,
+                IsDisplayUpdated 
+                = false;
 
         int 
                 MonitorWidth,

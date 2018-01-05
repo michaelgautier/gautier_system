@@ -39,7 +39,7 @@ namespace ui {
         class mainscreengenerator {
                 public:
 	        using interactionstate = visualfunc::formulation::InteractionState;
-	        using InteractionCallBackType = void(*)(interactionstate);
+	        using InteractionCallBackType = void(*)(interactionstate&);
 
                 mainscreengenerator();
                 ~mainscreengenerator();
@@ -49,7 +49,7 @@ namespace ui {
 
                 /*Application Logic*/
 
-                void ProcessUpdates(const interactionstate& interactionState);
+                void ProcessUpdates(interactionstate& interactionState);
 
                 private:
 
@@ -127,17 +127,18 @@ namespace ui {
                 bool _article_contents_enlarge = false;
                 bool _article_contents_enlarge_click = false;
                 bool _feed_articles_requested = false;
+                bool _render_is_requested = false;
 
                 string _feed_names_location = "feeds.txt";
 
                 vector<rss::material> _feed_articles;
                 
-                void BuildVisualModel(const interactionstate& interaction_ctx);
-                void ProcessInteractions(const interactionstate& interaction_ctx);
-                void UpdateVisualOutput(const interactionstate& interaction_ctx);
+                void BuildVisualModel(interactionstate& interaction_ctx);
+                void ProcessInteractions(interactionstate& interaction_ctx);
+                void UpdateVisualOutput(interactionstate& interaction_ctx);
 
                 /*Widget geometry*/
-                vector<visualfunc::formulation::visualcallable> callables;
+                vector<visualfunc::formulation::visualcallable> _callables;
 
                 const int _text_wh_plus = 20;
 
@@ -163,7 +164,7 @@ namespace ui {
                         return (region_h_half - (button_h / 2));
                 }
 
-                void measure_screen(const interactionstate& interaction_ctx);
+                void measure_screen(interactionstate& interaction_ctx);
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
         };
 }
