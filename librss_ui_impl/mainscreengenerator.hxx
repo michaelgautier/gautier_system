@@ -114,15 +114,38 @@ namespace ui {
                 void LoadFont();
                 dlib::drectangle MeasureLineHeight(const char* str);
 
-                void draw_region_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
+                void draw_region_background(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
 
-                void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
+                void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
 
-                void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+                void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
 
-                void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+                void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+
+                void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
 
                 /*Application Logic Implementation*/
+                bool _article_contents_enlarge = false;
+                bool _article_contents_enlarge_click = false;
+                bool _feed_articles_requested = false;
+                bool _render_is_requested = false;
+
+                int _feed_index = 0;//Defaults to the first feed, if available;
+
+                string _feed_names_location = "feeds.txt";
+
+                vector<rss::material> _feed_articles;
+                
+                void BuildVisualModel(interactionstate& interaction_ctx);
+                void ProcessInteractions(interactionstate& interaction_ctx);
+                void UpdateVisualOutput(interactionstate& interaction_ctx);
+
+                /*Widget geometry*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header
                         headlines = 1,//RSS Reader Headlines
@@ -140,20 +163,6 @@ namespace ui {
                         vertical_scrollbar = 4
                 };
 
-                bool _article_contents_enlarge = false;
-                bool _article_contents_enlarge_click = false;
-                bool _feed_articles_requested = false;
-                bool _render_is_requested = false;
-
-                string _feed_names_location = "feeds.txt";
-
-                vector<rss::material> _feed_articles;
-                
-                void BuildVisualModel(interactionstate& interaction_ctx);
-                void ProcessInteractions(interactionstate& interaction_ctx);
-                void UpdateVisualOutput(interactionstate& interaction_ctx);
-
-                /*Widget geometry*/
                 vector<visualfunc::formulation::visualcallable> _callables;
 
                 const int _text_wh_plus = 20;
@@ -191,6 +200,9 @@ namespace ui {
 
                 visualfunc::formulation::visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
                 const double bdr_width, string label_text);
+
+                visualfunc::formulation::visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
+                const double y_offset, double& next_y, const double bdr_width, string label_text);
         };
 }
 }

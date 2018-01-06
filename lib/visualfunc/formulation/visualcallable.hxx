@@ -90,6 +90,7 @@ namespace formulation {
                         string label();
                         
                         void label(string v);
+                        void label(const char* v);
                         
                         vector<visualcallable> callables();
                         void callables(vector<visualcallable> v);

@@ -151,7 +151,13 @@ string cls::label() {
 }
 
 void cls::label(string v) {
-        _label = v;
+        _label = string(v);
+        
+        return;
+}
+
+void cls::label(const char* v) {
+        _label = string(v);
         
         return;
 }
