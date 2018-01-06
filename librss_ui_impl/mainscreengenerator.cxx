@@ -92,10 +92,11 @@ void cls::ProcessUpdates(interactionstate& interaction_ctx) {
 
         if(IsVisualModelChanged) {
                 if(!_Font) {
-                        if(!GetIsFontLoaded()) {
+                        if(!_Font) {
                                 cout << "loading font\n";
-                                SetFontParameters("NotoSans-Regular.ttf", 10);
-                                cout << "font loaded with size w/h " << _FontBoxW << "/" << _FontBoxH << "\n";
+                                _FontPath = "NotoSans-Regular.ttf";
+                                _FontSize = 10;
+                                _Font = load_sized_font(_FontSize, _FontPath);
                         }
                 }
 
@@ -207,7 +208,7 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                         {
                                 const double button_border_line_width = 1;
 
-                                visualcallable descendant_callable = build_visual_right_aligned_button(x1, y1, x2, y2, 1, callable->label());
+                                visualcallable descendant_callable = build_visual_right_aligned_button(x1, y1, x2, y2, true, button_border_line_width, "Enlarge");
                                 descendant_callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
                                 
                                 callable->add_descendant(descendant_callable);
@@ -225,12 +226,16 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
                                         string label_text = widget_texts[widget_index];
 
-                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x,
-                                                 widget_border_line_width, label_text);
+                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, 
+                                                (widget_index == 2), x_offset, next_x,
+                                                widget_border_line_width, label_text);
 
                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
 
-                                        if(widget_index == 2) {
+                                        if(widget_index < 2) {
+                                                descendant_callable.label("");
+                                        }
+                                        else if(widget_index == 2) {
                                                 descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
                                         }
 
@@ -259,8 +264,9 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 for(int button_index = 0; button_index < feednames.size(); button_index++) {
                                         string label_text = feednames[button_index];
 
-                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x,
-                                                 button_border_line_width, label_text);
+                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, 
+                                                true, x_offset, next_x,
+                                                button_border_line_width, label_text);
 
                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
 
@@ -434,8 +440,10 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                                 const double c_y1 = descendant_callable.y();
                                                 const double c_y2 = descendant_callable.h();
 
+                                                string button_text = descendant_callable.label();
+
                                                 draw_right_aligned_button(c_x1, c_y1, c_x2, c_y2, 
-                                                        button_background_color, button_border_color, button_border_line_width, label_text, button_text_color);
+                                                        button_background_color, button_border_color, button_border_line_width, button_text, button_text_color);
                                         }
                                 }
                         }
@@ -574,13 +582,14 @@ void cls::draw_scrollbar_right_background(const double x1, const double y1, cons
         return;
 }
 
-visualcallable cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, const double x_offset, double& next_x, const double bdr_width, string label_text) {
+visualcallable cls::build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text) {
         /*Widgets aligned to the left.*/
 
         const double widget_border_line_width = bdr_width;
-//cout << label_text.data() << "\n";
-        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
-//cout << " label w/h " << widget_dimensions.right() << " / " << widget_dimensions.bottom() << "\n";
+
+        dlib::drectangle widget_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size, _FontPath);
+
         const double widget_h = (widget_dimensions.bottom() + y1);
 
         const double widget_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - widget_h));
@@ -588,7 +597,18 @@ visualcallable cls::build_visual_left_aligned_widget(const double x1, const doub
 
         const double widget_x = (next_x + widget_x_offset);
         const double widget_y = (widget_y_offset + y1);
-        const double widget_w = widget_x + widget_dimensions.right();
+        double widget_w = widget_x + widget_dimensions.right();
+
+        if(trim_to_label && !label_text.empty()) {
+                dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _FontPath);
+
+                const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
+                const double font_w = font_dimensions.right();
+
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _FontPath);
+
+                widget_w = widget_x + font_w + (_default_label_margin_left * 2.0);
+        }
 
         next_x = widget_w;
 
@@ -600,12 +620,10 @@ visualcallable cls::build_visual_left_aligned_widget(const double x1, const doub
         callable.w(widget_w);
         callable.h(widget_h);
 
-        //cout << "built callable x/y/w/h " << callable.x() << "/" << callable.y() << "/" << callable.w() << "/" << callable.h() << "\n";
-
         return callable;
 }
 
-void cls::draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+void cls::draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2,
         ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color) {
         ALLEGRO_COLOR widget_background_color = bkg_clr;
         ALLEGRO_COLOR widget_border_color = bdr_clr;
@@ -615,7 +633,15 @@ void cls::draw_left_aligned_widget(const double x1, const double y1, const doubl
                 widget_background_color, widget_border_color, bdr_width);
 
         if(!label_text.empty()) {
-                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _FontPath);
+
+                const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
+
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _FontPath);
+
+                const double font_x = (x1 + _default_label_margin_left);
+
+                al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());                
         }
 
         return;
@@ -626,7 +652,7 @@ visualcallable cls::build_visual_vertical_widget(const double x1, const double y
 
         const double widget_border_line_width = bdr_width;
 
-        dlib::drectangle widget_dimensions = MeasureLineHeight(label_text.data());
+        dlib::drectangle widget_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size, _FontPath);
 
         const double widget_x = x1;
         const double widget_y = (y_offset + y1 + next_y);
@@ -661,27 +687,42 @@ void cls::draw_visual_vertical_widget(const double x1, const double y1, const do
                 widget_background_color, widget_border_color, bdr_width);
 
         if(!label_text.empty()) {
-                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                const double font_x = (x1 + _default_label_margin_left);
+
+                al_draw_text(_Font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
         }
 
         return;
 }
 
-visualcallable cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, const double bdr_width, string label_text) {
+visualcallable cls::build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+bool trim_to_label, const double bdr_width, string label_text) {
         /*Button aligned to the right.*/
 
         const double button_border_line_width = bdr_width;
 
-        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+        dlib::drectangle button_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size, _FontPath);
 
         const double button_h = (button_dimensions.bottom() + y1);
 
         const double button_y_offset = measure_widget_y(((y2 - y1) / 2.0), (y2 - button_h));
+        const double button_y = (button_y_offset + y1);
+
         const double button_x_offset = (x2 - 20);
 
-        const double button_x = (button_x_offset - button_dimensions.right());
-        const double button_y = (button_y_offset + y1);
-        const double button_w = button_x_offset;
+        double button_x = (button_x_offset - button_dimensions.right());
+        double button_w = button_x_offset;
+
+        if(trim_to_label && !label_text.empty()) {
+                dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _FontPath);
+
+                const double font_w = font_dimensions.right();
+
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _FontPath);
+
+                button_x = ((x2 - 60) - font_w);
+                button_w = (font_w + button_x) + (_default_label_margin_left * 2.0);
+        }
 
         visualcallable callable(0);
         callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
@@ -696,7 +737,7 @@ visualcallable cls::build_visual_right_aligned_button(const double x1, const dou
 
 void cls::draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
         ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color) {
-        dlib::drectangle button_dimensions = MeasureLineHeight(label_text.data());
+        dlib::drectangle button_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size, _FontPath);
 
         ALLEGRO_COLOR button_background_color = bkg_clr;
         ALLEGRO_COLOR button_border_color = bdr_clr;
@@ -708,13 +749,19 @@ void cls::draw_right_aligned_button(const double x1, const double y1, const doub
                 button_background_color, button_border_color, bdr_width);
 
         if(!label_text.empty()) {
-                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _FontPath);
+
+                const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
+
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _FontPath);
+
+                const double font_x = (x1 + _default_label_margin_left);
+
+                al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());
         }
 
         return;
 }
-
-
 
 void cls::ProcessInteractions(interactionstate& interaction_ctx) {
         bool visual_model_changed = GetIsVisualModelChanged(_InteractionStateLast, interaction_ctx);
@@ -750,7 +797,6 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index) {
 
         return feed_parameters;
 }
-
 
 /*private member implementation*/
 cls::mainscreengenerator() {
@@ -825,6 +871,7 @@ void cls::Initialize() {
 
 	return;
 }
+
 void cls::Activate(InteractionCallBackType interactionCallBack) {
         cout << __func__ << " line: " << __LINE__ << "\n";
         if(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
@@ -884,6 +931,7 @@ void cls::Activate(InteractionCallBackType interactionCallBack) {
 	
 	return;
 }
+
 void cls::Release() {
         if(!_IsAllegroUnInitialized) {
                 if(_WinMsgEvtQueue) {
@@ -908,8 +956,8 @@ void cls::Release() {
 	
 	return;
 }
-void cls::GetScreenDpi(double& screenDpi) {
-	double scrdpi = 0;
+
+double cls::GetScreenDpi() {
 	/*
 	 * 	Calculate true screen resolution, PPI  (see wikipedia  Pixel Density
 	 * 
@@ -917,22 +965,14 @@ void cls::GetScreenDpi(double& screenDpi) {
 	 * 
 	 * 		diag_res / diagonal screen size in inches (the average of (11, 12, 13.3, 14, 15.6, and 17) )
 	 */		
-	if(_IsScreenDPICached) {
-		scrdpi = _ScreenDpiLast;
-	}
-	else {
-		double diagres = std::hypot(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
-		double scrtmp = diagres/_AvgPhysicalScreenSize; 
+	double diagres = std::hypot(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
+	double scrtmp = diagres/_AvgPhysicalScreenSize; 
 
-		scrdpi = _ScreenDpiLast = scrtmp;
-
-		_IsScreenDPICached = true;
-	}
+	const double scrdpi = _ScreenDpiLast = scrtmp;
 	
-	screenDpi = scrdpi;
-	
-	return;
+	return scrdpi;
 }
+
 bool cls::GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now) {
         bool IsChanged = (now.IsVisualModelChanged || now.IsWindowResized || now.IsMouseDown || now.IsMouseUp);
 
@@ -957,6 +997,7 @@ void cls::StartRenderGraphics() {
 
         return;
 }
+
 void cls::EndRenderGraphics() {
         //cout << __func__ << " line: " << __LINE__ << "\n";
         al_flip_display();
@@ -969,88 +1010,30 @@ void cls::EndRenderGraphics() {
 
         return;
 }
-bool cls::GetIsFontLoaded() {
-        return _Font != nullptr;
-}
-void cls::SetFontParameters(const char* fontPath, double const& fontSize) {
-        _FontPath = fontPath;
-        _FontSize = fontSize;
 
-        LoadFont();
+ALLEGRO_FONT* cls::load_sized_font(int font_size, const char* font_file_location) {
+        /*
+                Font scaling based on Paragraph #4 in the Article DPI and Device-Independent Pixels at: 
+                https://msdn.microsoft.com/en-us/library/windows/desktop/ff684173(v=vs.85).aspx
+        */
+        const double screen_dpi = GetScreenDpi();
 
-        return;
-}
-void cls::GetFont(ALLEGRO_FONT*& font, int& fontBoxX, int& fontBoxY, int& fontBoxW, int& fontBoxH) {
-        font = _Font;
-        fontBoxX = _FontBoxX;
-        fontBoxY = _FontBoxY;
-        fontBoxW = _FontBoxW;
-        fontBoxH = _FontBoxH;
+        const double scaled_font_size = (font_size / _PrintPointSize) * screen_dpi;
 
-        return;
-}
-void cls::LoadFont() {
-        if(!_Font) {
-                cout << "font load\n";
-                /*
-                        Font scaling based on Paragraph #4 in the Article DPI and Device-Independent Pixels at: 
-                        https://msdn.microsoft.com/en-us/library/windows/desktop/ff684173(v=vs.85).aspx
-                */
-                double ScreenDpi;
+        ALLEGRO_FONT* Font = al_load_font(font_file_location, scaled_font_size, 0);
 
-                GetScreenDpi(ScreenDpi);
-
-                const double ScaledFontSizeD = (_FontSize/_PrintPointSize) * ScreenDpi;
-
-                _Font = al_load_font(_FontPath, ScaledFontSizeD, 0);
-
-                if(_Font) {
-                        char
-                                TextToMeasure[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','z','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','Z','Y','Z','1','2','3','4','5','6','8','9','0','~','!','@','#','$','%','^','&','*','(',')','_','+','-','=','{','}','[',']','|','\\',':',';','<','>','?',',','.','/','\0'}; 
-
-                        const char* 
-                                SampleText = TextToMeasure;
-
-                        MeasureLineHeight(SampleText);
-
-                        int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
-
-                        std::vector<double>
-                                FontBoxWs;
-
-                        double FontBoxWm = 0;
-
-                        for(auto txt : TextToMeasure) {
-                                char Letter[] = {txt, '\0'};
-
-                                al_get_text_dimensions(_Font, Letter, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
-
-                                FontBoxWm += FontBoxW;
-
-                                FontBoxWs.push_back(FontBoxW);
-                        }
-
-                        _FontBoxW = FontBoxWm/FontBoxWs.size();
-                }
-                else {
-                        std::cout << __FILE__ " " << __func__ << " " << "(" << __LINE__ << ") ";
-                        std::cout << "could not load font\r\n";
-                }
-        }
-        else {
-                cout << "font already loaded\n";
-        }
-
-        return;
+        return Font;
 }
 
-dlib::drectangle cls::MeasureLineHeight(const char* str) {
+dlib::drectangle cls::measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location) {
         dlib::drectangle rect;
 
-        if(_Font) {
+        ALLEGRO_FONT* Font = load_sized_font(font_size, font_file_location);
+
+        if(Font) {
                 int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
                 
-                al_get_text_dimensions(_Font, str, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
+                al_get_text_dimensions(Font, str, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
 
                 rect = dlib::drectangle(FontBoxX, FontBoxY, FontBoxW, FontBoxH);
         }
@@ -1058,12 +1041,26 @@ dlib::drectangle cls::MeasureLineHeight(const char* str) {
         return rect;
 }
 
+constexpr double cls::measure_font_y_offset(const double y1, const double y2, const double h) {
+        const double font_y_diff = y2 - y1;
+        const double font_y1 = h;
+        const double font_y2 = abs((y2 - y1) - h);
+
+        double font_y = y1;
+        
+        if(font_y1 > font_y_diff && font_y_diff == font_y2) {
+                font_y = (y1 - (font_y2 / 2.0));
+        }
+
+        return font_y;
+}
+
 vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h) {
         vector<visualcallable> callables;
         
         double next_y = 0;
         double text_w = 0;
-        double text_h = _FontBoxH;
+        double text_h = 0;
         double accumulated_h = 0;
         double remaining_h = 0;
 
@@ -1095,7 +1092,7 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                                 
                                 callable.label(label_text);
 
-                                dlib::drectangle text_dimensions = MeasureLineHeight(label_text.data());
+                                dlib::drectangle text_dimensions = measure_text_by_sized_font(label_text.data(), _FontSize, _FontPath);
 
                                 text_h = text_dimensions.bottom();
 

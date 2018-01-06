@@ -83,51 +83,29 @@ namespace ui {
 
                 bool 
                         _IsAllegroInitialized, 
-                        _IsAllegroUnInitialized,
-                        _IsScreenDPICached;
-                        
-                int 
-                        _FontBoxX, 
-                        _FontBoxW, 
-                        _FontBoxY, 
-                        _FontBoxH;
+                        _IsAllegroUnInitialized;
 
                 double 
                         _FontSize, 
                         _ScreenDPI;
-                        
+
                 const char* _FontPath = nullptr;
 
 	        void Activate(InteractionCallBackType);
                 void StartRenderGraphics();
                 void EndRenderGraphics();
-                void GetScreenDpi(double& screenDpi);
+                double GetScreenDpi();
 
                 bool GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now);
-                bool GetIsFontLoaded();
-                void SetFontParameters(const char* fontPath, double const& fontSize);
-                void GetFont(ALLEGRO_FONT*& font, int& fontBoxX, int& fontBoxY, int& fontBoxW, int& fontBoxH);
 
 	        void Initialize();
 	        void Release();
 
-                void LoadFont();
-                dlib::drectangle MeasureLineHeight(const char* str);
+                dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
 
-                void draw_region_background(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
+                constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
 
-                void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
-
-                void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
-
-                void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
-
-                void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+                ALLEGRO_FONT* load_sized_font(int font_size, const char* font_file_location);
 
                 /*Application Logic Implementation*/
                 bool _article_contents_enlarge = false;
@@ -184,7 +162,10 @@ namespace ui {
 
                 int _last_w = 0;
                 int _last_h = 0;
-      
+
+                const int _default_widget_font_size = 12;
+                const double _default_label_margin_left = 4;
+
                 constexpr double measure_widget_y(const double region_h_half, const double button_h) {
                         return (region_h_half - (button_h / 2));
                 }
@@ -196,13 +177,28 @@ namespace ui {
                 const double bdr_width, const double scrollbar_width);
 
                 visualfunc::formulation::visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
-                const double x_offset, double& next_x, const double bdr_width, string label_text);
+                bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text);
 
                 visualfunc::formulation::visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
-                const double bdr_width, string label_text);
+                bool trim_to_label, const double bdr_width, string label_text);
 
                 visualfunc::formulation::visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
                 const double y_offset, double& next_y, const double bdr_width, string label_text);
+
+                void draw_region_background(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
+
+                void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
+
+                void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+
+                void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+
+                void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
+                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
         };
 }
 }
