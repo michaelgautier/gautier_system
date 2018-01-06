@@ -240,8 +240,6 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                         {
-                                vector<string> button_texts;
-
                                 vector<request> feed_parameters = get_rss_feed_data(_feed_index);
                                 vector<string> feednames;
                                 
@@ -250,7 +248,7 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
                                         request feedsource = feed_parameters[feed_source_index];
 
-                                        button_texts.push_back(feedsource.feedname);
+                                        feednames.push_back(feedsource.feedname);
                                 }
 
                                 double next_x = 20;
@@ -258,8 +256,8 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                                 
                                 const double button_border_line_width = 1;
 
-                                for(int button_index = 0; button_index < button_texts.size(); button_index++) {
-                                        string label_text = button_texts[button_index];
+                                for(int button_index = 0; button_index < feednames.size(); button_index++) {
+                                        string label_text = feednames[button_index];
 
                                         visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, x_offset, next_x,
                                                  button_border_line_width, label_text);
@@ -475,9 +473,11 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                                         widget_background_color = al_map_rgb(222, 170, 135);
                                                 }
 
+                                                string widget_text = descendant_callable.label();
+
                                                 draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
                                                         widget_background_color, widget_border_color, widget_border_line_width, 
-                                                        label_text, widget_text_color);
+                                                        widget_text, widget_text_color);
                                         }
                                 }
                         }
@@ -507,9 +507,11 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                                                 const double c_y1 = descendant_callable.y();
                                                 const double c_y2 = descendant_callable.h();
 
+                                                string feed_name = descendant_callable.label();
+
                                                 draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
                                                         button_background_color, button_border_color, button_border_line_width, 
-                                                        label_text, button_text_color);
+                                                        feed_name, button_text_color);
                                         }
                                 }
                         }
@@ -592,6 +594,7 @@ visualcallable cls::build_visual_left_aligned_widget(const double x1, const doub
 
         visualcallable callable(0);
         callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+        callable.label(label_text);
         callable.x(widget_x);
         callable.y(widget_y);
         callable.w(widget_w);
@@ -610,6 +613,10 @@ void cls::draw_left_aligned_widget(const double x1, const double y1, const doubl
 
         draw_region_background(x1, y1, x2, y2, 
                 widget_background_color, widget_border_color, bdr_width);
+
+        if(!label_text.empty()) {
+                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+        }
 
         return;
 }
@@ -653,7 +660,9 @@ void cls::draw_visual_vertical_widget(const double x1, const double y1, const do
         draw_region_background(x1, y1, x2, y2, 
                 widget_background_color, widget_border_color, bdr_width);
 
-        al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+        if(!label_text.empty()) {
+                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+        }
 
         return;
 }
@@ -676,6 +685,7 @@ visualcallable cls::build_visual_right_aligned_button(const double x1, const dou
 
         visualcallable callable(0);
         callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
+        callable.label(label_text);
         callable.x(button_x);
         callable.y(button_y);
         callable.w(button_w);
@@ -696,6 +706,10 @@ void cls::draw_right_aligned_button(const double x1, const double y1, const doub
 
         draw_region_background(x1, y1, x2, y2, 
                 button_background_color, button_border_color, bdr_width);
+
+        if(!label_text.empty()) {
+                al_draw_text(_Font, label_color, x1, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+        }
 
         return;
 }
