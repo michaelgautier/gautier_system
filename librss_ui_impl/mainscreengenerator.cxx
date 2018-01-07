@@ -57,13 +57,13 @@ void cls::init() {
 }
 
 void cls::generate() {
-        Activate(UpdateDisplay);
+        activate_allegro_graphics_engine(UpdateDisplay);
         
         return;
 }
 
 void UpdateDisplay(interactionstate& interactionState) {
-        _self->ProcessUpdates(interactionState);
+        _self->process_updates(interactionState);
 
 	return;
 }
@@ -87,39 +87,35 @@ void clear_interaction_state_events(interactionstate& interaction_ctx) {
         return;
 }
 
-void cls::ProcessUpdates(interactionstate& interaction_ctx) {
-        bool IsVisualModelChanged = GetIsVisualModelChanged(_InteractionState, interaction_ctx);
+void cls::process_updates(interactionstate& interaction_ctx) {
+        bool IsVisualModelChanged = get_is_visual_model_changed(_interaction_state, interaction_ctx);
 
         if(IsVisualModelChanged) {
-                if(!_Font) {
-                        if(!_Font) {
-                                cout << "loading font\n";
-                                _font_file_location = "NotoSans-Regular.ttf";
-                                _font_size = 10;
-                                _Font = load_sized_font(_font_size, _font_file_location);
-                        }
+                if(!_default_font) {
+                        cout << "loading font\n";
+                        _default_font = load_sized_font(_font_size, _font_file_location);
                 }
 
-                ProcessInteractions(interaction_ctx);
-                BuildVisualModel(interaction_ctx);
+                process_interactions(interaction_ctx);
+                build_visual_model(interaction_ctx);
                 
                 if(_render_is_requested) {
                         _render_is_requested = false;
                         //cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
-                        UpdateVisualOutput(interaction_ctx);
-                        UpdateVisualOutput(interaction_ctx);
+                        update_visual_output(interaction_ctx);
+                        update_visual_output(interaction_ctx);
                 }
                 
                 clear_interaction_state_events(interaction_ctx);
-                _InteractionState = interaction_ctx;
-                _InteractionStateLast = _InteractionState;
+                _interaction_state = interaction_ctx;
+                _interaction_state_last = _interaction_state;
 	}
 
         return;
 }
 
-void cls::ProcessInteractions(interactionstate& interaction_ctx) {
-        bool visual_model_changed = GetIsVisualModelChanged(_InteractionStateLast, interaction_ctx);
+void cls::process_interactions(interactionstate& interaction_ctx) {
+        bool visual_model_changed = get_is_visual_model_changed(_interaction_state_last, interaction_ctx);
         bool window_resized = interaction_ctx.IsWindowResized;
         bool display_updated = interaction_ctx.IsDisplayUpdated;
 
@@ -147,7 +143,7 @@ void cls::ProcessInteractions(interactionstate& interaction_ctx) {
         return;
 }
 
-void cls::BuildVisualModel(interactionstate& interaction_ctx) {
+void cls::build_visual_model(interactionstate& interaction_ctx) {
         measure_screen(interaction_ctx);
 
         _callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
@@ -296,7 +292,7 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
         return;
 }
 
-void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
+void cls::update_visual_output(interactionstate& interaction_ctx) {
         const int callable_size = _callables.size();
 
         double previous_line_stroke_width = 0;
@@ -543,7 +539,7 @@ void cls::UpdateVisualOutput(interactionstate& interaction_ctx) {
                 previous_line_stroke_width = border_line_width;
         }
 
-        EndRenderGraphics();
+        render_graphics_end();
         interaction_ctx.IsDisplayUpdated = true;
 
         return;
@@ -703,7 +699,7 @@ void cls::draw_visual_vertical_widget(const double x1, const double y1, const do
         if(!label_text.empty()) {
                 const double font_x = (x1 + _default_label_margin_left);
 
-                al_draw_text(_Font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                al_draw_text(_default_font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
         }
 
         return;
@@ -800,24 +796,24 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<materi
 /*private member implementation*/
 cls::mainscreengenerator() {
         _self = this;
-        Initialize();
+        initialize_allegro_graphics_engine();
         
         return;
 }
 
 cls::~mainscreengenerator() {
-        Release();
+        shutdown_allegro_graphics_engine();
         
         return;
 }
 
-void cls::Initialize() {
-        _InteractionState.WindowPosition = dlib::dpoint(0, 0);
-        _InteractionState.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
+void cls::initialize_allegro_graphics_engine() {
+        _interaction_state.WindowPosition = dlib::dpoint(0, 0);
+        _interaction_state.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
 
-	_IsAllegroInitialized = al_init();
+	_is_allegro_initialized = al_init();
 
-	if(_IsAllegroInitialized) {
+	if(_is_allegro_initialized) {
 	        al_init_primitives_addon();
 		al_init_font_addon();
 		al_init_ttf_addon();
@@ -825,34 +821,34 @@ void cls::Initialize() {
 		al_set_new_display_flags(ALLEGRO_RESIZABLE | ALLEGRO_MAXIMIZED | ALLEGRO_GENERATE_EXPOSE_EVENTS);
 		al_set_new_display_option(ALLEGRO_FLOAT_COLOR, true, ALLEGRO_SUGGEST);
 		
-		bool IsMonitorInfoAvailable = al_get_monitor_info(0, &_WinScreenInfo);
+		bool IsMonitorInfoAvailable = al_get_monitor_info(0, &_win_screen_info);
 
 		if(IsMonitorInfoAvailable) {
-			_InteractionState.MonitorWidth = _WinScreenInfo.x2-_WinScreenInfo.x1;
-			_InteractionState.MonitorHeight = _WinScreenInfo.y2-_WinScreenInfo.y1;
+			_interaction_state.MonitorWidth = _win_screen_info.x2 - _win_screen_info.x1;
+			_interaction_state.MonitorHeight = _win_screen_info.y2 - _win_screen_info.y1;
 
-			_WinCtx = al_create_display(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
+			_win_ctx = al_create_display(_interaction_state.MonitorWidth, _interaction_state.MonitorHeight);
 
-                        if(_WinCtx) {
-			        _InteractionState.WindowWidth = al_get_display_width(_WinCtx);		
-			        _InteractionState.WindowHeight = al_get_display_height(_WinCtx);
+                        if(_win_ctx) {
+			        _interaction_state.WindowWidth = al_get_display_width(_win_ctx);		
+			        _interaction_state.WindowHeight = al_get_display_height(_win_ctx);
 
-                                _InteractionState.WindowDimensions = dlib::drectangle(0,0,_InteractionState.WindowWidth, _InteractionState.WindowHeight);
+                                _interaction_state.WindowDimensions = dlib::drectangle(0,0,_interaction_state.WindowWidth, _interaction_state.WindowHeight);
 
-			        al_set_window_title(_WinCtx, _DefaultWindowTitle.data());
-			        al_set_window_position(_WinCtx, _InteractionState.WindowPosition.x(), _InteractionState.WindowPosition.y());
+			        al_set_window_title(_win_ctx, _DefaultWindowTitle.data());
+			        al_set_window_position(_win_ctx, _interaction_state.WindowPosition.x(), _interaction_state.WindowPosition.y());
 
-			        _WinMsgEvtSrc = al_get_display_event_source(_WinCtx);
-			        _WinMsgEvtQueue = al_create_event_queue();
+			        _win_msg_evt_src = al_get_display_event_source(_win_ctx);
+			        _win_msg_evt_queue = al_create_event_queue();
 
-			        al_register_event_source(_WinMsgEvtQueue, _WinMsgEvtSrc);
+			        al_register_event_source(_win_msg_evt_queue, _win_msg_evt_src);
 
 		                if(!al_is_mouse_installed()) {
 			                al_install_mouse();
 
-			                _MouseEvtSrc = al_get_mouse_event_source();
+			                _mouse_evt_src = al_get_mouse_event_source();
 
-			                al_register_event_source(_WinMsgEvtQueue, _MouseEvtSrc);
+			                al_register_event_source(_win_msg_evt_queue, _mouse_evt_src);
 		                }
                         }
                         else {
@@ -861,36 +857,36 @@ void cls::Initialize() {
                         }
 		}
 		
-		if(_WinCtx) {
-			_InteractionState.IsWindowOpen = true;
-			_InteractionState.IsVisualModelChanged = true;
-			_InteractionStateLast = _InteractionState;
+		if(_win_ctx) {
+			_interaction_state.IsWindowOpen = true;
+			_interaction_state.IsVisualModelChanged = true;
+			_interaction_state = _interaction_state;
 		}
 	}
 
 	return;
 }
 
-void cls::Activate(InteractionCallBackType interactionCallBack) {
+void cls::activate_allegro_graphics_engine(interaction_callback_type interactionCallBack) {
         cout << __func__ << " line: " << __LINE__ << "\n";
-        if(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
-                StartRenderGraphics();
+        if(_interaction_state.IsWindowOpen && _win_msg_evt_queue) {
+                render_graphics_begin();
         }
 
-        _InteractionCallBack = interactionCallBack;
-	while(_InteractionState.IsWindowOpen && _WinMsgEvtQueue) {
+        _interaction_callback = interactionCallBack;
+	while(_interaction_state.IsWindowOpen && _win_msg_evt_queue) {
 		ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
 
 		switch (window_event_type) {
 			case ALLEGRO_EVENT_DISPLAY_CLOSE:
-				_InteractionState.IsWindowOpen = false;
+				_interaction_state.IsWindowOpen = false;
 			        break;
 			case ALLEGRO_EVENT_DISPLAY_RESIZE:
-				al_acknowledge_resize(_WinCtx);
+				al_acknowledge_resize(_win_ctx);
 				
-				_InteractionState.WindowWidth = _winmsg_event.display.width;
-				_InteractionState.WindowHeight = _winmsg_event.display.height;
-                                _InteractionState.WindowDimensions = dlib::drectangle(0,0,_InteractionState.WindowWidth, _InteractionState.WindowHeight);
+				_interaction_state.WindowWidth = _winmsg_event.display.width;
+				_interaction_state.WindowHeight = _winmsg_event.display.height;
+                                _interaction_state.WindowDimensions = dlib::drectangle(0, 0, _interaction_state.WindowWidth, _interaction_state.WindowHeight);
 
                                 /*Allegro will replay the same event over and over again.
                                         You cannot merely set a flag based on the event.
@@ -899,58 +895,58 @@ void cls::Activate(InteractionCallBackType interactionCallBack) {
                                 //cout << "resize before w/h " << _InteractionStateLast.WindowWidth << "/" << _InteractionStateLast.WindowHeight << "\n";
                                 //cout << "resize after  w/h " << _InteractionState.WindowWidth << "/" << _InteractionState.WindowHeight << "\n";
 
-				_InteractionState.IsWindowResized = (   _InteractionState.WindowWidth != _InteractionStateLast.WindowWidth || 
-				                                        _InteractionState.WindowHeight != _InteractionStateLast.WindowHeight);
+				_interaction_state.IsWindowResized = (  _interaction_state.WindowWidth != _interaction_state.WindowWidth || 
+				                                        _interaction_state.WindowHeight != _interaction_state.WindowHeight);
 			        break;
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-	                        _InteractionState.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
-	                        _InteractionState.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
+	                        _interaction_state.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
+	                        _interaction_state.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
 	                        break;
 	                case ALLEGRO_EVENT_MOUSE_AXES:
-	                        _InteractionState.MouseDirection = _winmsg_event.mouse.dz;
+	                        _interaction_state.MouseDirection = _winmsg_event.mouse.dz;
 	                        break;
                 }
 
-                _InteractionState.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
-                _InteractionState.MouseButton = _winmsg_event.mouse.button;
+                _interaction_state.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
+                _interaction_state.MouseButton = _winmsg_event.mouse.button;
 
-                if(_InteractionState.IsWindowOpen) {
-                        if(_WinCtx) {
-                                al_flush_event_queue(_WinMsgEvtQueue);
-                                interactionCallBack(_InteractionState);
+                if(_interaction_state.IsWindowOpen) {
+                        if(_win_ctx) {
+                                al_flush_event_queue(_win_msg_evt_queue);
+                                interactionCallBack(_interaction_state);
 	                }
 
-                        al_wait_for_event_timed(_WinMsgEvtQueue, &_winmsg_event, 0.2);
+                        al_wait_for_event_timed(_win_msg_evt_queue, &_winmsg_event, 0.2);
                 }
                 else {
-		        Release();
+		        shutdown_allegro_graphics_engine();
                 }
 	}
 	
 	return;
 }
 
-void cls::Release() {
-        if(!_IsAllegroUnInitialized) {
-                if(_WinMsgEvtQueue) {
-                        if(_MouseEvtSrc) {
-	                        al_unregister_event_source(_WinMsgEvtQueue, _MouseEvtSrc);
+void cls::shutdown_allegro_graphics_engine() {
+        if(!_is_allegro_uninitialized) {
+                if(_win_msg_evt_queue) {
+                        if(_mouse_evt_src) {
+	                        al_unregister_event_source(_win_msg_evt_queue, _mouse_evt_src);
 	                }
 
-                        if(_WinMsgEvtSrc) {
-	                        al_unregister_event_source(_WinMsgEvtQueue, _WinMsgEvtSrc);
+                        if(_win_msg_evt_src) {
+	                        al_unregister_event_source(_win_msg_evt_queue, _win_msg_evt_src);
 	                }
 
-	                al_destroy_event_queue(_WinMsgEvtQueue);
+	                al_destroy_event_queue(_win_msg_evt_queue);
 	        }
 
-                if(_WinCtx) {
-	                al_destroy_display(_WinCtx);
+                if(_win_ctx) {
+	                al_destroy_display(_win_ctx);
 	        }
 
-	        _IsAllegroUnInitialized = true;
-	        _IsAllegroInitialized = false;
+	        _is_allegro_uninitialized = true;
+	        _is_allegro_initialized = false;
 	}
 	
 	return;
@@ -964,15 +960,13 @@ double cls::get_screen_dpi() {
 	 * 
 	 * 		diag_res / diagonal screen size in inches (the average of (11, 12, 13.3, 14, 15.6, and 17) )
 	 */		
-	double diagres = std::hypot(_InteractionState.MonitorWidth, _InteractionState.MonitorHeight);
-	double scrtmp = diagres/_AvgPhysicalScreenSize; 
+	double diagres = std::hypot(_interaction_state.MonitorWidth, _interaction_state.MonitorHeight);
+	const double scrdpi = diagres/_AvgPhysicalScreenSize; 
 
-	const double scrdpi = _ScreenDpiLast = scrtmp;
-	
 	return scrdpi;
 }
 
-bool cls::GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now) {
+bool cls::get_is_visual_model_changed(interactionstate const& old, interactionstate const& now) {
         bool IsChanged = (now.IsVisualModelChanged || now.IsWindowResized || now.IsMouseDown || now.IsMouseUp);
 
         if(!IsChanged) {
@@ -989,7 +983,7 @@ void clear_to_background_color() {
         return;
 }
 
-void cls::StartRenderGraphics() {
+void cls::render_graphics_begin() {
         //cout << __func__ << " line: " << __LINE__ << "\n";
         clear_to_background_color();
         al_flip_display();
@@ -997,7 +991,7 @@ void cls::StartRenderGraphics() {
         return;
 }
 
-void cls::EndRenderGraphics() {
+void cls::render_graphics_end() {
         //cout << __func__ << " line: " << __LINE__ << "\n";
         al_flip_display();
 

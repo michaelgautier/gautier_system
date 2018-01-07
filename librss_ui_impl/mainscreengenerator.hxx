@@ -39,7 +39,7 @@ namespace ui {
         class mainscreengenerator {
                 public:
 	        using interactionstate = visualfunc::formulation::InteractionState;
-	        using InteractionCallBackType = void(*)(interactionstate&);
+	        using interaction_callback_type = void(*)(interactionstate&);
 
                 mainscreengenerator();
                 ~mainscreengenerator();
@@ -47,51 +47,50 @@ namespace ui {
                 void generate();
 
                 /*Application Logic*/
-                void ProcessUpdates(interactionstate& interactionState);
+                void process_updates(interactionstate& interactionState);
 
                 private:
 
                 /*Graphics Engine*/
                 ALLEGRO_DISPLAY* 
-                        _WinCtx = nullptr;
+                        _win_ctx = nullptr;
 
                 ALLEGRO_MONITOR_INFO 
-                        _WinScreenInfo;
+                        _win_screen_info;
 
                 ALLEGRO_EVENT_SOURCE* 
-                        _WinMsgEvtSrc = nullptr;
+                        _win_msg_evt_src = nullptr;
 
                 ALLEGRO_EVENT_SOURCE* 
-                        _MouseEvtSrc = nullptr;
+                        _mouse_evt_src = nullptr;
 
                 ALLEGRO_EVENT_QUEUE* 
-                        _WinMsgEvtQueue = nullptr;
+                        _win_msg_evt_queue = nullptr;
 
                 ALLEGRO_EVENT 
                         _winmsg_event;
 
-                ALLEGRO_FONT* _Font = nullptr;
-
                 interactionstate 
-                        _InteractionState, 
-                        _InteractionStateLast;
+                        _interaction_state, 
+                        _interaction_state_last;
 
-                InteractionCallBackType 
-                        _InteractionCallBack;
+                interaction_callback_type 
+                        _interaction_callback;
 
                 bool 
-                        _IsAllegroInitialized, 
-                        _IsAllegroUnInitialized;
+                        _is_allegro_initialized, 
+                        _is_allegro_uninitialized
+                        = false;
 
 
-	        void Activate(InteractionCallBackType);
-                void StartRenderGraphics();
-                void EndRenderGraphics();
+	        void activate_allegro_graphics_engine(interaction_callback_type);
+                void render_graphics_begin();
+                void render_graphics_end();
 
-                bool GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now);
+                bool get_is_visual_model_changed(interactionstate const& old, interactionstate const& now);
 
-	        void Initialize();
-	        void Release();
+	        void initialize_allegro_graphics_engine();
+	        void shutdown_allegro_graphics_engine();
 
                 /*Application Logic Implementation*/
                 bool 
@@ -109,9 +108,9 @@ namespace ui {
                 vector<rss::material> _feed_articles;
                 vector<rss::request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
                 
-                void ProcessInteractions(interactionstate& interaction_ctx);
-                void BuildVisualModel(interactionstate& interaction_ctx);
-                void UpdateVisualOutput(interactionstate& interaction_ctx);
+                void process_interactions(interactionstate& interaction_ctx);
+                void build_visual_model(interactionstate& interaction_ctx);
+                void update_visual_output(interactionstate& interaction_ctx);
 
                 /*Widget geometry and visualization*/
                 enum visual_index_rss_reader_region {
@@ -144,14 +143,16 @@ namespace ui {
                 _screen_w,
                 _screen_h,
 
-                _font_size, 
                 _screen_dpi
                 = 0;
 
                 const int _default_widget_font_size = 12;
                 const double _default_label_margin_left = 4;
 
-                const char* _font_file_location = nullptr;
+                const char* _font_file_location = "NotoSans-Regular.ttf";
+                int _font_size = 10;
+
+                ALLEGRO_FONT* _default_font = nullptr;
 
                 double get_screen_dpi();
 
