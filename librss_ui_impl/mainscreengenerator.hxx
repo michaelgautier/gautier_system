@@ -83,27 +83,15 @@ namespace ui {
                         _IsAllegroInitialized, 
                         _IsAllegroUnInitialized;
 
-                double 
-                        _FontSize, 
-                        _ScreenDPI;
-
-                const char* _FontPath = nullptr;
 
 	        void Activate(InteractionCallBackType);
                 void StartRenderGraphics();
                 void EndRenderGraphics();
-                double GetScreenDpi();
 
                 bool GetIsVisualModelChanged(interactionstate const& old, interactionstate const& now);
 
 	        void Initialize();
 	        void Release();
-
-                dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
-
-                constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
-
-                ALLEGRO_FONT* load_sized_font(int font_size, const char* font_file_location);
 
                 /*Application Logic Implementation*/
                 bool 
@@ -121,11 +109,11 @@ namespace ui {
                 vector<rss::material> _feed_articles;
                 vector<rss::request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
                 
-                void BuildVisualModel(interactionstate& interaction_ctx);
                 void ProcessInteractions(interactionstate& interaction_ctx);
+                void BuildVisualModel(interactionstate& interaction_ctx);
                 void UpdateVisualOutput(interactionstate& interaction_ctx);
 
-                /*Widget geometry*/
+                /*Widget geometry and visualization*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header
                         headlines = 1,//RSS Reader Headlines
@@ -145,34 +133,35 @@ namespace ui {
 
                 vector<visualfunc::formulation::visualcallable> _callables;
 
-                const int _text_wh_plus = 20;
+                double 
+                _workarea_x,
+                _workarea_y,
+                _workarea_w,
+                _workarea_h,
 
-                int _text_x = 0;
-                int _text_y = 0;
-                int _text_w = 0;
-                int _text_h = 0;
+                _screen_x,
+                _screen_y,
+                _screen_w,
+                _screen_h,
 
-                int _workarea_x = 0;
-                int _workarea_y = 0;
-                int _workarea_w = 0;
-                int _workarea_h = 0;
-
-                int _screen_x = 0;
-                int _screen_y = 0;
-                int _screen_w = 0;
-                int _screen_h = 0;
-
-                int _last_w = 0;
-                int _last_h = 0;
+                _font_size, 
+                _screen_dpi
+                = 0;
 
                 const int _default_widget_font_size = 12;
                 const double _default_label_margin_left = 4;
 
-                constexpr double measure_widget_y(const double region_h_half, const double button_h) {
-                        return (region_h_half - (button_h / 2));
-                }
+                const char* _font_file_location = nullptr;
 
+                double get_screen_dpi();
+
+                ALLEGRO_FONT* load_sized_font(int font_size, const char* font_file_location);
+
+                dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
+                constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
+                constexpr double measure_widget_y(const double region_h_half, const double button_h);
                 void measure_screen(interactionstate& interaction_ctx);
+
                 vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
                 visualfunc::formulation::visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
