@@ -45,10 +45,8 @@ namespace ui {
                 ~mainscreengenerator();
                 void init();
                 void generate();
-                vector<rss::request> get_rss_feed_data(int feed_source_index);
 
                 /*Application Logic*/
-
                 void ProcessUpdates(interactionstate& interactionState);
 
                 private:
@@ -108,16 +106,20 @@ namespace ui {
                 ALLEGRO_FONT* load_sized_font(int font_size, const char* font_file_location);
 
                 /*Application Logic Implementation*/
-                bool _article_contents_enlarge = false;
-                bool _article_contents_enlarge_click = false;
-                bool _feed_articles_requested = false;
-                bool _render_is_requested = false;
+                bool 
+                        _article_contents_enlarge,
+                        _article_contents_enlarge_click,
+                        _feed_articles_requested,
+                        _render_is_requested
+                        = false;
 
                 int _feed_index = 0;//Defaults to the first feed, if available;
 
                 string _feed_names_location = "feeds.txt";
 
+                vector<string> _feednames;
                 vector<rss::material> _feed_articles;
+                vector<rss::request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
                 
                 void BuildVisualModel(interactionstate& interaction_ctx);
                 void ProcessInteractions(interactionstate& interaction_ctx);

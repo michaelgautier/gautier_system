@@ -100,8 +100,8 @@ void cls::ProcessUpdates(interactionstate& interaction_ctx) {
                         }
                 }
 
-                BuildVisualModel(interaction_ctx);
                 ProcessInteractions(interaction_ctx);
+                BuildVisualModel(interaction_ctx);
                 
                 if(_render_is_requested) {
                         _render_is_requested = false;
@@ -165,10 +165,6 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::headlines://RSS Reader Headlines
                         {
-                                vector<request> feed_parameters;
-                                
-                                feed_parameters = get_rss_feed_data(_feed_index);
-
                                 const int articles_size = _feed_articles.size();
 
                                 double next_y = 0;
@@ -245,24 +241,13 @@ void cls::BuildVisualModel(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::choice_bar://RSS Reader Feed Choice Bar
                         {
-                                vector<request> feed_parameters = get_rss_feed_data(_feed_index);
-                                vector<string> feednames;
-                                
-                                const int feed_source_size = feed_parameters.size();
-
-                                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                                        request feedsource = feed_parameters[feed_source_index];
-
-                                        feednames.push_back(feedsource.feedname);
-                                }
-
                                 double next_x = 20;
                                 const double x_offset = 20;
                                 
                                 const double button_border_line_width = 1;
 
-                                for(int button_index = 0; button_index < feednames.size(); button_index++) {
-                                        string label_text = feednames[button_index];
+                                for(int button_index = 0; button_index < _feednames.size(); button_index++) {
+                                        string label_text = _feednames[button_index];
 
                                         visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, 
                                                 true, x_offset, next_x,
@@ -768,6 +753,22 @@ void cls::ProcessInteractions(interactionstate& interaction_ctx) {
         bool window_resized = interaction_ctx.IsWindowResized;
         bool display_updated = interaction_ctx.IsDisplayUpdated;
 
+        if(!_feed_articles_requested) {
+                vector<material> feed_articles;
+                vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
+                _feed_articles = feed_articles;
+
+                const int feed_source_size = feed_parameters.size();
+
+                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
+                        request feedsource = feed_parameters[feed_source_index];
+
+                        _feednames.push_back(feedsource.feedname);
+                }
+
+                _feed_articles_requested = true;
+        }
+
         if(visual_model_changed && window_resized) {
                 _render_is_requested = true;
                 cout << "window_resized " << window_resized << "\n";
@@ -776,7 +777,7 @@ void cls::ProcessInteractions(interactionstate& interaction_ctx) {
         return;
 }
 
-vector<rss::request> cls::get_rss_feed_data(int feed_source_index) {
+vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<material>& feed_articles) {
         feedscycle feeds_group;
         
         vector<request> feed_parameters;
@@ -788,9 +789,7 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index) {
                 //cout << "feedsource " << feedsource.feedname << "\n";
 
                 collector rss_requestor;
-	        _feed_articles = rss_requestor.pull(feedsource);
-	        
-	        _feed_articles_requested = true;
+	        feed_articles = rss_requestor.pull(feedsource);
 	        
 	        //cout << "_feed_articles.size() " << _feed_articles.size() << "\n";
 	}
