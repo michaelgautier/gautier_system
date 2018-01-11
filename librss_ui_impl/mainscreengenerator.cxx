@@ -69,56 +69,49 @@ void UpdateDisplay(interactionstate& interactionState) {
 }
 
 void cls::measure_screen(interactionstate& interaction_ctx) {
-        _workarea_x = interaction_ctx.WindowDimensions.left();
-        _workarea_y = interaction_ctx.WindowDimensions.top();
-        _workarea_w = interaction_ctx.WindowDimensions.right();
-        _workarea_h = interaction_ctx.WindowDimensions.bottom();
+        const double x = interaction_ctx.WindowDimensions.left();
+        const double y = interaction_ctx.WindowDimensions.top();
+        const double w = interaction_ctx.WindowWidth;
+        const double h = interaction_ctx.WindowHeight;
 
-        return;
-}
+        _workarea_x = x;
+        _workarea_y = y;
+        _workarea_w = w;
+        _workarea_h = h;
 
-void clear_interaction_state_events(interactionstate& interaction_ctx) {
-        interaction_ctx.IsWindowResized = false;
-        interaction_ctx.IsMouseDown = false;
-        interaction_ctx.IsMouseUp = false;
-        interaction_ctx.IsVisualModelChanged = false;
-        interaction_ctx.IsDisplayUpdated = false;
+        //cout << " workarea w   workarea h  " << _workarea_w << " " << _workarea_h << " \n";
 
         return;
 }
 
 void cls::process_updates(interactionstate& interaction_ctx) {
-        bool IsVisualModelChanged = get_is_visual_model_changed(_interaction_state, interaction_ctx);
+        if(!interaction_ctx.IsDisplayUpdating) {
+                interaction_ctx.IsDisplayUpdating = true;
 
-        if(IsVisualModelChanged) {
-                if(!_default_font) {
-                        cout << "loading font\n";
-                        _default_font = load_sized_font(_font_size, _font_file_location);
+                if(interaction_ctx.IsWindowResized) {
+                        interaction_ctx.IsWindowResized = false;
+                        _render_is_requested = true;
+                }
+                else {
+                        process_interactions(interaction_ctx);
                 }
 
-                process_interactions(interaction_ctx);
-                build_visual_model(interaction_ctx);
-                
                 if(_render_is_requested) {
                         _render_is_requested = false;
                         //cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
-                        update_visual_output(interaction_ctx);
+                        build_visual_model(interaction_ctx);
                         update_visual_output(interaction_ctx);
                 }
-                
-                clear_interaction_state_events(interaction_ctx);
-                _interaction_state = interaction_ctx;
-                _interaction_state_last = _interaction_state;
-	}
+
+                interaction_ctx.IsDisplayUpdating = false;
+
+                _interaction_state_last = interaction_ctx;
+        }
 
         return;
 }
 
 void cls::process_interactions(interactionstate& interaction_ctx) {
-        bool visual_model_changed = get_is_visual_model_changed(_interaction_state_last, interaction_ctx);
-        bool window_resized = interaction_ctx.IsWindowResized;
-        bool display_updated = interaction_ctx.IsDisplayUpdated;
-
         if(!_feed_articles_requested) {
                 vector<material> feed_articles;
                 vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
@@ -135,9 +128,42 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                 _feed_articles_requested = true;
         }
 
-        if(visual_model_changed && window_resized) {
-                _render_is_requested = true;
-                cout << "window_resized " << window_resized << "\n";
+        int 
+                mouse_direction = interaction_ctx.MouseDirection,
+                mouse_button = interaction_ctx.MouseButton;
+
+        const bool 
+                is_mouse_click = (interaction_ctx.IsMouseUp && _interaction_state_last.IsMouseDown), 
+                is_mouse_down = interaction_ctx.IsMouseDown,
+                is_mouse_button_left = (mouse_button == 1);
+
+        dlib::dpoint 
+                mouse_position = interaction_ctx.MousePosition;
+
+        const double mouse_y = mouse_position.y();
+
+        const double headline_y_end = (_headline_y_end + (_headline_h + 0.2));
+
+        if(is_mouse_click) {
+                cout << "is_mouse_click\n";
+        }
+
+        if(is_mouse_click && mouse_y >= _headline_y_start && mouse_y <= headline_y_end) {
+                cout << "full mouse click detection\n";
+                int headline_index = 0;
+
+                for(double y = _headline_y_start; y <= headline_y_end; y = y + _headline_h) {
+                        dlib::drectangle headline_region(0, y, _workarea_w, (y + _headline_h));
+                        
+                        if(headline_region.contains(mouse_position)) {
+                                _headline_index = headline_index;
+                                _article_selected = true;
+                                _render_is_requested = true;
+                                break;               
+                        }
+                        
+                        headline_index++;
+                }
         }
 
         return;
@@ -145,6 +171,15 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
 
 void cls::build_visual_model(interactionstate& interaction_ctx) {
         measure_screen(interaction_ctx);
+
+        //cache fonts
+        if(_callables.empty()) {
+                string text_value = "WWWWWWWWWWWWWWWWWWWWWWWW";
+
+                for(int font_size = 2; font_size < 18; font_size++) {
+                        dlib::drectangle text_dimensions = measure_text_by_sized_font(text_value.data(), font_size, _font_file_location);                
+                }
+        }
 
         _callables = get_visual_definitions(_workarea_x, _screen_y, _workarea_w, _workarea_h);
 
@@ -207,8 +242,16 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
                                                  widget_border_line_width, headline);
 
                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
+
+                                        if(article_index == 0) {
+                                                _headline_h = descendant_callable.h();
+                                                _headline_y_start = descendant_callable.y();
+                                        }
+                                        else if(article_index + 1 == articles_size) {
+                                                _headline_y_end = descendant_callable.y();
+                                        }
                                         
-                                        callable->add_descendant(descendant_callable);
+                                        callable->add_descendant(descendant_callable);                                        
                                 }
 
                                 visualcallable scrollbar_callable = build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
@@ -219,6 +262,30 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::article_content://RSS Reader article content
                         {
+                                const int articles_size = _feed_articles.size();
+                                const int article_index = _headline_index;
+
+                                if(_article_selected && article_index > -1 && article_index < articles_size) {
+                                        _article_selected = false;
+
+                                        double next_x = 0;
+                                        const double x_offset = 0;
+
+                                        auto feed_article_entry = _feed_articles[article_index];
+
+                                        string article_content = feed_article_entry.description;
+
+                                        cout << "build visual model " << article_content << "\n";
+
+                                        visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, 
+                                                false, x_offset, next_x,
+                                                0, article_content);
+
+                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
+
+                                        callable->add_descendant(descendant_callable);
+                                }
+                        
                                 visualcallable scrollbar_callable = build_visual_vertical_scrollbar(x1, y1, x2, y2, 1, scrollbar_width);
                                 scrollbar_callable.type_id(visual_index_rss_reader_widget_type::vertical_scrollbar);
                                 
@@ -303,32 +370,33 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
 
         double const scrollbar_width = 38;
 
-        clear_to_background_color();
+        al_clear_to_color(al_map_rgb(255, 153, 85));
+        al_flip_display();
 
         for(int callable_index = 0; callable_index < callable_size; callable_index++) {
-                visualcallable callable = _callables[callable_index];
+                visualcallable* callable = &_callables[callable_index];
 
-                string* label = new string(callable.label());
+                string* label = new string(callable->label());
 
                 const char* label_text = label->data();
 
                 delete label;
 
-                const double x = callable.x();
-                const double y = callable.y();
-                const double w = callable.w();
-                const double h = callable.h();
+                const double x = callable->x();
+                const double y = callable->y();
+                const double w = callable->w();
+                const double h = callable->h();
 
                 //Allegro uses a x1/x2, y1,y2 coordinate pairs for some draw calls.
-                const double x1 = callable.x1();
-                const double x2 = callable.x2();
+                const double x1 = callable->x1();
+                const double x2 = callable->x2();
                 
-                const double y1 = callable.y1();
-                const double y2 = callable.y2();
+                const double y1 = callable->y1();
+                const double y2 = callable->y2();
 
-                //cout << "callable " << callable_index << " " << x << "/" << y << "/" << w << "/" << h << "\n";
+                cout << "(" << callable_index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
 
-                double const  border_line_width = callable.line_stroke_width();
+                double const  border_line_width = callable->line_stroke_width();
 
                 switch(callable_index) {
                         case visual_index_rss_reader_region::header://RSS Reader Header
@@ -348,7 +416,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
-                                vector<visualcallable> descendant_callables = callable.callables();
+                                vector<visualcallable> descendant_callables = callable->callables();
 
                                 ALLEGRO_COLOR headline_background_color = al_map_rgb(249, 249, 249);
                                 ALLEGRO_COLOR headline_border_color = al_map_rgb(227, 219, 219);
@@ -402,10 +470,35 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
 
                                 draw_region_background(x1, y1, x2, y2, background_color, border_color, border_line_width);
 
+                                ALLEGRO_COLOR widget_background_color = al_map_rgb(255, 255, 255);
+                                ALLEGRO_COLOR widget_border_color = al_map_rgb(255, 255, 255);
+                                ALLEGRO_COLOR widget_text_color = al_map_rgb(0, 0, 0);
+
+                                vector<visualcallable> descendant_callables = callable->callables();
+
+                                for(auto descendant_callable : descendant_callables) {
+                                        const int descendant_type = descendant_callable.type_id();
+
+                                        if(descendant_type == visual_index_rss_reader_widget_type::text_field) {
+                                                const double widget_border_line_width = 0;
+
+                                                const double c_x1 = descendant_callable.x();
+                                                const double c_x2 = descendant_callable.w();
+                                                const double c_y1 = descendant_callable.y();
+                                                const double c_y2 = descendant_callable.h();
+
+                                                string widget_text = descendant_callable.label();
+
+                                                //cout << "draw text " << widget_text << "\n";
+
+                                                draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
+                                                        widget_background_color, widget_border_color, widget_border_line_width, 
+                                                        widget_text, widget_text_color);
+                                        }
+                                }
+
                                 ALLEGRO_COLOR vertical_scrollbar_background_color = al_map_rgb(244, 227, 215);
                                 ALLEGRO_COLOR vertical_scrollbar_border_color = al_map_rgb(222, 170, 135);
-
-                                vector<visualcallable> descendant_callables = callable.callables();
 
                                 for(auto descendant_callable : descendant_callables) {
                                         const int descendant_type = descendant_callable.type_id();
@@ -437,7 +530,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                                 ALLEGRO_COLOR button_border_color = al_map_rgb(0,0,0);
                                 ALLEGRO_COLOR button_text_color = al_map_rgb(0,0,0);
 
-                                vector<visualcallable> descendant_callables = callable.callables();
+                                vector<visualcallable> descendant_callables = callable->callables();
 
                                 for(auto descendant_callable : descendant_callables) {
                                         const int descendant_type = descendant_callable.type_id();
@@ -470,7 +563,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                                 ALLEGRO_COLOR widget_border_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR widget_text_color = al_map_rgb(0, 0, 0);
 
-                                vector<visualcallable> descendant_callables = callable.callables();
+                                vector<visualcallable> descendant_callables = callable->callables();
 
                                 for(auto descendant_callable : descendant_callables) {
                                         const int descendant_type = descendant_callable.type_id();
@@ -512,7 +605,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                                 ALLEGRO_COLOR button_border_color = al_map_rgb(0, 0, 0);
                                 ALLEGRO_COLOR button_text_color = al_map_rgb(0, 0, 0);
 
-                                vector<visualcallable> descendant_callables = callable.callables();
+                                vector<visualcallable> descendant_callables = callable->callables();
 
                                 for(auto descendant_callable : descendant_callables) {
                                         const int descendant_type = descendant_callable.type_id();
@@ -539,7 +632,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                 previous_line_stroke_width = border_line_width;
         }
 
-        render_graphics_end();
+        al_flip_display();
         interaction_ctx.IsDisplayUpdated = true;
 
         return;
@@ -554,6 +647,10 @@ void cls::draw_region_background(const double x1, const double y1, const double 
 
         al_draw_filled_rectangle(rect_x1, rect_y1, rect_x2, rect_y2, bkg_clr);
         al_draw_rectangle(rect_x1, rect_y1, rect_x2, rect_y2, bdr_clr, bdr_width);
+
+//        if(y1 < 4) {
+//                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+//        }
 
         return;
 }
@@ -589,6 +686,10 @@ void cls::draw_scrollbar_right_background(const double x1, const double y1, cons
         draw_region_background(x1, y1, x2, y2, 
                 vertical_scrollbar_background_color, vertical_scrollbar_border_color, bdr_width);
 
+//        if(y1 < 4) {
+//                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+//        }
+
         return;
 }
 
@@ -615,7 +716,7 @@ bool trim_to_label, const double x_offset, double& next_x, const double bdr_widt
                 const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
                 const double font_w = font_dimensions.right();
 
-                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
+                //ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
 
                 widget_w = widget_x + font_w + (_default_label_margin_left * 2.0);
         }
@@ -646,13 +747,22 @@ void cls::draw_left_aligned_widget(const double x1, const double y1, const doubl
                 dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _font_file_location);
 
                 const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
-
-                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
-
                 const double font_x = (x1 + _default_label_margin_left);
 
-                al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());                
+                //cout << __func__ << " " << __LINE__ << " \n";
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
+
+                if(Font) {
+                        al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());
+                }
+                else {
+                        cout << __func__ << " " << __LINE__ << " font not loaded\n";
+                }
         }
+
+//        if(y1 < 4) {
+//                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+//        }
 
         return;
 }
@@ -699,8 +809,19 @@ void cls::draw_visual_vertical_widget(const double x1, const double y1, const do
         if(!label_text.empty()) {
                 const double font_x = (x1 + _default_label_margin_left);
 
-                al_draw_text(_default_font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                ALLEGRO_FONT* Font = load_sized_font(_default_font_size, _font_file_location);
+
+                if(Font) {
+                        al_draw_text(Font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
+                }
+                else {
+                        cout << __func__ << " " << __LINE__ << " font not loaded\n";
+                }
         }
+
+//        if(y1 < 4) {
+//                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+//        }
 
         return;
 }
@@ -728,7 +849,7 @@ bool trim_to_label, const double bdr_width, string label_text) {
 
                 const double font_w = font_dimensions.right();
 
-                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
+                //ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
 
                 button_x = ((x2 - 60) - font_w);
                 button_w = (font_w + button_x) + (_default_label_margin_left * 2.0);
@@ -762,13 +883,22 @@ void cls::draw_right_aligned_button(const double x1, const double y1, const doub
                 dlib::drectangle font_dimensions = measure_text_by_sized_font(label_text.data(), _default_widget_font_size/2, _font_file_location);
 
                 const double font_y = measure_font_y_offset(y1, y2, font_dimensions.bottom());
-
-                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
-
                 const double font_x = (x1 + _default_label_margin_left);
 
-                al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());
+                //cout << __func__ << " " << __LINE__ << " \n";
+                ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
+
+                if(Font) {
+                        al_draw_text(Font, label_color, font_x, font_y, ALLEGRO_ALIGN_LEFT, label_text.data());
+                }
+                else {
+                        cout << __func__ << " " << __LINE__ << " font not loaded\n";
+                }
         }
+
+//        if(y1 < 4) {
+//                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+//        }
 
         return;
 }
@@ -808,8 +938,8 @@ cls::~mainscreengenerator() {
 }
 
 void cls::initialize_allegro_graphics_engine() {
-        _interaction_state.WindowPosition = dlib::dpoint(0, 0);
-        _interaction_state.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
+        _interaction_state_init.WindowPosition = dlib::dpoint(0, 0);
+        _interaction_state_init.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
 
 	_is_allegro_initialized = al_init();
 
@@ -817,26 +947,34 @@ void cls::initialize_allegro_graphics_engine() {
 	        al_init_primitives_addon();
 		al_init_font_addon();
 		al_init_ttf_addon();
+		al_init_native_dialog_addon();
 
-		al_set_new_display_flags(ALLEGRO_RESIZABLE | ALLEGRO_MAXIMIZED | ALLEGRO_GENERATE_EXPOSE_EVENTS);
-		al_set_new_display_option(ALLEGRO_FLOAT_COLOR, true, ALLEGRO_SUGGEST);
+		al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE | ALLEGRO_GENERATE_EXPOSE_EVENTS);
+		al_set_new_display_option(ALLEGRO_FLOAT_COLOR, 1, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_RENDER_METHOD, 1, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_SINGLE_BUFFER, 0, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_SWAP_METHOD, 2, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_UPDATE_DISPLAY_REGION, 0, ALLEGRO_SUGGEST);
+		al_set_new_display_option(ALLEGRO_CAN_DRAW_INTO_BITMAP, 0, ALLEGRO_SUGGEST);
 		
 		bool IsMonitorInfoAvailable = al_get_monitor_info(0, &_win_screen_info);
 
 		if(IsMonitorInfoAvailable) {
-			_interaction_state.MonitorWidth = _win_screen_info.x2 - _win_screen_info.x1;
-			_interaction_state.MonitorHeight = _win_screen_info.y2 - _win_screen_info.y1;
+		        _screen_w = _win_screen_info.x2 - _win_screen_info.x1;
+		        _screen_h = _win_screen_info.y2 - _win_screen_info.y1;
+			_interaction_state_init.MonitorWidth = _screen_w;
+			_interaction_state_init.MonitorHeight = _screen_h;
 
-			_win_ctx = al_create_display(_interaction_state.MonitorWidth, _interaction_state.MonitorHeight);
+			_win_ctx = al_create_display(_interaction_state_init.MonitorWidth, _interaction_state_init.MonitorHeight);
 
                         if(_win_ctx) {
-			        _interaction_state.WindowWidth = al_get_display_width(_win_ctx);		
-			        _interaction_state.WindowHeight = al_get_display_height(_win_ctx);
+			        _interaction_state_init.WindowWidth = al_get_display_width(_win_ctx);		
+			        _interaction_state_init.WindowHeight = al_get_display_height(_win_ctx);
 
-                                _interaction_state.WindowDimensions = dlib::drectangle(0,0,_interaction_state.WindowWidth, _interaction_state.WindowHeight);
+                                _interaction_state_init.WindowDimensions = dlib::drectangle(0, 0, _interaction_state_init.WindowWidth, _interaction_state_init.WindowHeight);
 
 			        al_set_window_title(_win_ctx, _DefaultWindowTitle.data());
-			        al_set_window_position(_win_ctx, _interaction_state.WindowPosition.x(), _interaction_state.WindowPosition.y());
+			        al_set_window_position(_win_ctx, _interaction_state_init.WindowPosition.x(), _interaction_state_init.WindowPosition.y());
 
 			        _win_msg_evt_src = al_get_display_event_source(_win_ctx);
 			        _win_msg_evt_queue = al_create_event_queue();
@@ -858,9 +996,8 @@ void cls::initialize_allegro_graphics_engine() {
 		}
 		
 		if(_win_ctx) {
-			_interaction_state.IsWindowOpen = true;
-			_interaction_state.IsVisualModelChanged = true;
-			_interaction_state = _interaction_state;
+			_interaction_state_init.IsWindowOpen = true;
+			_interaction_state_init.IsVisualModelChanged = true;
 		}
 	}
 
@@ -868,62 +1005,64 @@ void cls::initialize_allegro_graphics_engine() {
 }
 
 void cls::activate_allegro_graphics_engine(interaction_callback_type interactionCallBack) {
-        cout << __func__ << " line: " << __LINE__ << "\n";
-        if(_interaction_state.IsWindowOpen && _win_msg_evt_queue) {
-                render_graphics_begin();
+        //cout << __func__ << " line: " << __LINE__ << "\n";
+        if(_interaction_state_init.IsWindowOpen && _win_msg_evt_queue) {
+                _interaction_state_last = _interaction_state_init;
         }
 
         _interaction_callback = interactionCallBack;
-	while(_interaction_state.IsWindowOpen && _win_msg_evt_queue) {
+
+        interactionstate interaction_ctx = _interaction_state_init;
+        
+	while(interaction_ctx.IsWindowOpen && _win_msg_evt_queue) {
+                al_wait_for_event(_win_msg_evt_queue, &_winmsg_event);
+	
 		ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
 
 		switch (window_event_type) {
 			case ALLEGRO_EVENT_DISPLAY_CLOSE:
-				_interaction_state.IsWindowOpen = false;
+				interaction_ctx.IsWindowOpen = false;
 			        break;
 			case ALLEGRO_EVENT_DISPLAY_RESIZE:
 				al_acknowledge_resize(_win_ctx);
-				
-				_interaction_state.WindowWidth = _winmsg_event.display.width;
-				_interaction_state.WindowHeight = _winmsg_event.display.height;
-                                _interaction_state.WindowDimensions = dlib::drectangle(0, 0, _interaction_state.WindowWidth, _interaction_state.WindowHeight);
+	                        al_flush_event_queue(_win_msg_evt_queue);
 
-                                /*Allegro will replay the same event over and over again.
-                                        You cannot merely set a flag based on the event.
-                                        You have to check the values since flushing the queue does not remove subsequent duplicate events.
-                                */
-                                //cout << "resize before w/h " << _InteractionStateLast.WindowWidth << "/" << _InteractionStateLast.WindowHeight << "\n";
-                                //cout << "resize after  w/h " << _InteractionState.WindowWidth << "/" << _InteractionState.WindowHeight << "\n";
+				interaction_ctx.WindowWidth = _winmsg_event.display.width;
+				interaction_ctx.WindowHeight = _winmsg_event.display.height;
+                                interaction_ctx.WindowDimensions = dlib::drectangle(0, 0, interaction_ctx.WindowWidth, interaction_ctx.WindowHeight);
 
-				_interaction_state.IsWindowResized = (  _interaction_state.WindowWidth != _interaction_state.WindowWidth || 
-				                                        _interaction_state.WindowHeight != _interaction_state.WindowHeight);
+				interaction_ctx.IsWindowResized = (interaction_ctx.WindowWidth != _interaction_state_last.WindowWidth || 
+				                                   interaction_ctx.WindowHeight != _interaction_state_last.WindowHeight);
+				//cout << "resize " << interaction_ctx.IsWindowResized << "\n";
 			        break;
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
 	                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-	                        _interaction_state.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
-	                        _interaction_state.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
+	                        interaction_ctx.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
+	                        interaction_ctx.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
+                                interaction_ctx.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
+                                interaction_ctx.MouseButton = _winmsg_event.mouse.button;
 	                        break;
 	                case ALLEGRO_EVENT_MOUSE_AXES:
-	                        _interaction_state.MouseDirection = _winmsg_event.mouse.dz;
+	                        interaction_ctx.MouseDirection = _winmsg_event.mouse.dz;
 	                        break;
                 }
 
-                _interaction_state.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
-                _interaction_state.MouseButton = _winmsg_event.mouse.button;
-
-                if(_interaction_state.IsWindowOpen) {
-                        if(_win_ctx) {
-                                al_flush_event_queue(_win_msg_evt_queue);
-                                interactionCallBack(_interaction_state);
-	                }
-
-                        al_wait_for_event_timed(_win_msg_evt_queue, &_winmsg_event, 0.2);
+                if(!interaction_ctx.IsWindowOpen) {
+                        break;
                 }
-                else {
-		        shutdown_allegro_graphics_engine();
+                else if(_win_ctx) {
+                        interactionCallBack(interaction_ctx);
+	                al_flush_event_queue(_win_msg_evt_queue);
+
+                        interaction_ctx.IsWindowResized = false;
+                        interaction_ctx.IsMouseUp = true;
+                        interaction_ctx.IsMouseDown = false;
+                        interaction_ctx.MouseDirection = -1;                        
                 }
 	}
-	
+
+        shutdown_allegro_graphics_engine();
+
 	return;
 }
 
@@ -959,61 +1098,50 @@ double cls::get_screen_dpi() {
 	 * 		diagonal resolution in pixels   =   square root of ( (screen_w)^2  +  (screen_h)^2  )
 	 * 
 	 * 		diag_res / diagonal screen size in inches (the average of (11, 12, 13.3, 14, 15.6, and 17) )
-	 */		
-	double diagres = std::hypot(_interaction_state.MonitorWidth, _interaction_state.MonitorHeight);
+	 */
+	double diagres = std::hypot(_screen_w, _screen_h);
 	const double scrdpi = diagres/_AvgPhysicalScreenSize; 
 
 	return scrdpi;
 }
 
-bool cls::get_is_visual_model_changed(interactionstate const& old, interactionstate const& now) {
-        bool IsChanged = (now.IsVisualModelChanged || now.IsWindowResized || now.IsMouseDown || now.IsMouseUp);
-
-        if(!IsChanged) {
-                IsChanged = (old != now);
-        }
-        
-        return IsChanged;
-}
-
-void clear_to_background_color() {
-        //cout << __func__ << " line: " << __LINE__ << "\n";
-        al_clear_to_color(al_map_rgb(255, 153, 85));
-
-        return;
-}
-
-void cls::render_graphics_begin() {
-        //cout << __func__ << " line: " << __LINE__ << "\n";
-        clear_to_background_color();
-        al_flip_display();
-
-        return;
-}
-
-void cls::render_graphics_end() {
-        //cout << __func__ << " line: " << __LINE__ << "\n";
-        al_flip_display();
-
-        std::chrono::time_point<std::chrono::system_clock> current_clock_time = std::chrono::system_clock::now();
-        std::time_t end_time = std::chrono::system_clock::to_time_t(current_clock_time);
-        string end_time_text(std::ctime(&end_time));
-
-        cout << "display flipped " << end_time_text << "\n";
-
-        return;
-}
-
-ALLEGRO_FONT* cls::load_sized_font(int font_size, const char* font_file_location) {
+ALLEGRO_FONT* cls::load_sized_font(const int font_size, const char* font_file_location) {
         /*
                 Font scaling based on Paragraph #4 in the Article DPI and Device-Independent Pixels at: 
                 https://msdn.microsoft.com/en-us/library/windows/desktop/ff684173(v=vs.85).aspx
         */
-        const double screen_dpi = get_screen_dpi();
+        ALLEGRO_FONT* Font = nullptr;
 
-        const double scaled_font_size = (font_size / _PrintPointSize) * screen_dpi;
+        auto font_count = _fonts.count(font_size);
 
-        ALLEGRO_FONT* Font = al_load_font(font_file_location, scaled_font_size, 0);
+        if(font_count < 1) {
+                //cout << "adding font to _fonts\n";
+                const double screen_dpi = get_screen_dpi();
+
+                const double scaled_font_size = (font_size / _PrintPointSize) * screen_dpi;
+
+                Font = al_load_font(font_file_location, scaled_font_size, 0);
+
+                if(Font) {
+                        _fonts[font_size] = Font;
+                }
+                else {
+                        //cout << "loaded font invalid\n";
+                        _fonts.erase(font_size);
+                        //cout << __func__ << " " << __LINE__ << " \n";
+                        load_sized_font(font_size, font_file_location);
+                }
+        }
+        else {
+                Font = _fonts[font_size];
+
+                if(!Font) {
+                        //cout << "cached font invalid\n";
+                        _fonts.erase(font_size);
+                        //cout << __func__ << " " << __LINE__ << " \n";
+                        load_sized_font(font_size, font_file_location);
+                }
+        }
 
         return Font;
 }
@@ -1025,14 +1153,21 @@ constexpr double cls::measure_widget_y(const double region_h_half, const double 
 dlib::drectangle cls::measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location) {
         dlib::drectangle rect;
 
-        ALLEGRO_FONT* Font = load_sized_font(font_size, font_file_location);
+        ALLEGRO_FONT* Font = nullptr;
+
+        do {
+                Font = load_sized_font(font_size, font_file_location);
+        } while(!Font);
 
         if(Font) {
                 int FontBoxX = 0, FontBoxY = 0, FontBoxW = 0, FontBoxH = 0;
-                
+
                 al_get_text_dimensions(Font, str, &FontBoxX, &FontBoxY, &FontBoxW, &FontBoxH);
 
                 rect = dlib::drectangle(FontBoxX, FontBoxY, FontBoxW, FontBoxH);
+        }
+        else {
+                cout << __func__ << " " << __LINE__ << " Font not loaded \n";
         }
 
         return rect;
@@ -1085,11 +1220,9 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
                         {
                                 stroke_width = 1;
                                 
-                                string label_text = "RSS Reader";
-                                
-                                callable.label(label_text);
+                                callable.label("RSS Reader");
 
-                                dlib::drectangle text_dimensions = measure_text_by_sized_font(label_text.data(), _font_size, _font_file_location);
+                                dlib::drectangle text_dimensions = measure_text_by_sized_font(callable.label().data(), _default_font_size, _font_file_location);
 
                                 text_h = text_dimensions.bottom();
 
@@ -1157,12 +1290,12 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
 
                 callables.push_back(callable);
 
-                /*cout << "index: " << index << " x/y/w/h";
-                cout << " : " << callable.x();
-                cout << " / " << callable.y();
-                cout << " / " << callable.w();
-                cout << " / " << callable.h();
-                cout << "\n";*/
+                cout << "(" << index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h";
+                cout << " " << callable.x();
+                cout << " " << callable.y();
+                cout << " " << callable.w();
+                cout << " " << callable.h();
+                cout << "\n";
         }
         
         return callables;

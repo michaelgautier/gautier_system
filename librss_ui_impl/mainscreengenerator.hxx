@@ -18,12 +18,14 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #define __rss_ui_mainscreengenerator__
 
 #include <vector>
+#include <map>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_color.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_native_dialog.h>
 
 #include <dlib/geometry.h>
 
@@ -67,11 +69,11 @@ namespace ui {
                 ALLEGRO_EVENT_QUEUE* 
                         _win_msg_evt_queue = nullptr;
 
-                ALLEGRO_EVENT 
+                ALLEGRO_EVENT
                         _winmsg_event;
 
                 interactionstate 
-                        _interaction_state, 
+                        _interaction_state_init,
                         _interaction_state_last;
 
                 interaction_callback_type 
@@ -82,12 +84,7 @@ namespace ui {
                         _is_allegro_uninitialized
                         = false;
 
-
 	        void activate_allegro_graphics_engine(interaction_callback_type);
-                void render_graphics_begin();
-                void render_graphics_end();
-
-                bool get_is_visual_model_changed(interactionstate const& old, interactionstate const& now);
 
 	        void initialize_allegro_graphics_engine();
 	        void shutdown_allegro_graphics_engine();
@@ -97,7 +94,8 @@ namespace ui {
                         _article_contents_enlarge,
                         _article_contents_enlarge_click,
                         _feed_articles_requested,
-                        _render_is_requested
+                        _render_is_requested,
+                        _article_selected
                         = false;
 
                 int _feed_index = 0;//Defaults to the first feed, if available;
@@ -146,17 +144,26 @@ namespace ui {
                 _screen_dpi
                 = 0;
 
+                double
+                _headline_h,
+                _headline_y_start,
+                _headline_y_end = 0;
+
+                int 
+                _headline_index = -1;
+
                 const int _default_widget_font_size = 12;
                 const double _default_label_margin_left = 4;
 
                 const char* _font_file_location = "NotoSans-Regular.ttf";
-                int _font_size = 10;
+                
+                int _default_font_size = 10;
 
-                ALLEGRO_FONT* _default_font = nullptr;
+                map<int, ALLEGRO_FONT*> _fonts;
 
                 double get_screen_dpi();
 
-                ALLEGRO_FONT* load_sized_font(int font_size, const char* font_file_location);
+                ALLEGRO_FONT* load_sized_font(const int font_size, const char* font_file_location);
 
                 dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
                 constexpr double measure_font_y_offset(const double y1, const double y2, const double h);

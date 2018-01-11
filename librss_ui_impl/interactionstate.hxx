@@ -16,7 +16,8 @@ struct InteractionState {
                 IsMouseDown, 
                 IsMouseUp,
                 IsVisualModelChanged,
-                IsDisplayUpdated 
+                IsDisplayUpdated,
+                IsDisplayUpdating
                 = false;
 
         int 
