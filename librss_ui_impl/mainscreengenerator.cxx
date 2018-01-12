@@ -140,29 +140,33 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
         dlib::dpoint 
                 mouse_position = interaction_ctx.MousePosition;
 
-        const double mouse_y = mouse_position.y();
+        const double mouse_y = mouse_position.y();                                        
 
-        const double headline_y_end = (_headline_y_end + (_headline_h + 0.2));
+        if(is_mouse_click && _callables.size() > 4) {
+                visualcallable headline_callable = _callables[visual_index_rss_reader_region::headlines];
+                const double headline_y_start = headline_callable.y();
+                const double headline_y_end = (headline_callable.y() + headline_callable.h());
 
-        if(is_mouse_click) {
-                cout << "is_mouse_click\n";
-        }
+                if(mouse_y >= headline_y_start && mouse_y <= headline_y_end) {
 
-        if(is_mouse_click && mouse_y >= _headline_y_start && mouse_y <= headline_y_end) {
-                cout << "full mouse click detection\n";
-                int headline_index = 0;
+                        dlib::drectangle button_dimensions = measure_text_by_sized_font("WWWWWWWWWWWWWWWW", _default_font_size, _font_file_location);
 
-                for(double y = _headline_y_start; y <= headline_y_end; y = y + _headline_h) {
-                        dlib::drectangle headline_region(0, y, _workarea_w, (y + _headline_h));
-                        
-                        if(headline_region.contains(mouse_position)) {
-                                _headline_index = headline_index;
-                                _article_selected = true;
-                                _render_is_requested = true;
-                                break;               
+                        const double headline_h = button_dimensions.bottom();
+
+                        int headline_index = 0;
+
+                        for(double y = headline_y_start; y <= headline_y_end; y = y + headline_h) {
+                                dlib::drectangle headline_region(0, y, _workarea_w, (y + headline_h));
+
+                                if(headline_region.contains(mouse_position)) {
+                                        _headline_index = headline_index;
+                                        _article_selected = true;
+                                        _render_is_requested = true;
+                                        break;               
+                                }
+
+                                headline_index++;
                         }
-                        
-                        headline_index++;
                 }
         }
 
@@ -243,14 +247,6 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
 
                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
 
-                                        if(article_index == 0) {
-                                                _headline_h = descendant_callable.h();
-                                                _headline_y_start = descendant_callable.y();
-                                        }
-                                        else if(article_index + 1 == articles_size) {
-                                                _headline_y_end = descendant_callable.y();
-                                        }
-                                        
                                         callable->add_descendant(descendant_callable);                                        
                                 }
 
@@ -304,7 +300,7 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
                         break;
                         case visual_index_rss_reader_region::change_bar://RSS Reader RSS Change Bar
                         {
-                                vector<string> widget_texts = {"THE LONGEST FEED NAME EVER WWWWWWWWWWWWWWW", "HTTPS://WWWWWWWWWWWWWWWWWWWWWWWW.COM", "Update"};
+                                vector<string> widget_texts = {"THE LONGEST FEED NAME EVER", "HTTPS://WWWWWWWWWWWWWWWW.COM", "Update"};
 
                                 double next_x = 20;
                                 const double x_offset = 20;
@@ -394,7 +390,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                 const double y1 = callable->y1();
                 const double y2 = callable->y2();
 
-                cout << "(" << callable_index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+                //cout << "(" << callable_index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
 
                 double const  border_line_width = callable->line_stroke_width();
 
@@ -1290,12 +1286,12 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
 
                 callables.push_back(callable);
 
-                cout << "(" << index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h";
+                /*cout << "(" << index << ") " << __func__ << " line " << __LINE__ << ", x/y/w/h";
                 cout << " " << callable.x();
                 cout << " " << callable.y();
                 cout << " " << callable.w();
                 cout << " " << callable.h();
-                cout << "\n";
+                cout << "\n";*/
         }
         
         return callables;

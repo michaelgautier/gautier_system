@@ -144,11 +144,6 @@ namespace ui {
                 _screen_dpi
                 = 0;
 
-                double
-                _headline_h,
-                _headline_y_start,
-                _headline_y_end = 0;
-
                 int 
                 _headline_index = -1;
 
