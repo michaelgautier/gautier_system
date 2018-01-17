@@ -105,6 +105,7 @@ namespace ui {
                 vector<string> _feednames;
                 vector<rss::material> _feed_articles;
                 vector<rss::request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
+                void get_rss_feed_names_and_articles();
                 
                 void process_interactions(interactionstate& interaction_ctx);
                 void build_visual_model(interactionstate& interaction_ctx);

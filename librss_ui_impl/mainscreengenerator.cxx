@@ -57,6 +57,10 @@ void cls::init() {
 }
 
 void cls::generate() {
+        get_rss_feed_names_and_articles();
+
+        _feed_articles_requested = true;
+
         activate_allegro_graphics_engine(UpdateDisplay);
         
         return;
@@ -113,42 +117,45 @@ void cls::process_updates(interactionstate& interaction_ctx) {
 
 void cls::process_interactions(interactionstate& interaction_ctx) {
         if(!_feed_articles_requested) {
-                vector<material> feed_articles;
-                vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
-                _feed_articles = feed_articles;
-
-                const int feed_source_size = feed_parameters.size();
-
-                for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-                        request feedsource = feed_parameters[feed_source_index];
-
-                        _feednames.push_back(feedsource.feedname);
-                }
+                get_rss_feed_names_and_articles();
 
                 _feed_articles_requested = true;
         }
 
-        int 
+        const int 
                 mouse_direction = interaction_ctx.MouseDirection,
                 mouse_button = interaction_ctx.MouseButton;
 
         const bool 
-                is_mouse_click = (interaction_ctx.IsMouseUp && _interaction_state_last.IsMouseDown), 
+                is_mouse_click = (interaction_ctx.IsMouseUp && _interaction_state_last.IsMouseDown),
                 is_mouse_down = interaction_ctx.IsMouseDown,
                 is_mouse_button_left = (mouse_button == 1);
 
         dlib::dpoint 
                 mouse_position = interaction_ctx.MousePosition;
 
-        const double mouse_y = mouse_position.y();                                        
-
         if(is_mouse_click && _callables.size() > 4) {
+                const double mouse_x = mouse_position.x();
+                const double mouse_y = mouse_position.y();
+
                 visualcallable headline_callable = _callables[visual_index_rss_reader_region::headlines];
+                visualcallable ctrl_bar_callable = _callables[visual_index_rss_reader_region::control_bar];
+                visualcallable chng_bar_callable = _callables[visual_index_rss_reader_region::change_bar];
+                visualcallable feed_bar_callable = _callables[visual_index_rss_reader_region::choice_bar];
+
                 const double headline_y_start = headline_callable.y();
                 const double headline_y_end = (headline_callable.y() + headline_callable.h());
 
-                if(mouse_y >= headline_y_start && mouse_y <= headline_y_end) {
+                const double control_bar_y_start = ctrl_bar_callable.y();
+                const double control_bar_y_end = control_bar_y_start + ctrl_bar_callable.h();
 
+                const double change_bar_y_start = chng_bar_callable.y();
+                const double change_bar_y_end = change_bar_y_start + chng_bar_callable.h();
+
+                const double feed_bar_y_start = feed_bar_callable.y();
+                const double feed_bar_y_end = feed_bar_y_start + feed_bar_callable.h();
+
+                if(mouse_y >= headline_y_start && mouse_y <= headline_y_end) {
                         dlib::drectangle button_dimensions = measure_text_by_sized_font("WWWWWWWWWWWWWWWW", _default_font_size, _font_file_location);
 
                         const double headline_h = button_dimensions.bottom();
@@ -166,6 +173,65 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                                 }
 
                                 headline_index++;
+                        }
+                }
+                else if(mouse_y >= control_bar_y_start && mouse_y <= control_bar_y_end && ctrl_bar_callable.callables().size() > 0) {
+                        visualcallable descendant_callable = ctrl_bar_callable.callables()[0];
+                        dlib::drectangle region(descendant_callable.x(), descendant_callable.y(), descendant_callable.w(), descendant_callable.h());
+                        
+                        if(region.contains(mouse_position)) {
+                                _article_contents_enlarge = !_article_contents_enlarge;
+                                _render_is_requested = true;
+                        }
+                }
+                else if(mouse_y >= change_bar_y_start && mouse_y <= change_bar_y_end && chng_bar_callable.callables().size() > 0) {
+                        int widget_index = -1;
+
+                        for(auto& descendant_callable : chng_bar_callable.callables()) {
+                                widget_index++;
+
+                                dlib::drectangle region(descendant_callable.x(), descendant_callable.y(), descendant_callable.w(), descendant_callable.h());
+                                
+                                if(region.contains(mouse_position)) {
+                                        switch(widget_index) {
+                                                case 0:
+                                                        cout << "feed name text field clicked\n";
+                                                break;
+                                                case 1:
+                                                        cout << "feed url text field clicked\n";
+                                                break;
+                                                case 2:
+                                                        cout << "feed name/url update clicked\n";
+                                                break;
+                                        }
+                                }
+                        }
+                }
+                else if(mouse_y >= feed_bar_y_start && mouse_y <= feed_bar_y_end && feed_bar_callable.callables().size() > 0) {
+                        int feed_name_index = -1;
+                        bool feed_name_clicked = false;
+
+                        for(auto& descendant_callable : feed_bar_callable.callables()) {
+                                feed_name_index++;
+
+                                dlib::drectangle region(descendant_callable.x(), descendant_callable.y(), descendant_callable.w(), descendant_callable.h());
+                                
+                                if(region.contains(mouse_position)) {
+                                        feed_name_clicked = true;
+                                        break;
+                                }
+                        }
+
+                        if(feed_name_clicked && feed_name_index > -1 && feed_name_index < _feednames.size()) {
+                                if(_feed_index != feed_name_index) {
+                                        _feed_index = feed_name_index;
+
+                                        vector<material> feed_articles;
+                                        get_rss_feed_data(_feed_index, feed_articles);
+                                        _feed_articles = feed_articles;
+
+                                        _render_is_requested = true;
+                                }
                         }
                 }
         }
@@ -190,18 +256,19 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
         const int callable_size = _callables.size();
 
         if(_article_contents_enlarge) {
-                cout << __func__ << " enlarge button click implementation, line: " << __LINE__ << "\n";
+                //cout << __func__ << " enlarge button click implementation, line: " << __LINE__ << "\n";
 
-                visualcallable headline_region = _callables[visual_index_rss_reader_region::headlines];
-                visualcallable article_content = _callables[visual_index_rss_reader_region::article_content];
+                visualcallable* headline_region = &_callables[visual_index_rss_reader_region::headlines];
+                visualcallable* article_content = &_callables[visual_index_rss_reader_region::article_content];
 
-                const int region_h = headline_region.h() + article_content.h();
+                const int region_h = headline_region->h() + article_content->h();
                 
                 const int headlines_h = region_h/4;
                 const int article_contents_h = region_h - headlines_h;
                 
-                headline_region.h(headlines_h);
-                article_content.h(article_contents_h);
+                headline_region->h(headlines_h);
+                article_content->y(headline_region->y() + headlines_h);
+                article_content->h(article_contents_h);
         }
 
         double previous_line_stroke_width = 0;
@@ -271,7 +338,7 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
 
                                         string article_content = feed_article_entry.description;
 
-                                        cout << "build visual model " << article_content << "\n";
+                                        //cout << "build visual model " << article_content << "\n";
 
                                         visualcallable descendant_callable = build_visual_left_aligned_widget(x1, y1, x2, y2, 
                                                 false, x_offset, next_x,
@@ -292,7 +359,13 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
                         {
                                 const double button_border_line_width = 1;
 
-                                visualcallable descendant_callable = build_visual_right_aligned_button(x1, y1, x2, y2, true, button_border_line_width, "Enlarge");
+                                string button_text = "Enlarge";
+                                
+                                if(_article_contents_enlarge) {
+                                        button_text = "Shrink";
+                                }
+
+                                visualcallable descendant_callable = build_visual_right_aligned_button(x1, y1, x2, y2, true, button_border_line_width, button_text);
                                 descendant_callable.type_id(visual_index_rss_reader_widget_type::right_aligned_button);
                                 
                                 callable->add_descendant(descendant_callable);
@@ -895,6 +968,22 @@ void cls::draw_right_aligned_button(const double x1, const double y1, const doub
 //        if(y1 < 4) {
 //                cout << __func__ << " line " << __LINE__ << ", x/y/w/h " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
 //        }
+
+        return;
+}
+
+void cls::get_rss_feed_names_and_articles() {
+        vector<material> feed_articles;
+        vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
+        _feed_articles = feed_articles;
+
+        const int feed_source_size = feed_parameters.size();
+
+        for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
+                request feedsource = feed_parameters[feed_source_index];
+
+                _feednames.push_back(feedsource.feedname);
+        }
 
         return;
 }
