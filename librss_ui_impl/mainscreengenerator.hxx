@@ -52,6 +52,34 @@ namespace ui {
                 void process_updates(interactionstate& interactionState);
 
                 private:
+                /*Text Input*/
+                string
+                        _text_buffer_feed_name,
+                        _text_buffer_feed_url,
+                        _text_buffer_feed_entry
+                        = "";
+
+                int
+                        _text_buffer_feed_edit_index = -1,
+
+                        _text_buffer_feed_name_pos,
+                        _text_buffer_feed_url_pos,
+                        _text_buffer_feed_pos,
+
+                        _text_buffer_feed_name_selection_pos1,
+                        _text_buffer_feed_name_selection_pos2,
+                        _text_buffer_feed_selection_pos1,
+
+                        _text_buffer_feed_url_selection_pos1,
+                        _text_buffer_feed_url_selection_pos2,
+                        _text_buffer_feed_selection_pos2
+                        = 0;
+
+                double
+                        _text_buffer_feed_name_x,
+                        _text_buffer_feed_url_x,
+                        _text_buffer_feed_x
+                        = 0;
 
                 /*Graphics Engine*/
                 ALLEGRO_DISPLAY* 
@@ -92,7 +120,6 @@ namespace ui {
                 /*Application Logic Implementation*/
                 bool 
                         _article_contents_enlarge,
-                        _article_contents_enlarge_click,
                         _feed_articles_requested,
                         _render_is_requested,
                         _article_selected

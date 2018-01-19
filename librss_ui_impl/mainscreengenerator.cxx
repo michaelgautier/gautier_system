@@ -57,6 +57,7 @@ void cls::init() {
 }
 
 void cls::generate() {
+        _article_contents_enlarge = false;
         get_rss_feed_names_and_articles();
 
         _feed_articles_requested = true;
@@ -180,6 +181,7 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                         dlib::drectangle region(descendant_callable.x(), descendant_callable.y(), descendant_callable.w(), descendant_callable.h());
                         
                         if(region.contains(mouse_position)) {
+                                cout << "enlarge/shrink clicked\n";
                                 _article_contents_enlarge = !_article_contents_enlarge;
                                 _render_is_requested = true;
                         }
@@ -196,9 +198,35 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                                         switch(widget_index) {
                                                 case 0:
                                                         cout << "feed name text field clicked\n";
+                                                        _text_buffer_feed_edit_index = 0;
+                                                        _text_buffer_feed_name_x = mouse_x;
+
+                                                        _text_buffer_feed_pos = _text_buffer_feed_name_pos;
+
+                                                        _text_buffer_feed_selection_pos1 = _text_buffer_feed_name_selection_pos1;
+                                                        _text_buffer_feed_selection_pos2 = _text_buffer_feed_name_selection_pos2;
+
+                                                        _text_buffer_feed_x = _text_buffer_feed_name_x;
+                                                        
+                                                        _text_buffer_feed_entry = _text_buffer_feed_name;
+
+                                                        _render_is_requested = true;
                                                 break;
                                                 case 1:
                                                         cout << "feed url text field clicked\n";
+                                                        _text_buffer_feed_edit_index = 1;
+                                                        _text_buffer_feed_url_x = mouse_x;
+
+                                                        _text_buffer_feed_pos = _text_buffer_feed_url_pos;
+
+                                                        _text_buffer_feed_selection_pos1 = _text_buffer_feed_url_selection_pos1;
+                                                        _text_buffer_feed_selection_pos2 = _text_buffer_feed_url_selection_pos2;
+
+                                                        _text_buffer_feed_x = _text_buffer_feed_url_x;
+                                                        
+                                                        _text_buffer_feed_entry = _text_buffer_feed_url;
+
+                                                        _render_is_requested = true;
                                                 break;
                                                 case 2:
                                                         cout << "feed name/url update clicked\n";
@@ -239,8 +267,13 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                                 }
                         }
                 }
+                else {
+                        if(_text_buffer_feed_edit_index != -1) {
+                                _text_buffer_feed_edit_index = -1;
+                        }
+                }
         }
-
+        
         return;
 }
 
@@ -412,13 +445,18 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
                                                 (widget_index == 2), x_offset, next_x,
                                                 widget_border_line_width, label_text);
 
-                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
-
-                                        if(widget_index < 2) {
-                                                descendant_callable.label("");
-                                        }
-                                        else if(widget_index == 2) {
-                                                descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+                                        switch(widget_index) {
+                                                case 0:
+                                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
+                                                        descendant_callable.label(_text_buffer_feed_name);
+                                                break;
+                                                case 1:
+                                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
+                                                        descendant_callable.label(_text_buffer_feed_url);                                                
+                                                break;
+                                                case 2:
+                                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
+                                                break;
                                         }
 
                                         callable->add_descendant(descendant_callable);
@@ -659,30 +697,77 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
 
                                 vector<visualcallable> descendant_callables = callable->callables();
 
+                                int text_field_edit_index = -1;
+
                                 for(auto descendant_callable : descendant_callables) {
                                         const int descendant_type = descendant_callable.type_id();
 
-                                        if(descendant_type == visual_index_rss_reader_widget_type::left_aligned_button ||
-                                                descendant_type == visual_index_rss_reader_widget_type::text_field) {
-                                                const double widget_border_line_width = descendant_callable.line_stroke_width();
+                                        switch(descendant_type) {
+                                                case visual_index_rss_reader_widget_type::left_aligned_button:
+                                                case visual_index_rss_reader_widget_type::text_field:
 
-                                                const double c_x1 = descendant_callable.x();
-                                                const double c_x2 = descendant_callable.w();
-                                                const double c_y1 = descendant_callable.y();
-                                                const double c_y2 = descendant_callable.h();
+                                                        const double widget_border_line_width = descendant_callable.line_stroke_width();
 
-                                                if(descendant_type == visual_index_rss_reader_widget_type::text_field) {
-                                                        widget_background_color = al_map_rgb(255, 255, 255);
-                                                }
-                                                else if(descendant_type == visual_index_rss_reader_widget_type::left_aligned_button) {
-                                                        widget_background_color = al_map_rgb(222, 170, 135);
-                                                }
+                                                        const double c_x1 = descendant_callable.x();
+                                                        const double c_x2 = descendant_callable.w();
+                                                        const double c_y1 = descendant_callable.y();
+                                                        const double c_y2 = descendant_callable.h();
 
-                                                string widget_text = descendant_callable.label();
+                                                        string widget_text;
+                                                        bool text_field_highlight = false;
+                                                        bool text_field_blank = true;
 
-                                                draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
-                                                        widget_background_color, widget_border_color, widget_border_line_width, 
-                                                        widget_text, widget_text_color);
+                                                        switch(descendant_type) {
+                                                                case visual_index_rss_reader_widget_type::left_aligned_button:
+                                                                        widget_background_color = al_map_rgb(222, 170, 135);
+                                                                        widget_text = descendant_callable.label();
+                                                                        break;
+                                                                case visual_index_rss_reader_widget_type::text_field:
+                                                                        text_field_edit_index++;
+
+                                                                        widget_background_color = al_map_rgb(255, 255, 255);
+                                                                        widget_text = descendant_callable.label();
+
+                                                                        if(text_field_edit_index == _text_buffer_feed_edit_index) {
+                                                                                ALLEGRO_COLOR highlight_background_color = al_map_rgb(255, 246, 213);
+                                                                                widget_background_color = highlight_background_color;
+
+                                                                                text_field_highlight = true;
+                                                                                text_field_blank = _text_buffer_feed_entry.empty();
+                                                                                //_text_buffer_feed_pos = _text_buffer_feed_name_pos;
+
+                                                                                //_text_buffer_feed_selection_pos1 = _text_buffer_feed_name_selection_pos1;
+                                                                                //_text_buffer_feed_selection_pos2 = _text_buffer_feed_name_selection_pos2;
+
+                                                                                //_text_buffer_feed_x = _text_buffer_feed_name_x;
+                                                                                
+                                                                                //_text_buffer_feed_entry = _text_buffer_feed_name;
+
+                                                                        }
+                                                                        break;
+                                                        }
+
+                                                        draw_left_aligned_widget(c_x1, c_y1, c_x2, c_y2, 
+                                                                widget_background_color, widget_border_color, widget_border_line_width, 
+                                                                widget_text, widget_text_color);
+
+                                                        if(text_field_highlight) {
+                                                                ALLEGRO_COLOR vertical_line_color = al_map_rgb(0, 43, 34);
+
+                                                                double widget_vertical_line_x = _text_buffer_feed_x;
+                                                                double widget_vertical_line_w = 1;
+
+                                                                if(text_field_blank) {
+                                                                        vertical_line_color = al_map_rgb(0, 85, 68);
+                                                                        widget_vertical_line_w = 8;
+                                                                        widget_vertical_line_x = c_x1 + 8;
+                                                                }
+
+                                                                al_draw_line(widget_vertical_line_x, c_y1, widget_vertical_line_x, c_y2,
+                                                                vertical_line_color, widget_vertical_line_w);
+                                                        }
+                                                
+                                                break;
                                         }
                                 }
                         }
