@@ -202,6 +202,11 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                                                 break;
                                                 case 2:
                                                         cout << "feed name/url update clicked\n";
+                                                        bool feed_sources_updated = update_feed_source();
+                                                        
+                                                        if(feed_sources_updated) {
+                                                                _render_is_requested = true;
+                                                        }
                                                 break;
                                         }
                                 }
@@ -237,6 +242,26 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
         }
 
         return;
+}
+
+bool cls::update_feed_source() {
+        bool feed_sources_updated = false;
+
+        string feedname;
+        string feedurl;
+
+        if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
+                feedscycle feeds_group;
+                vector<string> added_feednames = feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
+
+                if(added_feednames.size() > 0) {
+                        get_rss_feed_names_and_articles();
+                        
+                        feed_sources_updated = true;
+                }
+        }
+
+        return feed_sources_updated;
 }
 
 void cls::build_visual_model(interactionstate& interaction_ctx) {
