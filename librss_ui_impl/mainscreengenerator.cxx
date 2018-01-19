@@ -50,6 +50,20 @@ cls* _self = nullptr;
 void UpdateDisplay(interactionstate& interactionState);
 void clear_to_background_color();
 
+cls::mainscreengenerator() {
+        _self = this;
+
+        initialize_allegro_graphics_engine();
+        
+        return;
+}
+
+cls::~mainscreengenerator() {
+        shutdown_allegro_graphics_engine();
+        
+        return;
+}
+
 void cls::init() {
         _render_is_requested = true;
 
@@ -68,7 +82,9 @@ void cls::generate() {
 }
 
 void UpdateDisplay(interactionstate& interactionState) {
-        _self->process_updates(interactionState);
+        interactionstate interaction_ctx(interactionState);
+        
+        _self->process_updates(interaction_ctx);
 
 	return;
 }
@@ -90,8 +106,8 @@ void cls::measure_screen(interactionstate& interaction_ctx) {
 }
 
 void cls::process_updates(interactionstate& interaction_ctx) {
-        if(!interaction_ctx.IsDisplayUpdating) {
-                interaction_ctx.IsDisplayUpdating = true;
+        if(!_processing) {
+                _processing = true;
 
                 if(interaction_ctx.IsWindowResized) {
                         interaction_ctx.IsWindowResized = false;
@@ -103,17 +119,47 @@ void cls::process_updates(interactionstate& interaction_ctx) {
 
                 if(_render_is_requested) {
                         _render_is_requested = false;
+
                         //cout << __func__ << " call UpdateVisualOutput, line: " << __LINE__ << "\n";
                         build_visual_model(interaction_ctx);
                         update_visual_output(interaction_ctx);
                 }
 
-                interaction_ctx.IsDisplayUpdating = false;
-
-                _interaction_state_last = interaction_ctx;
+                _processing = false;
         }
 
         return;
+}
+
+void cls::persist_interaction_state(const interactionstate& v) {
+        _interaction_state_last.IsWindowOpen = v.IsWindowOpen;
+        _interaction_state_last.IsWindowResized = v.IsWindowResized;
+        _interaction_state_last.IsMouseDown = v.IsMouseDown;
+        _interaction_state_last.IsMouseUp = v.IsMouseUp;
+        _interaction_state_last.IsVisualModelChanged = v.IsVisualModelChanged;
+        _interaction_state_last.IsDisplayUpdated = v.IsDisplayUpdated;
+        _interaction_state_last.IsDisplayUpdating = v.IsDisplayUpdating;
+        _interaction_state_last.IsKeyAvailable = v.IsKeyAvailable;
+        _interaction_state_last.IsKeyUp = v.IsKeyUp;
+        _interaction_state_last.IsKeyDown = v.IsKeyDown;
+
+        _interaction_state_last.MonitorWidth = v.MonitorWidth;
+        _interaction_state_last.MonitorHeight = v.MonitorHeight;
+        _interaction_state_last.WindowWidth = v.WindowWidth;
+        _interaction_state_last.WindowHeight = v.WindowHeight;
+        _interaction_state_last.MouseButton = v.MouseButton;
+        _interaction_state_last.MouseDirection = v.MouseDirection;
+        _interaction_state_last.KeyboardKeyCode = v.KeyboardKeyCode;
+
+        _interaction_state_last.WindowDimensions = v.WindowDimensions;
+
+        _interaction_state_last.MousePosition = v.MousePosition;
+
+        _interaction_state_last.WindowPosition = v.WindowPosition;
+
+        cout << "state updated\n";
+
+        return;           
 }
 
 void cls::process_interactions(interactionstate& interaction_ctx) {
@@ -125,12 +171,25 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
 
         const int 
                 mouse_direction = interaction_ctx.MouseDirection,
-                mouse_button = interaction_ctx.MouseButton;
+                mouse_button = interaction_ctx.MouseButton,
+                keycode = interaction_ctx.KeyboardKeyCode;
 
         const bool 
                 is_mouse_click = (interaction_ctx.IsMouseUp && _interaction_state_last.IsMouseDown),
                 is_mouse_down = interaction_ctx.IsMouseDown,
-                is_mouse_button_left = (mouse_button == 1);
+                is_mouse_button_left = (mouse_button == 1),
+                is_keyboard_key_available = interaction_ctx.IsKeyAvailable,
+                is_keyboard_key_pressed = ((interaction_ctx.IsKeyUp && _interaction_state_last.IsKeyDown) && 
+                                                (interaction_ctx.KeyboardKeyCode == _interaction_state_last.KeyboardKeyCode));
+
+        const bool interactions_occured = (is_keyboard_key_available || is_mouse_click || is_mouse_down);
+
+if(interactions_occured) {
+//cout << "((interaction_ctx.IsKeyUp && _interaction_state_last.IsKeyDown) && (interaction_ctx.KeyboardKeyCode == _interaction_state_last.KeyboardKeyCode))\n";
+//cout << interaction_ctx.IsKeyUp << " " << _interaction_state_last.IsKeyDown << " " << interaction_ctx.KeyboardKeyCode << " " << _interaction_state_last.KeyboardKeyCode << "\n";
+
+        persist_interaction_state(interaction_ctx);
+}
 
         dlib::dpoint 
                 mouse_position = interaction_ctx.MousePosition;
@@ -208,7 +267,7 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
 
                                                         _text_buffer_feed_x = _text_buffer_feed_name_x;
                                                         
-                                                        _text_buffer_feed_entry = _text_buffer_feed_name;
+                                                        _text_buffer_feed_entry = &_text_buffer_feed_name;
 
                                                         _render_is_requested = true;
                                                 break;
@@ -224,7 +283,7 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
 
                                                         _text_buffer_feed_x = _text_buffer_feed_url_x;
                                                         
-                                                        _text_buffer_feed_entry = _text_buffer_feed_url;
+                                                        _text_buffer_feed_entry = &_text_buffer_feed_url;
 
                                                         _render_is_requested = true;
                                                 break;
@@ -272,6 +331,39 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                                 _text_buffer_feed_edit_index = -1;
                         }
                 }
+        }
+
+        if(_text_buffer_feed_edit_index != -1 && is_keyboard_key_available && is_keyboard_key_pressed) {
+                //cout << "keycode " << keycode << " = " << al_keycode_to_name(keycode) << "\n";
+                switch (keycode) {
+                        case ALLEGRO_KEY_BACKSPACE:
+                        break;
+                        case ALLEGRO_KEY_DELETE:
+                        case ALLEGRO_KEY_PAD_DELETE:
+                        break;
+                        case ALLEGRO_KEY_HOME:
+                        break;
+                        case ALLEGRO_KEY_END:
+                        break;
+                        case ALLEGRO_KEY_RIGHT:
+                        break;
+                        case ALLEGRO_KEY_LEFT:
+                        break;
+                        case ALLEGRO_KEY_SPACE:
+                        _text_buffer_feed_entry->append(" ");
+                        break;
+                        default:
+                                _text_buffer_feed_entry->append(al_keycode_to_name(keycode));
+                                //cout << "_text_buffer_feed_entry \t " << *_text_buffer_feed_entry << "\n";
+                        break;
+                }
+
+                _render_is_requested = true;
+        }        
+
+        if(interactions_occured) {
+
+                persist_interaction_state(interaction_ctx);
         }
         
         return;
@@ -447,12 +539,18 @@ void cls::build_visual_model(interactionstate& interaction_ctx) {
 
                                         switch(widget_index) {
                                                 case 0:
+                                                        if(widget_index == _text_buffer_feed_edit_index && _text_buffer_feed_entry) {
+                                                                _text_buffer_feed_name = *_text_buffer_feed_entry;
+                                                        }
                                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
                                                         descendant_callable.label(_text_buffer_feed_name);
                                                 break;
                                                 case 1:
+                                                        if(widget_index == _text_buffer_feed_edit_index && _text_buffer_feed_entry) {
+                                                                _text_buffer_feed_url = *_text_buffer_feed_entry;
+                                                        }
                                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
-                                                        descendant_callable.label(_text_buffer_feed_url);                                                
+                                                        descendant_callable.label(_text_buffer_feed_url);
                                                 break;
                                                 case 2:
                                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
@@ -733,7 +831,7 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                                                                                 widget_background_color = highlight_background_color;
 
                                                                                 text_field_highlight = true;
-                                                                                text_field_blank = _text_buffer_feed_entry.empty();
+                                                                                text_field_blank = _text_buffer_feed_entry->empty();
                                                                                 //_text_buffer_feed_pos = _text_buffer_feed_name_pos;
 
                                                                                 //_text_buffer_feed_selection_pos1 = _text_buffer_feed_name_selection_pos1;
@@ -742,7 +840,6 @@ void cls::update_visual_output(interactionstate& interaction_ctx) {
                                                                                 //_text_buffer_feed_x = _text_buffer_feed_name_x;
                                                                                 
                                                                                 //_text_buffer_feed_entry = _text_buffer_feed_name;
-
                                                                         }
                                                                         break;
                                                         }
@@ -1119,19 +1216,6 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<materi
 }
 
 /*private member implementation*/
-cls::mainscreengenerator() {
-        _self = this;
-        initialize_allegro_graphics_engine();
-        
-        return;
-}
-
-cls::~mainscreengenerator() {
-        shutdown_allegro_graphics_engine();
-        
-        return;
-}
-
 void cls::initialize_allegro_graphics_engine() {
         _interaction_state_init.WindowPosition = dlib::dpoint(0, 0);
         _interaction_state_init.WindowDimensions = dlib::drectangle(0, 0, 0, 0);
@@ -1173,6 +1257,8 @@ void cls::initialize_allegro_graphics_engine() {
 
 			        _win_msg_evt_src = al_get_display_event_source(_win_ctx);
 			        _win_msg_evt_queue = al_create_event_queue();
+			        _keyboard_evt_queue = al_create_event_queue();
+			        _mouse_evt_queue = al_create_event_queue();
 
 			        al_register_event_source(_win_msg_evt_queue, _win_msg_evt_src);
 
@@ -1181,7 +1267,15 @@ void cls::initialize_allegro_graphics_engine() {
 
 			                _mouse_evt_src = al_get_mouse_event_source();
 
-			                al_register_event_source(_win_msg_evt_queue, _mouse_evt_src);
+			                al_register_event_source(_mouse_evt_queue, _mouse_evt_src);
+		                }
+		                
+		                if(!al_is_keyboard_installed()) {
+                                        al_install_keyboard();
+
+                                        _keyboard_evt_src = al_get_keyboard_event_source();
+                                        
+                                        al_register_event_source(_keyboard_evt_queue, _keyboard_evt_src);
 		                }
                         }
                         else {
@@ -1200,46 +1294,80 @@ void cls::initialize_allegro_graphics_engine() {
 }
 
 void cls::activate_allegro_graphics_engine(interaction_callback_type interactionCallBack) {
-        //cout << __func__ << " line: " << __LINE__ << "\n";
-        if(_interaction_state_init.IsWindowOpen && _win_msg_evt_queue) {
-                _interaction_state_last = _interaction_state_init;
-        }
-
         _interaction_callback = interactionCallBack;
 
         interactionstate interaction_ctx = _interaction_state_init;
         
 	while(interaction_ctx.IsWindowOpen && _win_msg_evt_queue) {
-                al_wait_for_event(_win_msg_evt_queue, &_winmsg_event);
-	
-		ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
+                const bool has_window_event = al_get_next_event(_win_msg_evt_queue, &_winmsg_event);                
 
-		switch (window_event_type) {
-			case ALLEGRO_EVENT_DISPLAY_CLOSE:
-				interaction_ctx.IsWindowOpen = false;
-			        break;
-			case ALLEGRO_EVENT_DISPLAY_RESIZE:
-				al_acknowledge_resize(_win_ctx);
-	                        al_flush_event_queue(_win_msg_evt_queue);
+                if(has_window_event) {
+		        ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
 
-				interaction_ctx.WindowWidth = _winmsg_event.display.width;
-				interaction_ctx.WindowHeight = _winmsg_event.display.height;
-                                interaction_ctx.WindowDimensions = dlib::drectangle(0, 0, interaction_ctx.WindowWidth, interaction_ctx.WindowHeight);
+		        switch (window_event_type) {
+			        case ALLEGRO_EVENT_DISPLAY_CLOSE:
+				        interaction_ctx.IsWindowOpen = false;
+			                break;
+			        case ALLEGRO_EVENT_DISPLAY_RESIZE:
+				        al_acknowledge_resize(_win_ctx);
+	                                al_flush_event_queue(_win_msg_evt_queue);
 
-				interaction_ctx.IsWindowResized = (interaction_ctx.WindowWidth != _interaction_state_last.WindowWidth || 
-				                                   interaction_ctx.WindowHeight != _interaction_state_last.WindowHeight);
-				//cout << "resize " << interaction_ctx.IsWindowResized << "\n";
-			        break;
-	                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
-	                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-	                        interaction_ctx.IsMouseUp = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
-	                        interaction_ctx.IsMouseDown = (window_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
-                                interaction_ctx.MousePosition = dlib::dpoint(_winmsg_event.mouse.x, _winmsg_event.mouse.y);
-                                interaction_ctx.MouseButton = _winmsg_event.mouse.button;
-	                        break;
-	                case ALLEGRO_EVENT_MOUSE_AXES:
-	                        interaction_ctx.MouseDirection = _winmsg_event.mouse.dz;
-	                        break;
+				        interaction_ctx.WindowWidth = _winmsg_event.display.width;
+				        interaction_ctx.WindowHeight = _winmsg_event.display.height;
+                                        interaction_ctx.WindowDimensions = dlib::drectangle(0, 0, interaction_ctx.WindowWidth, interaction_ctx.WindowHeight);
+
+				        interaction_ctx.IsWindowResized = (interaction_ctx.WindowWidth != _interaction_state_last.WindowWidth || 
+				                                           interaction_ctx.WindowHeight != _interaction_state_last.WindowHeight);
+				        //cout << "resize " << interaction_ctx.IsWindowResized << "\n";
+			                break;
+                        }
+                }
+
+                const bool has_keyboard_event = al_get_next_event(_keyboard_evt_queue, &_keyboard_event);
+
+                if(has_keyboard_event) {
+                	ALLEGRO_EVENT_TYPE keyboard_event_type = _keyboard_event.type;
+
+                        const int keycode = _keyboard_event.keyboard.keycode;
+
+                        interaction_ctx.IsKeyAvailable = true;
+                        interaction_ctx.KeyboardKeyCode = keycode;
+
+		        switch (keyboard_event_type) {
+	                        case ALLEGRO_EVENT_KEY_DOWN:
+	                                interaction_ctx.IsKeyDown = true;
+	                                break;
+	                        case ALLEGRO_EVENT_KEY_UP:
+	                                interaction_ctx.IsKeyUp = true;
+	                                break;
+                                case ALLEGRO_EVENT_KEY_CHAR:
+                                        cout << "ALLEGRO_EVENT_KEY_CHAR, event\n";
+                                        break;
+                        }
+                        /*cout << "keyboard\n";
+                        cout << "\t IsKeyAvailable " << interaction_ctx.IsKeyAvailable << "\n";
+                        cout << "\t KeyboardKeyCode " << interaction_ctx.KeyboardKeyCode << "\n";
+                        cout << "\t IsKeyDown " << interaction_ctx.IsKeyDown << "\n";
+                        cout << "\t IsKeyUp " << interaction_ctx.IsKeyUp << "\n";*/
+                }
+
+                const bool has_mouse_event = al_get_next_event(_mouse_evt_queue, &_mouse_event);
+
+                if(has_mouse_event) {
+		        ALLEGRO_EVENT_TYPE mouse_event_type = _mouse_event.type;
+
+		        switch (mouse_event_type) {
+	                        case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+	                        case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+	                                interaction_ctx.IsMouseUp = (mouse_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_UP);
+	                                interaction_ctx.IsMouseDown = (mouse_event_type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN);
+                                        interaction_ctx.MousePosition = dlib::dpoint(_mouse_event.mouse.x, _mouse_event.mouse.y);
+                                        interaction_ctx.MouseButton = _mouse_event.mouse.button;
+	                                break;
+	                        case ALLEGRO_EVENT_MOUSE_AXES:
+	                                interaction_ctx.MouseDirection = _mouse_event.mouse.dz;
+                                        break;
+                        }
                 }
 
                 if(!interaction_ctx.IsWindowOpen) {
@@ -1247,12 +1375,15 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                 }
                 else if(_win_ctx) {
                         interactionCallBack(interaction_ctx);
-	                al_flush_event_queue(_win_msg_evt_queue);
 
                         interaction_ctx.IsWindowResized = false;
                         interaction_ctx.IsMouseUp = true;
                         interaction_ctx.IsMouseDown = false;
-                        interaction_ctx.MouseDirection = -1;                        
+                        interaction_ctx.MouseDirection = -1;     
+                        interaction_ctx.IsKeyAvailable = false;
+                        interaction_ctx.KeyboardKeyCode = -1;
+                        interaction_ctx.IsKeyDown = false;
+                        interaction_ctx.IsKeyUp = false;
                 }
 	}
 

@@ -55,9 +55,11 @@ namespace ui {
                 /*Text Input*/
                 string
                         _text_buffer_feed_name,
-                        _text_buffer_feed_url,
-                        _text_buffer_feed_entry
+                        _text_buffer_feed_url
                         = "";
+
+                string* 
+                        _text_buffer_feed_entry = nullptr;
 
                 int
                         _text_buffer_feed_edit_index = -1,
@@ -88,20 +90,39 @@ namespace ui {
                 ALLEGRO_MONITOR_INFO 
                         _win_screen_info;
 
-                ALLEGRO_EVENT_SOURCE* 
-                        _win_msg_evt_src = nullptr;
-
-                ALLEGRO_EVENT_SOURCE* 
-                        _mouse_evt_src = nullptr;
-
                 ALLEGRO_EVENT_QUEUE* 
                         _win_msg_evt_queue = nullptr;
+
+                ALLEGRO_EVENT_SOURCE* 
+                        _win_msg_evt_src = nullptr;
 
                 ALLEGRO_EVENT
                         _winmsg_event;
 
+
+                ALLEGRO_EVENT_QUEUE* 
+                        _mouse_evt_queue = nullptr;
+
+                ALLEGRO_EVENT_SOURCE* 
+                        _mouse_evt_src = nullptr;
+
+                ALLEGRO_EVENT
+                        _mouse_event;
+
+
+                ALLEGRO_EVENT_QUEUE* 
+                        _keyboard_evt_queue = nullptr;
+                        
+                ALLEGRO_EVENT_SOURCE*
+                        _keyboard_evt_src = nullptr;
+
+                ALLEGRO_EVENT
+                        _keyboard_event;
+
+                interactionstate
+                        _interaction_state_init;
+
                 interactionstate 
-                        _interaction_state_init,
                         _interaction_state_last;
 
                 interaction_callback_type 
@@ -139,6 +160,8 @@ namespace ui {
                 void build_visual_model(interactionstate& interaction_ctx);
                 void update_visual_output(interactionstate& interaction_ctx);
 
+                void persist_interaction_state(const interactionstate& v);
+
                 /*Widget geometry and visualization*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header
@@ -172,6 +195,8 @@ namespace ui {
 
                 _screen_dpi
                 = 0;
+
+                bool _processing = false;
 
                 int 
                 _headline_index = -1;

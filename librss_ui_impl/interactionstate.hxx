@@ -1,6 +1,6 @@
 #ifndef __visualfunc_formulation_interactionstate__
 #define __visualfunc_formulation_interactionstate__
-
+#include <iostream>
 #include <dlib/geometry.h>
 /*
 	Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 . Software distributed under the License is distributed on an "AS IS" BASIS, NO WARRANTIES OR CONDITIONS OF ANY KIND, explicit or implicit. See the License for details on permissions and limitations.
@@ -10,6 +10,9 @@ namespace visualfunc {
 namespace formulation {
 struct InteractionState {
 	public:
+	InteractionState(const InteractionState&) = default;	
+	InteractionState() = default;
+
         bool 
                 IsWindowOpen, 
                 IsWindowResized, 
@@ -17,7 +20,10 @@ struct InteractionState {
                 IsMouseUp,
                 IsVisualModelChanged,
                 IsDisplayUpdated,
-                IsDisplayUpdating
+                IsDisplayUpdating,
+                IsKeyAvailable,
+                IsKeyUp,
+                IsKeyDown
                 = false;
 
         int 
@@ -26,7 +32,8 @@ struct InteractionState {
                 WindowWidth,
                 WindowHeight,
                 MouseButton,
-                MouseDirection;
+                MouseDirection,
+                KeyboardKeyCode;
 
         dlib::drectangle 
                 WindowDimensions;
@@ -35,7 +42,8 @@ struct InteractionState {
                 MousePosition;
 
         dlib::dpoint 
-                WindowPosition;                
+                WindowPosition;
+                
 };
 inline bool operator ==(const InteractionState& lhs, const InteractionState& rhs) {
         bool BoolsEqual = (lhs.IsWindowOpen == rhs.IsWindowOpen && lhs.IsWindowResized == rhs.IsWindowResized && lhs.IsMouseDown == rhs.IsMouseDown && lhs.IsMouseUp == rhs.IsMouseUp && lhs.IsVisualModelChanged == rhs.IsVisualModelChanged);
