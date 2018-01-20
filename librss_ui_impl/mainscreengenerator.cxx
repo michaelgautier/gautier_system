@@ -16,6 +16,7 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <iostream>
 #include <chrono>
 #include <ctime>
+#include <cctype>
 
 #include "mainscreengenerator.hxx"
 
@@ -151,13 +152,18 @@ void cls::persist_interaction_state(const interactionstate& v) {
         _interaction_state_last.MouseDirection = v.MouseDirection;
         _interaction_state_last.KeyboardKeyCode = v.KeyboardKeyCode;
 
+        _interaction_state_last.KeyUnicode = v.KeyUnicode;
+        _interaction_state_last.KeyModifiers = v.KeyModifiers;
+        _interaction_state_last.IsCapsLockOn = v.IsCapsLockOn;
+        _interaction_state_last.IsShiftDown = v.IsShiftDown;
+
         _interaction_state_last.WindowDimensions = v.WindowDimensions;
 
         _interaction_state_last.MousePosition = v.MousePosition;
 
         _interaction_state_last.WindowPosition = v.WindowPosition;
 
-        cout << "state updated\n";
+        //cout << "state updated\n";
 
         return;           
 }
@@ -172,7 +178,10 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
         const int 
                 mouse_direction = interaction_ctx.MouseDirection,
                 mouse_button = interaction_ctx.MouseButton,
-                keycode = interaction_ctx.KeyboardKeyCode;
+                keycode = interaction_ctx.KeyboardKeyCode,
+                keyunicode = interaction_ctx.KeyUnicode;
+
+        const unsigned keymodifiers = interaction_ctx.KeyModifiers;
 
         const bool 
                 is_mouse_click = (interaction_ctx.IsMouseUp && _interaction_state_last.IsMouseDown),
@@ -180,7 +189,8 @@ void cls::process_interactions(interactionstate& interaction_ctx) {
                 is_mouse_button_left = (mouse_button == 1),
                 is_keyboard_key_available = interaction_ctx.IsKeyAvailable,
                 is_keyboard_key_pressed = ((interaction_ctx.IsKeyUp && _interaction_state_last.IsKeyDown) && 
-                                                (interaction_ctx.KeyboardKeyCode == _interaction_state_last.KeyboardKeyCode));
+                                                (interaction_ctx.KeyboardKeyCode == _interaction_state_last.KeyboardKeyCode)),
+                is_keyboard_caps_on = (interaction_ctx.IsShiftDown || (!interaction_ctx.IsShiftDown && interaction_ctx.IsCapsLockOn));
 
         const bool interactions_occured = (is_keyboard_key_available || is_mouse_click || is_mouse_down);
 
@@ -349,11 +359,24 @@ if(interactions_occured) {
                         break;
                         case ALLEGRO_KEY_LEFT:
                         break;
-                        case ALLEGRO_KEY_SPACE:
-                        _text_buffer_feed_entry->append(" ");
-                        break;
+                        //case ALLEGRO_KEY_SPACE:
+                        //_text_buffer_feed_entry->append(" ");
+                        //break;
                         default:
-                                _text_buffer_feed_entry->append(al_keycode_to_name(keycode));
+
+                                char d = get_al_char_from_keycode(keycode);
+
+                                if(!is_keyboard_caps_on) {
+                                        d = std::tolower(d);
+                                }
+
+                                //auto& n = std::use_facet<std::ctype<wchar_t>>(std::locale());;
+                                //char c = n.narrow(d, 0);
+
+                                //cout << "keycode: " << keycode << " keymodifiers: " << keymodifiers << " encoded data: " << d << "\n";
+
+                                //_text_buffer_feed_entry->append(al_keycode_to_name(keycode));
+                                _text_buffer_feed_entry->push_back(d);
                                 //cout << "_text_buffer_feed_entry \t " << *_text_buffer_feed_entry << "\n";
                         break;
                 }
@@ -1299,7 +1322,8 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
         interactionstate interaction_ctx = _interaction_state_init;
         
 	while(interaction_ctx.IsWindowOpen && _win_msg_evt_queue) {
-                const bool has_window_event = al_get_next_event(_win_msg_evt_queue, &_winmsg_event);                
+	        const float wait_time = 0.01;
+                const bool has_window_event = al_wait_for_event_timed(_win_msg_evt_queue, &_winmsg_event, wait_time);
 
                 if(has_window_event) {
 		        ALLEGRO_EVENT_TYPE window_event_type = _winmsg_event.type;
@@ -1323,15 +1347,21 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                         }
                 }
 
-                const bool has_keyboard_event = al_get_next_event(_keyboard_evt_queue, &_keyboard_event);
+                const bool has_keyboard_event = al_wait_for_event_timed(_keyboard_evt_queue, &_keyboard_event, wait_time);
 
                 if(has_keyboard_event) {
                 	ALLEGRO_EVENT_TYPE keyboard_event_type = _keyboard_event.type;
 
-                        const int keycode = _keyboard_event.keyboard.keycode;
+                        const int keycode = _keyboard_event.keyboard.keycode;                       
+                        const int keyunicode = _keyboard_event.keyboard.unichar;
+                        const unsigned keymodifiers = _keyboard_event.keyboard.modifiers;
+
+//cout << "keycode original: " << keycode << "\n";
 
                         interaction_ctx.IsKeyAvailable = true;
                         interaction_ctx.KeyboardKeyCode = keycode;
+                        interaction_ctx.KeyUnicode = keyunicode;
+                        interaction_ctx.KeyModifiers = keymodifiers;
 
 		        switch (keyboard_event_type) {
 	                        case ALLEGRO_EVENT_KEY_DOWN:
@@ -1344,6 +1374,19 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                                         cout << "ALLEGRO_EVENT_KEY_CHAR, event\n";
                                         break;
                         }
+                        
+                        switch(keycode) {
+                                case ALLEGRO_KEY_LSHIFT:
+                                case ALLEGRO_KEY_RSHIFT:
+                                        interaction_ctx.IsShiftDown = interaction_ctx.IsKeyDown;
+                                        if(interaction_ctx.IsKeyUp) {
+                                                interaction_ctx.IsShiftDown = false;
+                                        }
+                                break;
+                                case ALLEGRO_KEY_CAPSLOCK:
+                                        interaction_ctx.IsCapsLockOn = interaction_ctx.IsKeyDown;
+                                break;
+                        }
                         /*cout << "keyboard\n";
                         cout << "\t IsKeyAvailable " << interaction_ctx.IsKeyAvailable << "\n";
                         cout << "\t KeyboardKeyCode " << interaction_ctx.KeyboardKeyCode << "\n";
@@ -1351,7 +1394,7 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                         cout << "\t IsKeyUp " << interaction_ctx.IsKeyUp << "\n";*/
                 }
 
-                const bool has_mouse_event = al_get_next_event(_mouse_evt_queue, &_mouse_event);
+                const bool has_mouse_event = al_wait_for_event_timed(_mouse_evt_queue, &_mouse_event, wait_time);
 
                 if(has_mouse_event) {
 		        ALLEGRO_EVENT_TYPE mouse_event_type = _mouse_event.type;
@@ -1384,6 +1427,8 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                         interaction_ctx.KeyboardKeyCode = -1;
                         interaction_ctx.IsKeyDown = false;
                         interaction_ctx.IsKeyUp = false;
+                        interaction_ctx.KeyUnicode = -1;
+                        interaction_ctx.KeyModifiers = -1;
                 }
 	}
 
@@ -1625,4 +1670,129 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
         }
         
         return callables;
+}
+
+char cls::get_al_char_from_keycode(int keycode) {
+        char d = 0;
+
+        char chars[] = {
+        ' ',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+
+        ' ',
+        '~',
+        '-',
+        '=',
+        ' ',
+        '\t',
+        '{',
+        '}',
+        ' ',
+        ';',
+        '\'',
+        '\\',
+        '|',
+        ',',
+        ' ',
+        '/',
+        ' ',//space
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+
+        '/',
+        '*',
+        '-',
+        '+',
+        ' ',
+        ' ',
+
+        ' ',
+        ' ',
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ':',
+        '~',
+
+        '=',/* MacOS X */
+        '`' /* MacOS X */
+        };
+
+        d = chars[keycode];
+        
+        return d;
 }

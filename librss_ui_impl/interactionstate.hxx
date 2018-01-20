@@ -23,7 +23,9 @@ struct InteractionState {
                 IsDisplayUpdating,
                 IsKeyAvailable,
                 IsKeyUp,
-                IsKeyDown
+                IsKeyDown,
+                IsShiftDown,
+                IsCapsLockOn
                 = false;
 
         int 
@@ -34,6 +36,11 @@ struct InteractionState {
                 MouseButton,
                 MouseDirection,
                 KeyboardKeyCode;
+
+        int
+                KeyUnicode;
+        unsigned
+                KeyModifiers;
 
         dlib::drectangle 
                 WindowDimensions;
