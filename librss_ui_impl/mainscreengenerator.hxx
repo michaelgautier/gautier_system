@@ -161,7 +161,7 @@ namespace ui {
                 void update_visual_output(interactionstate& interaction_ctx);
 
                 void persist_interaction_state(const interactionstate& v);
-                char get_al_char_from_keycode(int keycode);
+                char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
                 /*Widget geometry and visualization*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header

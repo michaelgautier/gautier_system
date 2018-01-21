@@ -364,11 +364,7 @@ if(interactions_occured) {
                         //break;
                         default:
 
-                                char d = get_al_char_from_keycode(keycode);
-
-                                if(!is_keyboard_caps_on) {
-                                        d = std::tolower(d);
-                                }
+                                char d = get_al_char_from_keycode(keycode, is_keyboard_caps_on);
 
                                 //auto& n = std::use_facet<std::ctype<wchar_t>>(std::locale());;
                                 //char c = n.narrow(d, 0);
@@ -1320,7 +1316,7 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
         _interaction_callback = interactionCallBack;
 
         interactionstate interaction_ctx = _interaction_state_init;
-        
+
 	while(interaction_ctx.IsWindowOpen && _win_msg_evt_queue) {
 	        const float wait_time = 0.01;
                 const bool has_window_event = al_wait_for_event_timed(_win_msg_evt_queue, &_winmsg_event, wait_time);
@@ -1356,7 +1352,7 @@ void cls::activate_allegro_graphics_engine(interaction_callback_type interaction
                         const int keyunicode = _keyboard_event.keyboard.unichar;
                         const unsigned keymodifiers = _keyboard_event.keyboard.modifiers;
 
-//cout << "keycode original: " << keycode << "\n";
+cout << "keycode original: " << keycode << "\n";
 
                         interaction_ctx.IsKeyAvailable = true;
                         interaction_ctx.KeyboardKeyCode = keycode;
@@ -1672,37 +1668,37 @@ vector<visualcallable> cls::get_visual_definitions(int screen_x, int screen_y, i
         return callables;
 }
 
-char cls::get_al_char_from_keycode(int keycode) {
+char cls::get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on) {
         char d = 0;
 
         char chars[] = {
         ' ',
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+        'g',
+        'h',
+        'i',
+        'j',
+        'k',
+        'l',
+        'm',
+        'n',
+        'o',
+        'p',
+        'q',
+        'r',
+        's',
+        't',
+        'u',
+        'v',
+        'w',
+        'x',
+        'y',
+        'z',
 
         '0',
         '1',
@@ -1740,20 +1736,20 @@ char cls::get_al_char_from_keycode(int keycode) {
         ' ',
 
         ' ',
-        '~',
+        '`',
         '-',
         '=',
         ' ',
         '\t',
-        '{',
-        '}',
+        '[',
+        ']',
         ' ',
         ';',
         '\'',
         '\\',
-        '|',
-        ',',
         ' ',
+        ',',
+        '.',
         '/',
         ' ',//space
 
@@ -1792,7 +1788,141 @@ char cls::get_al_char_from_keycode(int keycode) {
         '`' /* MacOS X */
         };
 
-        d = chars[keycode];
-        
+        char alt_chars[] = {
+        ' ',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+
+        ')',
+        '!',
+        '@',
+        '#',
+        '$',
+        '%',
+        '^',
+        '&',
+        '*',
+        '(',
+
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+
+        ' ',
+        '~',
+        '_',
+        '+',
+        ' ',
+        '\t',
+        '{',
+        '}',
+        ' ',
+        ':',
+        '"',
+        '|',
+        ' ',
+        '<',
+        '>',
+        '?',
+        ' ',//space
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+
+        '/',
+        '*',
+        '-',
+        '+',
+        ' ',
+        ' ',
+
+        ' ',
+        ' ',
+
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ':',
+        '~',
+
+        '=',/* MacOS X */
+        '`' /* MacOS X */
+        };
+
+        if(keycode > -1 && keycode < 27) {
+                d = chars[keycode];
+
+                if(is_keyboard_caps_on) {
+                        d = std::toupper(d);
+                }
+                else {
+                        d = std::tolower(d);
+                }
+        }
+        else {
+                if(is_keyboard_caps_on) {
+                        d = alt_chars[keycode];
+                }
+                else {
+                        d = chars[keycode];
+                }
+        }
+
         return d;
 }
