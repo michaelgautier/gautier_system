@@ -10,8 +10,8 @@
 using namespace std;
 using cls = rss::feedscycle;
 
-using material = rss::material;
-using request = rss::request;
+using material = ::rss::material;
+using request = ::rss::request;
 
 void cls::get_feed_names_and_addresses(string& location, vector<request>& feed_parameters) {
 	vector<string> feed_parameter_lines;

@@ -13,20 +13,5 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
+#include "textbuffer.hxx"
 
-#ifndef __feedscycle__
-#define __feedscycle__
-
-#include <string>
-#include <vector>
-
-namespace rss {
-        using namespace std;
-	class feedscycle {
-		public:
-                void get_feed_names_and_addresses(string& location, vector<::rss::request>& feed_parameters);
-                void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
-                vector<string> set_feed_name_and_address(string& location, string& feed_name, string& feed_url);
-	};
-}
-#endif

@@ -21,7 +21,7 @@ echo "Building rss reader"
 
 #shared libraries - manual
 g++ -std=c++14 -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx
-g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -ldlib -lallegro -lallegro_font -lallegro_ttf -lallegro_primitives -lallegro_dialog -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lnews_visualcallable -Wl,-rpath,. -o bin/newsreader obj/newsreader.o
+g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -ldlib -lallegro -lallegro_font -lallegro_ttf -lallegro_primitives -lallegro_dialog -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -lrssui_mainscreengenerator -lrssui_interactionstate -lrssui_textbuffer -lnews_visualcallable -Wl,-rpath,. -o bin/newsreader obj/newsreader.o
 
 #static compile FLTK
 #g++ -std=c++14 -c -g -I$HOME/Code/lib_gcc/fltk/include/ -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ -o obj/newsreader.o ../news_reader.cxx

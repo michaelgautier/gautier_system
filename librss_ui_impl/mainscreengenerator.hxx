@@ -33,6 +33,7 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include "request.hxx"
 #include "material.hxx"
 
+#include "textbuffer.hxx"
 #include "interactionstate.hxx"
 
 namespace rss {
@@ -40,8 +41,12 @@ namespace ui {
         using namespace std;
         class mainscreengenerator {
                 public:
-	        using interactionstate = visualfunc::formulation::InteractionState;
-	        using interaction_callback_type = void(*)(interactionstate&);
+	        using interactionstate = ::visualfunc::formulation::InteractionState;
+	        using interaction_callback_type = void(*)(interactionstate*);
+	        using textbuffer = ::rss::ui::textbuffer;
+                using material = ::rss::material;
+                using request = ::rss::request;
+                using visualcallable = ::visualfunc::formulation::visualcallable;
 
                 mainscreengenerator();
                 ~mainscreengenerator();
@@ -49,39 +54,12 @@ namespace ui {
                 void generate();
 
                 /*Application Logic*/
-                void process_updates(interactionstate& interactionState);
+                void process_updates(interactionstate* interactionState);
 
                 private:
                 /*Text Input*/
-                string
-                        _text_buffer_feed_name,
-                        _text_buffer_feed_url
-                        = "";
-
-                string* 
-                        _text_buffer_feed_entry = nullptr;
-
-                int
-                        _text_buffer_feed_edit_index = -1,
-
-                        _text_buffer_feed_name_pos,
-                        _text_buffer_feed_url_pos,
-                        _text_buffer_feed_pos,
-
-                        _text_buffer_feed_name_selection_pos1,
-                        _text_buffer_feed_name_selection_pos2,
-                        _text_buffer_feed_selection_pos1,
-
-                        _text_buffer_feed_url_selection_pos1,
-                        _text_buffer_feed_url_selection_pos2,
-                        _text_buffer_feed_selection_pos2
-                        = 0;
-
-                double
-                        _text_buffer_feed_name_x,
-                        _text_buffer_feed_url_x,
-                        _text_buffer_feed_x
-                        = 0;
+                int _text_buffer_index = -1;
+                vector<textbuffer> _texts;
 
                 /*Graphics Engine*/
                 ALLEGRO_DISPLAY* 
@@ -119,11 +97,8 @@ namespace ui {
                 ALLEGRO_EVENT
                         _keyboard_event;
 
-                interactionstate
-                        _interaction_state_init;
-
-                interactionstate 
-                        _interaction_state_last;
+                interactionstate* _inter_sts = nullptr;
+                interactionstate* _inter_sts_lst = nullptr;
 
                 interaction_callback_type 
                         _interaction_callback;
@@ -133,10 +108,12 @@ namespace ui {
                         _is_allegro_uninitialized
                         = false;
 
-	        void activate_allegro_graphics_engine(interaction_callback_type);
+	        void activate_allegro_graphics_engine(interactionstate* interaction_ctx, interaction_callback_type);
 
-	        void initialize_allegro_graphics_engine();
+	        void initialize_allegro_graphics_engine(interactionstate* interaction_ctx);
 	        void shutdown_allegro_graphics_engine();
+
+                bool check_keyboard(interactionstate* interaction_ctx);
 
                 /*Application Logic Implementation*/
                 bool 
@@ -151,17 +128,17 @@ namespace ui {
                 string _feed_names_location = "feeds.txt";
 
                 vector<string> _feednames;
-                vector<rss::material> _feed_articles;
-                vector<rss::request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
+                vector<material> _feed_articles;
+                vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
                 void get_rss_feed_names_and_articles();
                 bool update_feed_source();
                 
-                void process_interactions(interactionstate& interaction_ctx);
-                void build_visual_model(interactionstate& interaction_ctx);
-                void update_visual_output(interactionstate& interaction_ctx);
+                void process_interactions(interactionstate* interaction_ctx);
+                void build_visual_model();
+                void update_visual_output();
 
-                void persist_interaction_state(const interactionstate& v);
-                char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
+                void persist_interaction_state(interactionstate* interaction_ctx);
+                const char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
                 /*Widget geometry and visualization*/
                 enum visual_index_rss_reader_region {
                         header = 0,//RSS Reader Header
@@ -180,7 +157,7 @@ namespace ui {
                         vertical_scrollbar = 4
                 };
 
-                vector<visualfunc::formulation::visualcallable> _callables;
+                vector<visualcallable> _callables;
 
                 double 
                 _workarea_x,
@@ -217,20 +194,20 @@ namespace ui {
                 dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
                 constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
                 constexpr double measure_widget_y(const double region_h_half, const double button_h);
-                void measure_screen(interactionstate& interaction_ctx);
+                void measure_screen(interactionstate* interaction_ctx);
 
-                vector<visualfunc::formulation::visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
+                vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
-                visualfunc::formulation::visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
+                visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
                 const double bdr_width, const double scrollbar_width);
 
-                visualfunc::formulation::visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
+                visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
                 bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text);
 
-                visualfunc::formulation::visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
+                visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
                 bool trim_to_label, const double bdr_width, string label_text);
 
-                visualfunc::formulation::visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
+                visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
                 const double y_offset, double& next_y, const double bdr_width, string label_text);
 
                 void draw_region_background(const double x1, const double y1, const double x2, const double y2, 

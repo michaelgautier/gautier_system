@@ -27,7 +27,7 @@ namespace rss {
         using namespace std;
 	class collector {
 		public:
-			vector<material>     pull(request request);
+			vector<::rss::material>     pull(::rss::request request);
 	};
 }
 #endif
