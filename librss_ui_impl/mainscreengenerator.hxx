@@ -114,6 +114,7 @@ namespace ui {
 	        void shutdown_allegro_graphics_engine();
 
                 bool check_keyboard(interactionstate* interaction_ctx);
+                void update_textfield(textbuffer* tb, visualcallable& vc);
 
                 /*Application Logic Implementation*/
                 bool 

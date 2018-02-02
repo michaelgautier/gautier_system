@@ -24,7 +24,10 @@ namespace ui {
         using namespace std;
         class textbuffer {
                 public:
-                        double buffer_x = 0;
+                        int buffer_x = 0;
+                        int buffer_visual_width = 0;
+                        int letter_width = 0;
+                        int text_visual_size = 0;
 
                         int buffer_insert_pos = 0;
                         int buffer_select_end_pos = 0;

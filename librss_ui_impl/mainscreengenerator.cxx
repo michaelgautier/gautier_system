@@ -231,7 +231,7 @@ if(interactions_occured) {
                                 
                                 if(region.contains(mouse_position)) {
                                         if(widget_index > -1 && widget_index < 2) {
-                                                _text_buffer_index = 0;
+                                                _text_buffer_index = widget_index;
                                                 (&_texts[_text_buffer_index])->buffer_x = mouse_x;
                                         }
                                         else if (widget_index == 2) {
@@ -443,6 +443,66 @@ bool cls::update_feed_source() {
         return feed_sources_updated;
 }
 
+void cls::update_textfield(textbuffer* tb, visualcallable& vc) {
+        if(tb->buffer_visual_width < 1) {
+                tb->buffer_visual_width = vc.x2() - vc.x1();
+
+                dlib::drectangle 
+                font_dimensions = measure_text_by_sized_font("W", (_default_widget_font_size / 2.0), _font_file_location);
+                
+                const int font_w = font_dimensions.right();
+                
+                tb->letter_width = font_w;
+        }
+
+        string label_text = tb->text;
+
+        const int label_text_size = label_text.size();
+        const int buffer_visual_width = tb->buffer_visual_width;
+        const int letter_width = tb->letter_width;
+
+        int label_visual_size = tb->text_visual_size;
+
+        if(label_text_size > 0 && label_visual_size == 0) {
+                dlib::drectangle 
+                font_dimensions = measure_text_by_sized_font(label_text.data(), (_default_widget_font_size / 2.0), _font_file_location);
+
+                const int font_w = font_dimensions.right();
+
+                const int remaining_w = (buffer_visual_width - font_w);
+
+                if(abs(remaining_w - letter_width) <= 16) {
+                        label_visual_size = label_text_size;
+                        tb->text_visual_size = label_visual_size;
+                }
+
+                //const int text_visual_limit_avg = (text_visual_limit_sum / label_text_size);
+
+                //const int text_visual_limit = (tb->buffer_visual_width / text_visual_limit_avg);
+
+                //tb->letter_width = text_visual_limit_avg;
+
+                //tb->text_visual_size = text_visual_limit;
+
+                /*cout << "letter_width " << letter_width << "\n";
+                cout << "font_w " << font_w << "\n";
+                cout << "buffer_visual_width " << buffer_visual_width << "\n";
+                cout << "remaining_w " << remaining_w << "\n";
+                cout << "label_text_size " << label_text_size << "\n";
+                cout << "label_visual_size " << label_visual_size << "\n";
+                cout << "----------------------------------------------\n";*/
+        }
+
+        if(label_visual_size != 0) {
+                label_text = label_text.substr(0, label_visual_size);
+        }
+
+        vc.type_id(visual_index_rss_reader_widget_type::text_field);
+        vc.label(label_text);
+
+        return;
+}
+
 void cls::build_visual_model() {
         //cache fonts
         if(_callables.empty()) {
@@ -593,18 +653,8 @@ void cls::build_visual_model() {
 
                                         switch(widget_index) {
                                                 case 0:
-                                                {
-                                                        string label_feed_name = (&_texts[widget_index])->text;
-                                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
-                                                        descendant_callable.label(label_feed_name);
-                                                }
-                                                break;
                                                 case 1:
-                                                {
-                                                        string label_feed_url = (&_texts[widget_index])->text;
-                                                        descendant_callable.type_id(visual_index_rss_reader_widget_type::text_field);
-                                                        descendant_callable.label(label_feed_url);
-                                                }
+                                                        update_textfield(&_texts[widget_index], descendant_callable);
                                                 break;
                                                 case 2:
                                                         descendant_callable.type_id(visual_index_rss_reader_widget_type::left_aligned_button);
@@ -881,21 +931,13 @@ void cls::update_visual_output() {
                                                                         widget_text = descendant_callable.label();
 
                                                                         if(text_field_edit_index == _text_buffer_index) {
-                                                                                auto text_buffer = (&_texts[_text_buffer_index]);
-                                                                        
+                                                                                textbuffer* text_buffer = &_texts[_text_buffer_index];
+
                                                                                 ALLEGRO_COLOR highlight_background_color = al_map_rgb(255, 246, 213);
                                                                                 widget_background_color = highlight_background_color;
 
                                                                                 text_field_highlight = true;
                                                                                 text_field_blank = text_buffer->text.empty();
-                                                                                //_text_buffer_feed_pos = _text_buffer_feed_name_pos;
-
-                                                                                //_text_buffer_feed_selection_pos1 = _text_buffer_feed_name_selection_pos1;
-                                                                                //_text_buffer_feed_selection_pos2 = _text_buffer_feed_name_selection_pos2;
-
-                                                                                //_text_buffer_feed_x = _text_buffer_feed_name_x;
-                                                                                
-                                                                                //_text_buffer_feed_entry = _text_buffer_feed_name;
                                                                         }
                                                                         break;
                                                         }
@@ -905,7 +947,7 @@ void cls::update_visual_output() {
                                                                 widget_text, widget_text_color);
 
                                                         if(text_field_highlight) {
-                                                                auto text_buffer = (&_texts[_text_buffer_index]);
+                                                                textbuffer* text_buffer = &_texts[_text_buffer_index];
                                                                 
                                                                 ALLEGRO_COLOR vertical_line_color = al_map_rgb(0, 43, 34);
 
@@ -1185,7 +1227,7 @@ bool trim_to_label, const double bdr_width, string label_text) {
                 //ALLEGRO_FONT* Font = load_sized_font(_default_widget_font_size/2, _font_file_location);
 
                 button_x = ((x2 - 60) - font_w);
-                button_w = (font_w + button_x) + (_default_label_margin_left * 2.0);
+                button_w = (font_w + button_x + (_default_label_margin_left * 2.0));
         }
 
         visualcallable callable(0);
