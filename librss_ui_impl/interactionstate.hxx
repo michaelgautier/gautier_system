@@ -39,8 +39,6 @@ struct InteractionState {
     MouseDirection,
     KeyboardKeyCode;
 
-    int
-    KeyUnicode;
     unsigned
     KeyModifiers;
 

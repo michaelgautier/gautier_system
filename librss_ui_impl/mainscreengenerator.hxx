@@ -113,7 +113,7 @@ class mainscreengenerator {
     void initialize_allegro_graphics_engine(interactionstate* interaction_ctx);
     void shutdown_allegro_graphics_engine();
 
-    bool check_keyboard(interactionstate* interaction_ctx);
+    bool check_keyboard(interactionstate* interaction_ctx, const float wait_time);
     void update_textfield(textbuffer* tb, visualcallable& vc);
 
     /*Application Logic Implementation*/
@@ -175,6 +175,7 @@ class mainscreengenerator {
         = 0;
 
     bool _processing = false;
+    bool _keyboard_field_active = false;
 
     int
     _headline_index = -1;

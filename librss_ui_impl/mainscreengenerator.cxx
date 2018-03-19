@@ -204,6 +204,7 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
                     _headline_index = headline_index;
                     _article_selected = true;
                     _render_is_requested = true;
+                    _keyboard_field_active = false;
                     break;
                 }
 
@@ -217,6 +218,7 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
                 cout << "enlarge/shrink clicked\n";
                 _article_contents_enlarge = !_article_contents_enlarge;
                 _render_is_requested = true;
+                _keyboard_field_active = false;
             }
         } else if(mouse_y >= change_bar_y_start && mouse_y <= change_bar_y_end && chng_bar_callable.callables().size() > 0) {
             int widget_index = -1;
@@ -230,12 +232,14 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
                     if(widget_index > -1 && widget_index < 2) {
                         _text_buffer_index = widget_index;
                         (&_texts[_text_buffer_index])->buffer_x = mouse_x;
+                        _keyboard_field_active = true;
                     } else if (widget_index == 2) {
                         bool feed_sources_updated = update_feed_source();
 
                         if(feed_sources_updated) {
 
                         }
+                        _keyboard_field_active = false;
                     }
 
                     _render_is_requested = (widget_index > -1 && widget_index < 3);
@@ -252,6 +256,7 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
 
                 if(region.contains(mouse_position)) {
                     feed_name_clicked = true;
+                    _keyboard_field_active = false;
                     break;
                 }
             }
@@ -267,114 +272,120 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
                     _render_is_requested = true;
                 }
             }
-        } else {
-            if(_text_buffer_index != -1) {
-                _text_buffer_index = -1;
-            }
         }
     }
 
-    int key_update_count = 0;
+    if(!_keyboard_field_active && _text_buffer_index > -1) {
+        _text_buffer_index = -1;
+    } else if(_keyboard_field_active) {
+        int key_update_count = 0;
+        /*The following technique is not perfect but it works in the limited testing conducted.*/
+        const float wait_time = 0.0006;
+        float elapsed_time = 0;
 
-    while(check_keyboard(interaction_ctx)) {
-        int
-        keycode = interaction_ctx->KeyboardKeyCode;
-        unsigned
-        keymodifiers = interaction_ctx->KeyModifiers;
+        while(elapsed_time < 1000000 && check_keyboard(interaction_ctx, wait_time)) {
+            elapsed_time += wait_time;
+            int
+            keycode = interaction_ctx->KeyboardKeyCode;
+            unsigned
+            keymodifiers = interaction_ctx->KeyModifiers;
 
-        bool
-        is_keyboard_caps_on = (interaction_ctx->IsShiftDown || (!interaction_ctx->IsShiftDown && interaction_ctx->IsCapsLockOn)),
+            const bool
+            is_keyboard_caps_on = (interaction_ctx->IsShiftDown || (!interaction_ctx->IsShiftDown && interaction_ctx->IsCapsLockOn));
 
-        is_keyboard_key_available = interaction_ctx->IsKeyAvailable,
-        is_keyboard_key_pressed = (interaction_ctx->IsKeyUp && _inter_sts_lst->IsKeyDown),
+            const bool
+            is_keyboard_key_available = interaction_ctx->IsKeyAvailable;
 
-        is_last_key_same = (interaction_ctx->KeyboardKeyCode == _inter_sts_lst->KeyboardKeyCode);
+            const bool
+            is_keyboard_key_pressed = (interaction_ctx->IsKeyUp && _inter_sts_lst->IsKeyDown);
 
-//                if(_inter_sts_lst->IsKeyDown == true) {
-//                        cout << "1 last state keydown\n";
-//
-//                        if(interaction_ctx->IsKeyUp == true) {
-//                                cout << "1 state is key up\n";
-//                        }
-//                }
+            const bool
+            is_last_key_same = (interaction_ctx->KeyboardKeyCode == _inter_sts_lst->KeyboardKeyCode);
 
-//
-//                if(interaction_ctx->IsKeyUp == true) {
-//                        cout << "0 state is key up\n";
-//                }
+            /*if(_inter_sts_lst->IsKeyDown == true) {
+                cout << "1 last state keydown\n";
 
-//                if(is_keyboard_key_pressed == true) {
-//                        cout << "is_keyboard_key_pressed\n";
-//                }
-
-//                if(keycode > 0 && is_last_key_same == true) {
-//                        cout << "is_last_key_same\n";
-//                }
-
-        if(_text_buffer_index != -1 && is_keyboard_key_available && is_keyboard_key_pressed) {
-            key_update_count++;
-            //cout << "keycode " << keycode << " = " << al_keycode_to_name(keycode) << "\n";
-            string* text = (&(&_texts[_text_buffer_index])->text);
-
-            switch (keycode) {
-            case ALLEGRO_KEY_BACKSPACE:
-                break;
-            case ALLEGRO_KEY_DELETE:
-            case ALLEGRO_KEY_PAD_DELETE:
-                break;
-            case ALLEGRO_KEY_HOME:
-                break;
-            case ALLEGRO_KEY_END:
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                break;
-            case ALLEGRO_KEY_LEFT:
-                break;
-            //case ALLEGRO_KEY_SPACE:
-            //_text_buffer_feed_entry->append(" ");
-            //break;
-            default: {
-                char d = get_al_char_from_keycode(keycode, is_keyboard_caps_on);
-
-                //auto& n = std::use_facet<std::ctype<wchar_t>>(std::locale());;
-                //char c = n.narrow(d, 0);
-
-                //cout << "keycode: " << keycode << " keymodifiers: " << keymodifiers << " encoded data: " << d << "\n";
-
-                //_text_buffer_feed_entry->append(al_keycode_to_name(keycode));
-                text->push_back(d);
-                //cout << "_text_buffer_feed_entry \t " << *_text_buffer_feed_entry << "\n";
+                if(interaction_ctx->IsKeyUp == true) {
+                    cout << "1 state is key up\n";
+                }
             }
-            break;
+
+            if(interaction_ctx->IsKeyUp == true) {
+                cout << "0 state is key up\n";
             }
+
+            if(is_keyboard_key_pressed == true) {
+                cout << "is_keyboard_key_pressed\n";
+            }
+
+            if(keycode > 0 && is_last_key_same == true) {
+                cout << "is_last_key_same\n";
+            }*/
+
+            if(_text_buffer_index != -1 && is_keyboard_key_available && is_keyboard_key_pressed) {
+                key_update_count++;
+                //cout << "keycode " << keycode << " = " << al_keycode_to_name(keycode) << "\n";
+                string* const text = (&(&_texts[_text_buffer_index])->text);
+
+                switch (keycode) {
+                case ALLEGRO_KEY_BACKSPACE:
+                    break;
+                case ALLEGRO_KEY_DELETE:
+                case ALLEGRO_KEY_PAD_DELETE:
+                    break;
+                case ALLEGRO_KEY_HOME:
+                    break;
+                case ALLEGRO_KEY_END:
+                    break;
+                case ALLEGRO_KEY_RIGHT:
+                    break;
+                case ALLEGRO_KEY_LEFT:
+                    break;
+                //case ALLEGRO_KEY_SPACE:
+                //_text_buffer_feed_entry->append(" ");
+                //break;
+                default: {
+                    char d = get_al_char_from_keycode(keycode, is_keyboard_caps_on);
+
+                    //auto& n = std::use_facet<std::ctype<wchar_t>>(std::locale());;
+                    //char c = n.narrow(d, 0);
+
+                    //cout << "keycode: " << keycode << " keymodifiers: " << keymodifiers << " encoded data: " << d << "\n";
+
+                    //_text_buffer_feed_entry->append(al_keycode_to_name(keycode));
+                    text->push_back(d);
+                    //cout << "_text_buffer_feed_entry \t " << *_text_buffer_feed_entry << "\n";
+                }
+                break;
+                }
+            }
+
+            persist_interaction_state(interaction_ctx);
         }
 
-        persist_interaction_state(interaction_ctx);
+        if(key_update_count > 0) {
+            _render_is_requested = true;
+        }
     }
 
-    if(key_update_count > 0) {
-        _render_is_requested = true;
-    } else if(interactions_occured) {
+    if(!_keyboard_field_active && interactions_occured) {
         persist_interaction_state(interaction_ctx);
     }
 
     return;
 }
 
-bool cls::check_keyboard(interactionstate* interaction_ctx) {
-    const float wait_time = 0.004;
+bool cls::check_keyboard(interactionstate* interaction_ctx, const float wait_time) {
     const bool has_keyboard_event = al_wait_for_event_timed(_keyboard_evt_queue, &_keyboard_event, wait_time);
 
     if(has_keyboard_event) {
         ALLEGRO_EVENT_TYPE keyboard_event_type = _keyboard_event.type;
 
         const int keycode = _keyboard_event.keyboard.keycode;
-        const int keyunicode = _keyboard_event.keyboard.unichar;
         const unsigned keymodifiers = _keyboard_event.keyboard.modifiers;
 
         interaction_ctx->IsKeyAvailable = true;
         interaction_ctx->KeyboardKeyCode = keycode;
-        interaction_ctx->KeyUnicode = keyunicode;
         interaction_ctx->KeyModifiers = keymodifiers;
         interaction_ctx->IsKeyDown = false;
         interaction_ctx->IsKeyUp = false;
@@ -1429,7 +1440,6 @@ void cls::activate_allegro_graphics_engine(interactionstate* interaction_ctx, in
             interaction_ctx->KeyboardKeyCode = -1;
             interaction_ctx->IsKeyDown = false;
             interaction_ctx->IsKeyUp = false;
-            interaction_ctx->KeyUnicode = -1;
             interaction_ctx->KeyModifiers = -1;
         }
     }
