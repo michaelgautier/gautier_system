@@ -10,7 +10,7 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
 Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
+POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
@@ -38,194 +38,194 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
 namespace rss {
 namespace ui {
-        using namespace std;
-        class mainscreengenerator {
-                public:
-	        using interactionstate = ::visualfunc::formulation::InteractionState;
-	        using interaction_callback_type = void(*)(interactionstate*);
-	        using textbuffer = ::rss::ui::textbuffer;
-                using material = ::rss::material;
-                using request = ::rss::request;
-                using visualcallable = ::visualfunc::formulation::visualcallable;
+using namespace std;
+class mainscreengenerator {
+  public:
+    using interactionstate = ::visualfunc::formulation::InteractionState;
+    using interaction_callback_type = void(*)(interactionstate*);
+    using textbuffer = ::rss::ui::textbuffer;
+    using material = ::rss::material;
+    using request = ::rss::request;
+    using visualcallable = ::visualfunc::formulation::visualcallable;
 
-                mainscreengenerator();
-                ~mainscreengenerator();
-                void init();
-                void generate();
+    mainscreengenerator();
+    ~mainscreengenerator();
+    void init();
+    void generate();
 
-                /*Application Logic*/
-                void process_updates(interactionstate* interactionState);
+    /*Application Logic*/
+    void process_updates(interactionstate* interactionState);
 
-                private:
-                /*Text Input*/
-                int _text_buffer_index = -1;
-                vector<textbuffer> _texts;
+  private:
+    /*Text Input*/
+    int _text_buffer_index = -1;
+    vector<textbuffer> _texts;
 
-                /*Graphics Engine*/
-                ALLEGRO_DISPLAY* 
-                        _win_ctx = nullptr;
+    /*Graphics Engine*/
+    ALLEGRO_DISPLAY*
+    _win_ctx = nullptr;
 
-                ALLEGRO_MONITOR_INFO 
-                        _win_screen_info;
+    ALLEGRO_MONITOR_INFO
+    _win_screen_info;
 
-                ALLEGRO_EVENT_QUEUE* 
-                        _win_msg_evt_queue = nullptr;
+    ALLEGRO_EVENT_QUEUE*
+    _win_msg_evt_queue = nullptr;
 
-                ALLEGRO_EVENT_SOURCE* 
-                        _win_msg_evt_src = nullptr;
+    ALLEGRO_EVENT_SOURCE*
+    _win_msg_evt_src = nullptr;
 
-                ALLEGRO_EVENT
-                        _winmsg_event;
-
-
-                ALLEGRO_EVENT_QUEUE* 
-                        _mouse_evt_queue = nullptr;
-
-                ALLEGRO_EVENT_SOURCE* 
-                        _mouse_evt_src = nullptr;
-
-                ALLEGRO_EVENT
-                        _mouse_event;
+    ALLEGRO_EVENT
+    _winmsg_event;
 
 
-                ALLEGRO_EVENT_QUEUE* 
-                        _keyboard_evt_queue = nullptr;
-                        
-                ALLEGRO_EVENT_SOURCE*
-                        _keyboard_evt_src = nullptr;
+    ALLEGRO_EVENT_QUEUE*
+    _mouse_evt_queue = nullptr;
 
-                ALLEGRO_EVENT
-                        _keyboard_event;
+    ALLEGRO_EVENT_SOURCE*
+    _mouse_evt_src = nullptr;
 
-                interactionstate* _inter_sts = nullptr;
-                interactionstate* _inter_sts_lst = nullptr;
+    ALLEGRO_EVENT
+    _mouse_event;
 
-                interaction_callback_type 
-                        _interaction_callback;
 
-                bool 
-                        _is_allegro_initialized, 
-                        _is_allegro_uninitialized
-                        = false;
+    ALLEGRO_EVENT_QUEUE*
+    _keyboard_evt_queue = nullptr;
 
-	        void activate_allegro_graphics_engine(interactionstate* interaction_ctx, interaction_callback_type);
+    ALLEGRO_EVENT_SOURCE*
+    _keyboard_evt_src = nullptr;
 
-	        void initialize_allegro_graphics_engine(interactionstate* interaction_ctx);
-	        void shutdown_allegro_graphics_engine();
+    ALLEGRO_EVENT
+    _keyboard_event;
 
-                bool check_keyboard(interactionstate* interaction_ctx);
-                void update_textfield(textbuffer* tb, visualcallable& vc);
+    interactionstate* _inter_sts = nullptr;
+    interactionstate* _inter_sts_lst = nullptr;
 
-                /*Application Logic Implementation*/
-                bool 
-                        _article_contents_enlarge,
-                        _feed_articles_requested,
-                        _render_is_requested,
-                        _article_selected
-                        = false;
+    interaction_callback_type
+    _interaction_callback;
 
-                int _feed_index = 0;//Defaults to the first feed, if available;
+    bool
+    _is_allegro_initialized,
+    _is_allegro_uninitialized
+        = false;
 
-                string _feed_names_location = "feeds.txt";
+    void activate_allegro_graphics_engine(interactionstate* interaction_ctx, interaction_callback_type);
 
-                vector<string> _feednames;
-                vector<material> _feed_articles;
-                vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
-                void get_rss_feed_names_and_articles();
-                bool update_feed_source();
-                
-                void process_interactions(interactionstate* interaction_ctx);
-                void build_visual_model();
-                void update_visual_output();
+    void initialize_allegro_graphics_engine(interactionstate* interaction_ctx);
+    void shutdown_allegro_graphics_engine();
 
-                void persist_interaction_state(interactionstate* interaction_ctx);
-                const char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
-                /*Widget geometry and visualization*/
-                enum visual_index_rss_reader_region {
-                        header = 0,//RSS Reader Header
-                        headlines = 1,//RSS Reader Headlines
-                        article_content = 2,//RSS Reader article content
-                        control_bar = 3,//RSS Reader Control Bar
-                        change_bar = 4,//RSS Reader RSS Change Bar
-                        choice_bar = 5//RSS Reader Feed Choice Bar
-                };
+    bool check_keyboard(interactionstate* interaction_ctx);
+    void update_textfield(textbuffer* tb, visualcallable& vc);
 
-                enum visual_index_rss_reader_widget_type {
-                        squared_region = 0,
-                        left_aligned_button = 1,
-                        right_aligned_button = 2,
-                        text_field = 3,
-                        vertical_scrollbar = 4
-                };
+    /*Application Logic Implementation*/
+    bool
+    _article_contents_enlarge,
+    _feed_articles_requested,
+    _render_is_requested,
+    _article_selected
+        = false;
 
-                vector<visualcallable> _callables;
+    int _feed_index = 0;//Defaults to the first feed, if available;
 
-                double 
-                _workarea_x,
-                _workarea_y,
-                _workarea_w,
-                _workarea_h,
+    string _feed_names_location = "feeds.txt";
 
-                _screen_x,
-                _screen_y,
-                _screen_w,
-                _screen_h,
+    vector<string> _feednames;
+    vector<material> _feed_articles;
+    vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
+    void get_rss_feed_names_and_articles();
+    bool update_feed_source();
 
-                _screen_dpi
-                = 0;
+    void process_interactions(interactionstate* interaction_ctx);
+    void build_visual_model();
+    void update_visual_output();
 
-                bool _processing = false;
+    void persist_interaction_state(interactionstate* interaction_ctx);
+    const char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
+    /*Widget geometry and visualization*/
+    enum visual_index_rss_reader_region {
+        header = 0,//RSS Reader Header
+        headlines = 1,//RSS Reader Headlines
+        article_content = 2,//RSS Reader article content
+        control_bar = 3,//RSS Reader Control Bar
+        change_bar = 4,//RSS Reader RSS Change Bar
+        choice_bar = 5//RSS Reader Feed Choice Bar
+    };
 
-                int 
-                _headline_index = -1;
+    enum visual_index_rss_reader_widget_type {
+        squared_region = 0,
+        left_aligned_button = 1,
+        right_aligned_button = 2,
+        text_field = 3,
+        vertical_scrollbar = 4
+    };
 
-                const int _default_widget_font_size = 12;
-                const double _default_label_margin_left = 4;
+    vector<visualcallable> _callables;
 
-                const char* _font_file_location = "NotoSans-Regular.ttf";
-                
-                int _default_font_size = 10;
+    double
+    _workarea_x,
+    _workarea_y,
+    _workarea_w,
+    _workarea_h,
 
-                map<int, ALLEGRO_FONT*> _fonts;
+    _screen_x,
+    _screen_y,
+    _screen_w,
+    _screen_h,
 
-                double get_screen_dpi();
+    _screen_dpi
+        = 0;
 
-                ALLEGRO_FONT* load_sized_font(const int font_size, const char* font_file_location);
+    bool _processing = false;
 
-                dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
-                constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
-                constexpr double measure_widget_y(const double region_h_half, const double button_h);
-                void measure_screen(interactionstate* interaction_ctx);
+    int
+    _headline_index = -1;
 
-                vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
+    const int _default_widget_font_size = 12;
+    const double _default_label_margin_left = 4;
 
-                visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2, 
-                const double bdr_width, const double scrollbar_width);
+    const char* _font_file_location = "NotoSans-Regular.ttf";
 
-                visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
-                bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text);
+    int _default_font_size = 10;
 
-                visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
-                bool trim_to_label, const double bdr_width, string label_text);
+    map<int, ALLEGRO_FONT*> _fonts;
 
-                visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
-                const double y_offset, double& next_y, const double bdr_width, string label_text);
+    double get_screen_dpi();
 
-                void draw_region_background(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
+    ALLEGRO_FONT* load_sized_font(const int font_size, const char* font_file_location);
 
-                void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
+    dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
+    constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
+    constexpr double measure_widget_y(const double region_h_half, const double button_h);
+    void measure_screen(interactionstate* interaction_ctx);
 
-                void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+    vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
 
-                void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+    visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2,
+            const double bdr_width, const double scrollbar_width);
 
-                void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2, 
-                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
-        };
+    visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2,
+            bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text);
+
+    visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2,
+            bool trim_to_label, const double bdr_width, string label_text);
+
+    visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2,
+            const double y_offset, double& next_y, const double bdr_width, string label_text);
+
+    void draw_region_background(const double x1, const double y1, const double x2, const double y2,
+                                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
+
+    void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2,
+                                         ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
+
+    void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2,
+                                  ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+
+    void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2,
+                                   ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+
+    void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2,
+                                     ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
+};
 }
 }
 #endif

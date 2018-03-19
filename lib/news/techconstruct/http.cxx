@@ -18,48 +18,47 @@ using cls = rss_techconstruct::http;
 using cls_fs = rss_techconstruct::file;
 
 bool cls::check_url_is_http(string url) {
-	bool result = false;
+    bool result = false;
 
-	int found_string_comparison_http = icompare(url, 0, 4, "http");
-	
-	result = (found_string_comparison_http == 0);
+    int found_string_comparison_http = icompare(url, 0, 4, "http");
 
-	if(!result) {
-		int found_string_comparison_https = icompare(url, 0, 5, "https");
+    result = (found_string_comparison_http == 0);
 
-		result = (found_string_comparison_https == 0);
-	}
+    if(!result) {
+        int found_string_comparison_https = icompare(url, 0, 5, "https");
 
-	return result;
+        result = (found_string_comparison_https == 0);
+    }
+
+    return result;
 }
 
 void cls::get_stream(string url, string& output) {
-	string request_method = "GET";
+    string request_method = "GET";
 
-	URI request_uri(url);
-	
-	HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
+    URI request_uri(url);
 
-	HTTPRequest http_request(request_method, url);
+    HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
 
-	try {
-		http_session.sendRequest(http_request);
+    HTTPRequest http_request(request_method, url);
 
-		HTTPResponse http_response;
+    try {
+        http_session.sendRequest(http_request);
 
-		istream& temp_http_response_stream = http_session.receiveResponse(http_response);
+        HTTPResponse http_response;
 
-                cls_fs filehandler;
-                
-		filehandler.read_istream_into_string(temp_http_response_stream, output);
-	}
-	catch(const exception e) {
-	        const string exception_explanation(e.what());
-		if(exception_explanation == "Host not found") {
-			cout << e.what() << " " << "reverting to offline copy if available.\n";
-		}
-	}
+        istream& temp_http_response_stream = http_session.receiveResponse(http_response);
 
-	return;
+        cls_fs filehandler;
+
+        filehandler.read_istream_into_string(temp_http_response_stream, output);
+    } catch(const exception e) {
+        const string exception_explanation(e.what());
+        if(exception_explanation == "Host not found") {
+            cout << e.what() << " " << "reverting to offline copy if available.\n";
+        }
+    }
+
+    return;
 }
 

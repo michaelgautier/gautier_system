@@ -10,7 +10,7 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
 Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
+POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
@@ -18,14 +18,14 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #define __newsmaterial__
 #include <string>
 namespace rss {
-	class material {
-		public:
-			int id{0};
+class material {
+  public:
+    int id{0};
 
-			std::string headline{};
-			std::string url{};
-			std::string description{};
-			std::string article_date{};
-	};
+    std::string headline{};
+    std::string url{};
+    std::string description{};
+    std::string article_date{};
+};
 }
 #endif

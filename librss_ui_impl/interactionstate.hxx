@@ -11,50 +11,50 @@
 namespace visualfunc {
 namespace formulation {
 struct InteractionState {
-	public:
-	InteractionState(const InteractionState&) = default;	
-	InteractionState() = default;
+  public:
+    InteractionState(const InteractionState&) = default;
+    InteractionState() = default;
 
-        bool 
-                IsWindowOpen, 
-                IsWindowResized, 
-                IsMouseDown, 
-                IsMouseUp,
-                IsVisualModelChanged,
-                IsDisplayUpdated,
-                IsDisplayUpdating,
-                IsKeyAvailable,
-                IsKeyUp,
-                IsKeyDown,
-                IsShiftDown,
-                IsCapsLockOn
-                = false;
+    bool
+    IsWindowOpen,
+    IsWindowResized,
+    IsMouseDown,
+    IsMouseUp,
+    IsVisualModelChanged,
+    IsDisplayUpdated,
+    IsDisplayUpdating,
+    IsKeyAvailable,
+    IsKeyUp,
+    IsKeyDown,
+    IsShiftDown,
+    IsCapsLockOn
+        = false;
 
-        int 
-                MonitorWidth,
-                MonitorHeight,
-                WindowWidth,
-                WindowHeight,
-                MouseButton,
-                MouseDirection,
-                KeyboardKeyCode;
+    int
+    MonitorWidth,
+    MonitorHeight,
+    WindowWidth,
+    WindowHeight,
+    MouseButton,
+    MouseDirection,
+    KeyboardKeyCode;
 
-        int
-                KeyUnicode;
-        unsigned
-                KeyModifiers;
+    int
+    KeyUnicode;
+    unsigned
+    KeyModifiers;
 
-        dlib::drectangle 
-                WindowDimensions;
+    dlib::drectangle
+    WindowDimensions;
 
-        dlib::dpoint 
-                MousePosition;
+    dlib::dpoint
+    MousePosition;
 
-        dlib::dpoint 
-                WindowPosition;
+    dlib::dpoint
+    WindowPosition;
 
-        bool operator ==(const InteractionState& rhs);
-        bool operator !=(const InteractionState& rhs);
+    bool operator ==(const InteractionState& rhs);
+    bool operator !=(const InteractionState& rhs);
 };
 }
 }

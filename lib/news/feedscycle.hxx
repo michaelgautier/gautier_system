@@ -10,7 +10,7 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
 Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
+POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
@@ -21,12 +21,12 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 #include <vector>
 
 namespace rss {
-        using namespace std;
-	class feedscycle {
-		public:
-                void get_feed_names_and_addresses(string& location, vector<::rss::request>& feed_parameters);
-                void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
-                vector<string> set_feed_name_and_address(string& location, string& feed_name, string& feed_url);
-	};
+using namespace std;
+class feedscycle {
+  public:
+    void get_feed_names_and_addresses(string& location, vector<::rss::request>& feed_parameters);
+    void get_feed_parameter_lines_from_config(string& location, vector<string>& feed_parameter_lines);
+    vector<string> set_feed_name_and_address(string& location, string& feed_name, string& feed_url);
+};
 }
 #endif

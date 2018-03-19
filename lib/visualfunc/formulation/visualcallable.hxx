@@ -10,7 +10,7 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
 Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
+POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
@@ -22,80 +22,80 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
 namespace visualfunc {
 namespace formulation {
-        using namespace std;
-        class visualcallable {
-                private:
-                        int _id = 0;
-                        int _type_id = 0;
+using namespace std;
+class visualcallable {
+  private:
+    int _id = 0;
+    int _type_id = 0;
 
-                        double _x = 0;
-                        double _y = 0;
-                        double _w = 0;
-                        double _h = 0;
+    double _x = 0;
+    double _y = 0;
+    double _w = 0;
+    double _h = 0;
 
-                        double _line_stroke_width_left = 1;
-                        double _line_stroke_width_top = 1;
-                        double _line_stroke_width_right = 1;
-                        double _line_stroke_width_bottom = 1;
-                        
-                        string _label;
-                        
-                        vector<visualcallable> _callables;
-                public:
-                        visualcallable(const int id) {
-                                _id = id;
-                                
-                                return;
-                        }
-                        
-                        int id();
-                        void id(const int v);
-                        
-                        int type_id();
-                        void type_id(const int v);
-                        
-                        double x();
-                        void x(const double v);
-                        
-                        double y();
-                        void y(const double v);
-                        
-                        double w();
-                        void w(const double v);
-                        
-                        double h();
-                        void h(const double v);
+    double _line_stroke_width_left = 1;
+    double _line_stroke_width_top = 1;
+    double _line_stroke_width_right = 1;
+    double _line_stroke_width_bottom = 1;
 
-                        double line_stroke_width_left();
-                        void line_stroke_width_left(const double v);
+    string _label;
 
-                        double line_stroke_width_top();
-                        void line_stroke_width_top(const double v);
+    vector<visualcallable> _callables;
+  public:
+    visualcallable(const int id) {
+        _id = id;
 
-                        double line_stroke_width_right();
-                        void line_stroke_width_right(const double v);
+        return;
+    }
 
-                        double line_stroke_width_bottom();
-                        void line_stroke_width_bottom(const double v);
+    int id();
+    void id(const int v);
 
-                        void line_stroke_width(const double v);
-                        double line_stroke_width();
+    int type_id();
+    void type_id(const int v);
 
-                        double x1();
-                        double x2();
+    double x();
+    void x(const double v);
 
-                        double y1();
-                        double y2();
+    double y();
+    void y(const double v);
 
-                        string label();
-                        
-                        void label(string v);
-                        void label(const char* v);
-                        
-                        vector<visualcallable> callables();
-                        void callables(vector<visualcallable> v);
-                        void add_descendant(visualcallable v);
-        };
+    double w();
+    void w(const double v);
+
+    double h();
+    void h(const double v);
+
+    double line_stroke_width_left();
+    void line_stroke_width_left(const double v);
+
+    double line_stroke_width_top();
+    void line_stroke_width_top(const double v);
+
+    double line_stroke_width_right();
+    void line_stroke_width_right(const double v);
+
+    double line_stroke_width_bottom();
+    void line_stroke_width_bottom(const double v);
+
+    void line_stroke_width(const double v);
+    double line_stroke_width();
+
+    double x1();
+    double x2();
+
+    double y1();
+    double y2();
+
+    string label();
+
+    void label(string v);
+    void label(const char* v);
+
+    vector<visualcallable> callables();
+    void callables(vector<visualcallable> v);
+    void add_descendant(visualcallable v);
+};
 }
 }
 #endif

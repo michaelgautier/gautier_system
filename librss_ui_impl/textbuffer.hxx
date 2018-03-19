@@ -10,7 +10,7 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
 Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors; 
+POCO C++ Libraries released under the Boost Software License; Copyright 2017, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 */
 
@@ -21,21 +21,21 @@ C++ Standard Library; Copyright 2017 Standard C++ Foundation.
 
 namespace rss {
 namespace ui {
-        using namespace std;
-        class textbuffer {
-                public:
-                        int buffer_x = 0;
-                        int buffer_visual_width = 0;
-                        int letter_width = 0;
-                        int text_visual_size = 0;
+using namespace std;
+class textbuffer {
+  public:
+    int buffer_x = 0;
+    int buffer_visual_width = 0;
+    int letter_width = 0;
+    int text_visual_size = 0;
 
-                        int buffer_insert_pos = 0;
-                        int buffer_select_end_pos = 0;
+    int buffer_insert_pos = 0;
+    int buffer_select_end_pos = 0;
 
-                        int last_char_size = 0;//When this differs from text.size(), then redraw. That way, text doesn't have to be real-time.
+    int last_char_size = 0;//When this differs from text.size(), then redraw. That way, text doesn't have to be real-time.
 
-                        string text;                        
-        };
+    string text;
+};
 }
 }
 #endif
