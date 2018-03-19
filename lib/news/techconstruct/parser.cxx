@@ -42,14 +42,14 @@ vector<material> cls::read(string newsdocument) {
                 Process:        CONVERT RSS XML TO SEQUENTIAL STRUCTURE
                 Overview:       Translate multi-level Xml hierarchy into a 1-dimensional array
                 Strategies:
-                                Algorithmic approach - Branch and Bound (see Wladston, Ferreira, Filho 2017)
+                                Algorithmic approach - Branch and Bound (see Wladston, Ferreira, Filho 2018)
                                 Replace structure processing by recursion with structure processing by iteration
                                 Visits tree nodes through a bounded general graph search algorithm represented as a breadth first search
                 History
-                                9/30/2017 - Implemented as a conventional recursive algorithm. Termination criteria based on
+                                9/30/2018 - Implemented as a conventional recursive algorithm. Termination criteria based on
                                 visiting the last node at the first level. The linear array was populated based on all field
                                 values set on a structured passed across recursive function calls.
-                                11/3/2017 - Replaced the recursive process with an iteration modeled on processing a doublely linked list.
+                                11/3/2018 - Replaced the recursive process with an iteration modeled on processing a doublely linked list.
                 Notes           Approach was chosen for the following reasons
                                 - Avoid large function call stack accumulations in the event a larger document is input
                                 - Fill output data structures based on the proximity of input elements rather than just their tag values
