@@ -13,10 +13,8 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-
 #ifndef __rss_ui_mainscreengenerator__
 #define __rss_ui_mainscreengenerator__
-
 #include <vector>
 #include <map>
 
@@ -35,111 +33,68 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "textbuffer.hxx"
 #include "interactionstate.hxx"
+#include "keyboardtr.hxx"
+#include "interactionengine.hxx"
 
 namespace rss {
 namespace ui {
 using namespace std;
 class mainscreengenerator {
   public:
-    using interactionstate = ::visualfunc::formulation::InteractionState;
-    using interaction_callback_type = void(*)(interactionstate*);
-    using textbuffer = ::rss::ui::textbuffer;
     using material = ::rss::material;
     using request = ::rss::request;
+
+    using interactionstate = ::visualfunc::formulation::InteractionState;
+    using textbuffer = ::visualfunc::formulation::textbuffer;
     using visualcallable = ::visualfunc::formulation::visualcallable;
+    using keyboardtr = ::visualfunc::formulation::keyboardtr;
+    using interactionengine = ::visualfunc::formulation::interactionengine;
 
     mainscreengenerator();
     ~mainscreengenerator();
+
     void init();
     void generate();
 
     /*Application Logic*/
-    void process_updates(interactionstate* interactionState);
+    void process_updates(interactionstate* interaction_ctx);
 
   private:
-    /*Text Input*/
-    int _text_buffer_index = -1;
-    vector<textbuffer> _texts;
+    interactionstate* _interaction_ctx;
+    interactionengine::interaction_callback_type _interaction_callback;
+    interactionengine _uiengine;
+    keyboardtr _keyboardtr;
 
-    /*Graphics Engine*/
-    ALLEGRO_DISPLAY*
-    _win_ctx = nullptr;
+    bool _article_contents_enlarge = false;
+    bool _article_selected = false;
+    bool _feed_articles_requested = false;
+    bool _keyboard_field_active = false;
+    bool _processing = false;
+    bool _render_is_requested = false;
 
-    ALLEGRO_MONITOR_INFO
-    _win_screen_info;
-
-    ALLEGRO_EVENT_QUEUE*
-    _win_msg_evt_queue = nullptr;
-
-    ALLEGRO_EVENT_SOURCE*
-    _win_msg_evt_src = nullptr;
-
-    ALLEGRO_EVENT
-    _winmsg_event;
-
-
-    ALLEGRO_EVENT_QUEUE*
-    _mouse_evt_queue = nullptr;
-
-    ALLEGRO_EVENT_SOURCE*
-    _mouse_evt_src = nullptr;
-
-    ALLEGRO_EVENT
-    _mouse_event;
-
-
-    ALLEGRO_EVENT_QUEUE*
-    _keyboard_evt_queue = nullptr;
-
-    ALLEGRO_EVENT_SOURCE*
-    _keyboard_evt_src = nullptr;
-
-    ALLEGRO_EVENT
-    _keyboard_event;
-
-    interactionstate* _inter_sts = nullptr;
-    interactionstate* _inter_sts_lst = nullptr;
-
-    interaction_callback_type
-    _interaction_callback;
-
-    bool
-    _is_allegro_initialized,
-    _is_allegro_uninitialized
-        = false;
-
-    void activate_allegro_graphics_engine(interactionstate* interaction_ctx, interaction_callback_type);
-
-    void initialize_allegro_graphics_engine(interactionstate* interaction_ctx);
-    void shutdown_allegro_graphics_engine();
-
-    bool check_keyboard(interactionstate* interaction_ctx, const float wait_time);
-    void update_textfield(textbuffer* tb, visualcallable& vc);
-
-    /*Application Logic Implementation*/
-    bool
-    _article_contents_enlarge,
-    _feed_articles_requested,
-    _render_is_requested,
-    _article_selected
-        = false;
+    const char* _font_file_location = "NotoSans-Regular.ttf";
+    const double _default_label_margin_left = 4;
+    const int _default_widget_font_size = 12;
 
     int _feed_index = 0;//Defaults to the first feed, if available;
+    int _headline_index = -1;
 
     string _feed_names_location = "feeds.txt";
 
-    vector<string> _feednames;
     vector<material> _feed_articles;
     vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
-    void get_rss_feed_names_and_articles();
-    bool update_feed_source();
+    vector<string> _feednames;
 
-    void process_interactions(interactionstate* interaction_ctx);
+    vector<visualcallable> _callables;
+    vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
+
     void build_visual_model();
+    void process_interactions(interactionstate* interaction_ctx);
     void update_visual_output();
 
-    void persist_interaction_state(interactionstate* interaction_ctx);
-    const char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
+    bool update_feed_source();
+    void get_rss_feed_names_and_articles();
+
     /*Widget geometry and visualization*/
     enum visual_index_rss_reader_region {
         header = 0,//RSS Reader Header
@@ -149,83 +104,6 @@ class mainscreengenerator {
         change_bar = 4,//RSS Reader RSS Change Bar
         choice_bar = 5//RSS Reader Feed Choice Bar
     };
-
-    enum visual_index_rss_reader_widget_type {
-        squared_region = 0,
-        left_aligned_button = 1,
-        right_aligned_button = 2,
-        text_field = 3,
-        vertical_scrollbar = 4
-    };
-
-    vector<visualcallable> _callables;
-
-    double
-    _workarea_x,
-    _workarea_y,
-    _workarea_w,
-    _workarea_h,
-
-    _screen_x,
-    _screen_y,
-    _screen_w,
-    _screen_h,
-
-    _screen_dpi
-        = 0;
-
-    bool _processing = false;
-    bool _keyboard_field_active = false;
-
-    int
-    _headline_index = -1;
-
-    const int _default_widget_font_size = 12;
-    const double _default_label_margin_left = 4;
-
-    const char* _font_file_location = "NotoSans-Regular.ttf";
-
-    int _default_font_size = 10;
-
-    map<int, ALLEGRO_FONT*> _fonts;
-
-    double get_screen_dpi();
-
-    ALLEGRO_FONT* load_sized_font(const int font_size, const char* font_file_location);
-
-    dlib::drectangle measure_text_by_sized_font(const char* str, int font_size, const char* font_file_location);
-    constexpr double measure_font_y_offset(const double y1, const double y2, const double h);
-    constexpr double measure_widget_y(const double region_h_half, const double button_h);
-    void measure_screen(interactionstate* interaction_ctx);
-
-    vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
-
-    visualcallable build_visual_vertical_scrollbar(const double x1, const double y1, const double x2, const double y2,
-            const double bdr_width, const double scrollbar_width);
-
-    visualcallable build_visual_left_aligned_widget(const double x1, const double y1, const double x2, const double y2,
-            bool trim_to_label, const double x_offset, double& next_x, const double bdr_width, string label_text);
-
-    visualcallable build_visual_right_aligned_button(const double x1, const double y1, const double x2, const double y2,
-            bool trim_to_label, const double bdr_width, string label_text);
-
-    visualcallable build_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2,
-            const double y_offset, double& next_y, const double bdr_width, string label_text);
-
-    void draw_region_background(const double x1, const double y1, const double x2, const double y2,
-                                ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width);
-
-    void draw_scrollbar_right_background(const double x1, const double y1, const double x2, const double y2,
-                                         ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, const double scrollbar_width);
-
-    void draw_left_aligned_widget(const double x1, const double y1, const double x2, const double y2,
-                                  ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
-
-    void draw_right_aligned_button(const double x1, const double y1, const double x2, const double y2,
-                                   ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
-
-    void draw_visual_vertical_widget(const double x1, const double y1, const double x2, const double y2,
-                                     ALLEGRO_COLOR& bkg_clr, ALLEGRO_COLOR& bdr_clr, const double bdr_width, string label_text, ALLEGRO_COLOR& label_color);
 };
 }
 }
