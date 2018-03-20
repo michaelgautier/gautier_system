@@ -6,9 +6,9 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-./build_libnews_collector.sh
-./build_libnews_feedscycle.sh
-./build_libnews_file.sh
-./build_libnews_http.sh
-./build_libnews_parser.sh
-
+rm obj/libui_visualcallable.o
+rm bin/libui_visualcallable.so
+echo "build visual callable"
+g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libui_visualcallable.o ../lib/visualfunc/formulation/visualcallable.cxx
+g++ -g -shared -L./bin -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libui_visualcallable.so obj/libui_visualcallable.o
+ls -gGh bin/libui_visualcallable*

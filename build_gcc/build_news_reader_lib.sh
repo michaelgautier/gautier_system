@@ -6,35 +6,10 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
+./build_libui_interactionengine.sh
+./build_libui_interactionstate.sh
+./build_libui_keyboardtr.sh
+./build_libui_textbuffer.sh
+./build_libui_visualcallable.sh
+./build_librssui_mainscreengenerator.sh
 
-rm obj/librssui_*.o
-rm bin/librssui_*.so
-
-echo "	build"
-ls -gGhU
-
-echo "build visual callable"
-g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libnews_visualcallable.o ../lib/visualfunc/formulation/visualcallable.cxx
-g++ -g -shared -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libnews_visualcallable.so obj/libnews_visualcallable.o
-
-#echo "build main screen blueprint"
-#g++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreenblueprint.o ../librss_ui_impl/mainscreenblueprint.cxx
-#g++ -g -shared -Wl,-rpath,. -o bin/librssui_mainscreenblueprint.so obj/librssui_mainscreenblueprint.o
-
-echo "build interaction state"
-g++ -std=c++14 -c -fPIC -g -o obj/librssui_interactionstate.o ../librss_ui_impl/interactionstate.cxx
-g++ -g -shared -L./bin -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_interactionstate.so obj/librssui_interactionstate.o
-
-echo "build text buffer"
-g++ -std=c++14 -c -fPIC -g -o obj/librssui_textbuffer.o ../librss_ui_impl/textbuffer.cxx
-g++ -g -shared -L./bin -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_textbuffer.so obj/librssui_textbuffer.o
-
-echo "build main screen generator"
-g++ -std=c++14 -c -fPIC -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
-g++ -g -shared -L./bin -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreengenerator.so obj/librssui_mainscreengenerator.o
-
-echo "	obj"
-ls -gGh obj/
-
-echo "	bin"
-ls -gGh bin/*.so

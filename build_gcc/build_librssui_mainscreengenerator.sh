@@ -6,9 +6,9 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-./build_libnews_collector.sh
-./build_libnews_feedscycle.sh
-./build_libnews_file.sh
-./build_libnews_http.sh
-./build_libnews_parser.sh
-
+rm obj/librssui_mainscreengenerator.o
+rm bin/librssui_mainscreengenerator.so
+echo "build main screen generator"
+g++ -std=c++14 -c -fPIC -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
+g++ -g -shared -L./bin -I../librss_ui_impl/ -Wl,-rpath,. -o bin/librssui_mainscreengenerator.so obj/librssui_mainscreengenerator.o
+ls -gGh bin/librssui_mainscreengenerator*
