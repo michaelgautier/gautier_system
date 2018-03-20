@@ -13,14 +13,12 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-
-#ifndef __rss_ui_textbuffer__
-#define __rss_ui_textbuffer__
-
+#ifndef __visualfunc_formulation_textbuffer__
+#define __visualfunc_formulation_textbuffer__
 #include <string>
 
-namespace rss {
-namespace ui {
+namespace visualfunc {
+namespace formulation {
 using namespace std;
 class textbuffer {
   public:

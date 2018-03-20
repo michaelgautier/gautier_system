@@ -13,10 +13,8 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-
 #ifndef __visualfunc_formulation_visualcallable__
 #define __visualfunc_formulation_visualcallable__
-
 #include <string>
 #include <vector>
 
