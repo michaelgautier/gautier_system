@@ -6,9 +6,9 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-./build_libnews_collector.sh
-./build_libnews_feedscycle.sh
-./build_libnews_file.sh
-./build_libnews_http.sh
-./build_libnews_parser.sh
-
+rm obj/libnews_parser.o
+rm bin/libnews_parser.so
+echo "build parser lib"
+clang++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -I../lib/news/ -o obj/libnews_parser.o ../lib/news/techconstruct/parser.cxx
+clang++ -g -shared -lPocoFoundation -lPocoXML -Wl,-rpath,. -o bin/libnews_parser.so obj/libnews_parser.o
+ls -gGh bin/libnews_parser*

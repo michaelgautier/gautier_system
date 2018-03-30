@@ -6,9 +6,9 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-./build_libnews_collector.sh
-./build_libnews_feedscycle.sh
-./build_libnews_file.sh
-./build_libnews_http.sh
-./build_libnews_parser.sh
-
+rm obj/libui_keyboardtr.o
+rm bin/libui_keyboardtr.so
+echo "keyboard tr"
+clang++ -std=c++14 -c -fPIC -g -I../lib/visualfunc/formulation/ -o obj/libui_keyboardtr.o ../lib/visualfunc/formulation/keyboardtr.cxx
+clang++ -g -shared -L./bin -I../lib/visualfunc/formulation/ -Wl,-rpath,. -o bin/libui_keyboardtr.so obj/libui_keyboardtr.o
+ls -gGh bin/libui_keyboardtr*
