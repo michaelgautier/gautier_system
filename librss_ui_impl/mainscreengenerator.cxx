@@ -39,8 +39,8 @@ cls::mainscreengenerator() {
 
     _interaction_ctx = new interactionstate();
 
-    _keyboardtr._texts.emplace_back(textbuffer());
-    _keyboardtr._texts.emplace_back(textbuffer());
+    _keyboardtr.texts.emplace_back(textbuffer());
+    _keyboardtr.texts.emplace_back(textbuffer());
 
     return;
 }
@@ -112,7 +112,7 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
     mouse_button = interaction_ctx->MouseButton;
 
     const bool
-    is_mouse_click = (interaction_ctx->IsMouseUp && _uiengine._interactionstate_previous->IsMouseDown),
+    is_mouse_click = (interaction_ctx->IsMouseUp && _uiengine.interactionstate_previous->IsMouseDown),
     is_mouse_down = interaction_ctx->IsMouseDown,
     is_mouse_button_left = (mouse_button == 1);
 
@@ -151,14 +151,14 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
         const double feed_bar_y_end = feed_bar_y_start + feed_bar_callable.h();
 
         if(mouse_y >= headline_y_start && mouse_y <= headline_y_end) {
-            dlib::drectangle button_dimensions = _uiengine.measure_text_by_sized_font("WWWWWWWWWWWWWWWW", _uiengine._default_font_size, _font_file_location);
+            dlib::drectangle button_dimensions = _uiengine.measure_text_by_sized_font("WWWWWWWWWWWWWWWW", _uiengine.default_font_size, _font_file_location);
 
             const double headline_h = button_dimensions.bottom();
 
             int headline_index = 0;
 
             for(double y = headline_y_start; y <= headline_y_end; y = y + headline_h) {
-                dlib::drectangle headline_region(0, y, _uiengine._workarea_w, (y + headline_h));
+                dlib::drectangle headline_region(0, y, _uiengine.workarea_w, (y + headline_h));
 
                 if(headline_region.contains(mouse_position)) {
                     _headline_index = headline_index;
@@ -190,8 +190,8 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
 
                 if(region.contains(mouse_position)) {
                     if(widget_index > -1 && widget_index < 2) {
-                        _keyboardtr._text_buffer_index = widget_index;
-                        (&_keyboardtr._texts[_keyboardtr._text_buffer_index])->buffer_x = mouse_x;
+                        _keyboardtr.text_buffer_index = widget_index;
+                        (&_keyboardtr.texts[_keyboardtr.text_buffer_index])->buffer_x = mouse_x;
                         _keyboard_field_active = true;
                     } else if (widget_index == 2) {
                         bool feed_sources_updated = update_feed_source();
@@ -235,8 +235,8 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
         }
     }
 
-    if(!_keyboard_field_active && _keyboardtr._text_buffer_index > -1) {
-        _keyboardtr._text_buffer_index = -1;
+    if(!_keyboard_field_active && _keyboardtr.text_buffer_index > -1) {
+        _keyboardtr.text_buffer_index = -1;
     } else if(_keyboard_field_active) {
         int key_update_count = 0;
         /*The following technique is not perfect but it works in the limited testing conducted.*/
@@ -246,7 +246,7 @@ void cls::process_interactions(interactionstate* interaction_ctx) {
         while(elapsed_time < 1000000 && _keyboardtr.check_keyboard(interaction_ctx, wait_time)) {
             elapsed_time += wait_time;
 
-            key_update_count = _keyboardtr.process_keyboard(interaction_ctx,_uiengine._interactionstate_previous);
+            key_update_count = _keyboardtr.process_keyboard(interaction_ctx,_uiengine.interactionstate_previous);
 
             _uiengine.persist_interaction_state(interaction_ctx);
         }
@@ -293,7 +293,7 @@ void cls::build_visual_model() {
         }
     }
 
-    _callables = get_visual_definitions(_uiengine._workarea_x, _uiengine._screen_y, _uiengine._workarea_w, _uiengine._workarea_h);
+    _callables = get_visual_definitions(_uiengine.workarea_x, _uiengine.screen_y, _uiengine.workarea_w, _uiengine.workarea_h);
 
     const int callable_size = _callables.size();
 
@@ -412,15 +412,15 @@ void cls::build_visual_model() {
         }
         break;
         case visual_index_rss_reader_region::change_bar: { //RSS Reader RSS Change Bar
-            vector<string> widget_texts = {"THE LONGEST FEED NAME EVER", "HTTPS://WWWWWWWWWWWWWWWW.COM", "Update"};
+            vector<string> widgettexts = {"THE LONGEST FEED NAME EVER", "HTTPS://WWWWWWWWWWWWWWWW.COM", "Update"};
 
             double next_x = 20;
             const double x_offset = 20;
 
             const double widget_border_line_width = 1;
 
-            for(int widget_index = 0; widget_index < widget_texts.size(); widget_index++) {
-                string label_text = widget_texts[widget_index];
+            for(int widget_index = 0; widget_index < widgettexts.size(); widget_index++) {
+                string label_text = widgettexts[widget_index];
 
                 visualcallable descendant_callable = _uiengine.build_visual_left_aligned_widget(x1, y1, x2, y2,
                                                      (widget_index == 2), x_offset, next_x,
@@ -429,7 +429,7 @@ void cls::build_visual_model() {
                 switch(widget_index) {
                 case 0:
                 case 1:
-                    _uiengine.update_textfield(&_keyboardtr._texts[widget_index], descendant_callable, interactionengine::widget_type::text_field);
+                    _uiengine.update_textfield(&_keyboardtr.texts[widget_index], descendant_callable, interactionengine::widget_type::text_field);
                     break;
                 case 2:
                     descendant_callable.type_id(interactionengine::widget_type::left_aligned_button);
@@ -535,7 +535,7 @@ void cls::update_visual_output() {
                     const double headline_border_line_width = descendant_callable.line_stroke_width();
 
                     const double c_x1 = descendant_callable.x();
-                    const double c_x2 = _uiengine._workarea_w;
+                    const double c_x2 = _uiengine.workarea_w;
                     const double c_y1 = descendant_callable.y();
                     const double c_y2 = descendant_callable.h();
 
@@ -699,8 +699,8 @@ void cls::update_visual_output() {
                         widget_background_color = al_map_rgb(255, 255, 255);
                         widget_text = descendant_callable.label();
 
-                        if(text_field_edit_index == _keyboardtr._text_buffer_index) {
-                            textbuffer* text_buffer = &_keyboardtr._texts[_keyboardtr._text_buffer_index];
+                        if(text_field_edit_index == _keyboardtr.text_buffer_index) {
+                            textbuffer* text_buffer = &_keyboardtr.texts[_keyboardtr.text_buffer_index];
 
                             ALLEGRO_COLOR highlight_background_color = al_map_rgb(255, 246, 213);
                             widget_background_color = highlight_background_color;
@@ -716,7 +716,7 @@ void cls::update_visual_output() {
                                                        widget_text, widget_text_color);
 
                     if(text_field_highlight) {
-                        textbuffer* text_buffer = &_keyboardtr._texts[_keyboardtr._text_buffer_index];
+                        textbuffer* text_buffer = &_keyboardtr.texts[_keyboardtr.text_buffer_index];
 
                         ALLEGRO_COLOR vertical_line_color = al_map_rgb(0, 43, 34);
 
@@ -851,7 +851,7 @@ vector<cls::visualcallable> cls::get_visual_definitions(int screen_x, int screen
 
             callable.label("RSS Reader");
 
-            dlib::drectangle text_dimensions = _uiengine.measure_text_by_sized_font(callable.label().data(), _uiengine._default_font_size, _font_file_location);
+            dlib::drectangle text_dimensions = _uiengine.measure_text_by_sized_font(callable.label().data(), _uiengine.default_font_size, _font_file_location);
 
             text_h = text_dimensions.bottom();
 
