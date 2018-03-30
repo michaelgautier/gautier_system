@@ -25,7 +25,11 @@ class textbuffer {
     int buffer_x = 0;
     int buffer_visual_width = 0;
     int letter_width = 0;
-    int text_visual_size = 0;
+    int letter_count = 0;
+    int letter_count_previous = -1;
+
+    int buffer_actual_width = 0;
+    int buffer_next_index = 0;
 
     int buffer_insert_pos = 0;
     int buffer_select_end_pos = 0;

@@ -43,10 +43,11 @@ void cls::persist_interaction_state(interactionstate* interaction_ctx) {
 }
 
 void cls::update_textfield(textbuffer* tb, visualcallable& vc, const int widget_type_id) {
+    dlib::drectangle font_dimensions;
+
     if(tb->buffer_visual_width < 1) {
         tb->buffer_visual_width = vc.x2() - vc.x1();
 
-        dlib::drectangle
         font_dimensions = measure_text_by_sized_font("W", (_default_widget_font_size / 2.0), _font_file_location);
 
         const int font_w = font_dimensions.right();
@@ -54,50 +55,40 @@ void cls::update_textfield(textbuffer* tb, visualcallable& vc, const int widget_
         tb->letter_width = font_w;
     }
 
-    string label_text = tb->text;
+    string letters = tb->text;
 
-    const int label_text_size = label_text.size();
+    const int letter_count = letters.size();
     const int buffer_visual_width = tb->buffer_visual_width;
     const int letter_width = tb->letter_width;
 
-    int label_visual_size = tb->text_visual_size;
+    if(letter_count != tb->letter_count_previous) {
+        font_dimensions = measure_text_by_sized_font(letters.data(), (_default_widget_font_size / 2.0), _font_file_location);
 
-    if(label_text_size > 0 && label_visual_size == 0) {
-        dlib::drectangle
-        font_dimensions = measure_text_by_sized_font(label_text.data(), (_default_widget_font_size / 2.0), _font_file_location);
+        const int buffer_actual_width = font_dimensions.right();
 
-        const int font_w = font_dimensions.right();
-
-        const int remaining_w = (buffer_visual_width - font_w);
-
-        if(abs(remaining_w - letter_width) <= 16) {
-            label_visual_size = label_text_size;
-            tb->text_visual_size = label_visual_size;
+        if(buffer_actual_width != tb->buffer_actual_width) {
+            if(buffer_actual_width > tb->buffer_visual_width) {
+                tb->buffer_next_index = tb->buffer_next_index + 1;
+            } else if(buffer_actual_width < tb->buffer_visual_width && tb->buffer_next_index > 0) {
+                tb->buffer_next_index = tb->buffer_next_index - 1;
+            }
         }
 
-        /*const int text_visual_limit_avg = (text_visual_limit_sum / label_text_size);
+        /*cout << "check buffer width ------------------------ \n";
+        cout << "letter count " << letter_count << "\n";
+        cout << "actual width " << buffer_actual_width << "\n";
+        cout << "max width " << tb->buffer_visual_width << "\n";
+        cout << "next index " << tb->buffer_next_index << "\n";*/
 
-        const int text_visual_limit = (tb->buffer_visual_width / text_visual_limit_avg);
+        tb->buffer_actual_width = font_dimensions.right();
 
-        tb->letter_width = text_visual_limit_avg;
+        letters = letters.substr(tb->buffer_next_index, letter_count);
 
-        tb->text_visual_size = text_visual_limit;
-
-        cout << "letter_width " << letter_width << "\n";
-        cout << "font_w " << font_w << "\n";
-        cout << "buffer_visual_width " << buffer_visual_width << "\n";
-        cout << "remaining_w " << remaining_w << "\n";
-        cout << "label_text_size " << label_text_size << "\n";
-        cout << "label_visual_size " << label_visual_size << "\n";
-        cout << "----------------------------------------------\n";*/
-    }
-
-    if(label_visual_size != 0) {
-        label_text = label_text.substr(0, label_visual_size);
+        tb->letter_count_previous = letter_count;
     }
 
     vc.type_id(widget_type_id);
-    vc.label(label_text);
+    vc.label(letters);
 
     return;
 }

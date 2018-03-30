@@ -101,6 +101,7 @@ int cls::process_keyboard(interactionstate* interaction_ctx, interactionstate* i
         //cout << "keycode " << keycode << " = " << al_keycode_to_name(keycode) << "\n";
         string* const text = (&(&texts[text_buffer_index])->text);
 
+        /*Ignore these keys for now.*/
         switch (keycode) {
         case ALLEGRO_KEY_BACKSPACE:
             break;
@@ -127,7 +128,9 @@ int cls::process_keyboard(interactionstate* interaction_ctx, interactionstate* i
             //cout << "keycode: " << keycode << " keymodifiers: " << keymodifiers << " encoded data: " << d << "\n";
 
             //_text_buffer_feed_entry->append(al_keycode_to_name(keycode));
-            text->push_back(d);
+            if(d > 0) {
+                text->push_back(d);
+            }
             //cout << "_text_buffer_feed_entry \t " << *_text_buffer_feed_entry << "\n";
         }
         break;
@@ -140,20 +143,32 @@ int cls::process_keyboard(interactionstate* interaction_ctx, interactionstate* i
 const char cls::get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on) {
     char d = 0;
 
-    if(keycode > -1 && keycode < 27) {
-        d = chars[keycode];
+    bool keysel1 = (keycode >= 1 && keycode <= 46);
+    bool keysel2 = (keycode >= 60 && keycode <= 62);
+    bool keysel3 = (keycode >= 65 && keycode <= 66);
+    bool keysel4 = (keycode >= 68 && keycode <= 70);
+    bool keysel5 = (keycode >= 72 && keycode <= 75);
+    bool keysel6 = (keycode >= 86 && keycode <= 89);
+    bool keysel7 = (keycode >= 101 && keycode <= 104);
 
-        if(is_keyboard_caps_on) {
-            d = std::toupper(d);
+    if(keysel1 || keysel2 || keysel3 || keysel4 || keysel5 || keysel6 || keysel7) {
+        if(keycode > -1 && keycode < 27) {
+            d = chars[keycode];
+
+            if(is_keyboard_caps_on) {
+                d = std::toupper(d);
+            } else {
+                d = std::tolower(d);
+            }
         } else {
-            d = std::tolower(d);
+            if(is_keyboard_caps_on) {
+                d = alt_chars[keycode];
+            } else {
+                d = chars[keycode];
+            }
         }
     } else {
-        if(is_keyboard_caps_on) {
-            d = alt_chars[keycode];
-        } else {
-            d = chars[keycode];
-        }
+        d = -1;
     }
 
     return d;
