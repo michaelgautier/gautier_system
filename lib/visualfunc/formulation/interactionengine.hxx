@@ -51,34 +51,21 @@ class interactionengine {
         vertical_scrollbar = 4
     };
 
+    interactionstate* interactionstate_previous;
+    int default_font_size = 10;
+
+    double workarea_x = 0;
+    double workarea_y = 0;
+    double workarea_w = 0;
+    double workarea_h = 0;
+
+    double screen_x = 0;
+    double screen_y = 0;
+    double screen_w = 0;
+    double screen_h = 0;
+
     interactionengine();
     ~interactionengine();
-
-    int _default_widget_font_size = 12;
-    char* _font_file_location;
-    double _default_label_margin_left;
-    std::string _DefaultWindowTitle = "Gautier RSS";
-
-    const double _AvgPhysicalScreenSize = 13.667;
-    const double _PrintPointSize = 72.0;
-
-    double _ScreenDpiLast = 96;
-
-    interactionstate* _interactionstate_previous;
-
-    int _default_font_size = 10;
-
-    double _workarea_x = 0;
-    double _workarea_y = 0;
-    double _workarea_w = 0;
-    double _workarea_h = 0;
-
-    double _screen_x = 0;
-    double _screen_y = 0;
-    double _screen_w = 0;
-    double _screen_h = 0;
-
-    double _screen_dpi = 0;
 
     void persist_interaction_state(interactionstate* interaction_ctx);
 
@@ -179,7 +166,25 @@ class interactionengine {
                                      const double bdr_width,
                                      string label_text,
                                      ALLEGRO_COLOR& label_color);
+
   private:
+    bool _is_allegro_initialized = false;
+    bool _is_allegro_uninitialized = false;
+
+    std::string _default_window_title = "Gautier RSS";
+    char* _font_file_location;
+
+    int _default_widget_font_size = 12;
+    double _default_label_margin_left;
+
+    const double _avg_physical_screen_size = 13.667;
+    const double _print_point_size = 72.0;
+
+    double _screen_dpi_previous = 96;
+    double _screen_dpi = 0;
+
+    map<int, ALLEGRO_FONT*> _fonts;
+
     /*Graphics Engine*/
     ALLEGRO_DISPLAY*
     _win_ctx = nullptr;
@@ -204,11 +209,6 @@ class interactionengine {
 
     ALLEGRO_EVENT
     _mouse_event;
-
-    bool _is_allegro_initialized = false;
-    bool _is_allegro_uninitialized = false;
-
-    map<int, ALLEGRO_FONT*> _fonts;
 };
 }
 }

@@ -6,7 +6,7 @@ extern const char chars[];
 extern const char alt_chars[];
 
 bool cls::check_keyboard(interactionstate* interaction_ctx, const float wait_time) {
-    const bool has_keyboard_event = al_wait_for_event_timed(_keyboard_evt_queue, &_keyboard_event, wait_time);
+    const bool has_keyboard_event = al_wait_for_event_timed(keyboard_evt_queue, &_keyboard_event, wait_time);
 
     if(has_keyboard_event) {
         ALLEGRO_EVENT_TYPE keyboard_event_type = _keyboard_event.type;
@@ -96,10 +96,10 @@ int cls::process_keyboard(interactionstate* interaction_ctx, interactionstate* i
         cout << "is_last_key_same\n";
     }*/
 
-    if(_text_buffer_index != -1 && is_keyboard_key_available && is_keyboard_key_pressed) {
+    if(text_buffer_index != -1 && is_keyboard_key_available && is_keyboard_key_pressed) {
         key_update_count++;
         //cout << "keycode " << keycode << " = " << al_keycode_to_name(keycode) << "\n";
-        string* const text = (&(&_texts[_text_buffer_index])->text);
+        string* const text = (&(&texts[text_buffer_index])->text);
 
         switch (keycode) {
         case ALLEGRO_KEY_BACKSPACE:

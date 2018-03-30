@@ -27,18 +27,19 @@ struct keyboardtr {
     using interactionstate = ::visualfunc::formulation::InteractionState;
 
     ALLEGRO_EVENT_QUEUE*
-    _keyboard_evt_queue = nullptr;
+    keyboard_evt_queue = nullptr;
 
     ALLEGRO_EVENT_SOURCE*
-    _keyboard_evt_src = nullptr;
+    keyboard_evt_src = nullptr;
 
-    ALLEGRO_EVENT
-    _keyboard_event;
-    vector<textbuffer> _texts;
+    vector<textbuffer> texts;
     bool check_keyboard(interactionstate* interaction_ctx, const float wait_time);
     int process_keyboard(interactionstate* interaction_ctx, interactionstate* interaction_ctx_previous);
+    int text_buffer_index = -1;
+  private:
+    ALLEGRO_EVENT
+    _keyboard_event;
     const char get_al_char_from_keycode(int keycode, bool is_keyboard_caps_on);
-    int _text_buffer_index = -1;
 };
 }
 }

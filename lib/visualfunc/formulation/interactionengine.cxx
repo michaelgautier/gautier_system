@@ -3,7 +3,7 @@
 using cls = ::visualfunc::formulation::interactionengine;
 
 cls::interactionengine() {
-    _interactionstate_previous = new interactionstate();
+    interactionstate_previous = new interactionstate();
 
     return;
 }
@@ -11,7 +11,7 @@ cls::interactionengine() {
 cls::~interactionengine() {
     shutdown_allegro_graphics_engine();
 
-    delete _interactionstate_previous;
+    delete interactionstate_previous;
 
     return;
 }
@@ -22,22 +22,22 @@ void cls::measure_screen(interactionstate* interaction_ctx) {
     const double w = interaction_ctx->WindowWidth;
     const double h = interaction_ctx->WindowHeight;
 
-    _workarea_x = x;
-    _workarea_y = y;
-    _workarea_w = w;
-    _workarea_h = h;
+    workarea_x = x;
+    workarea_y = y;
+    workarea_w = w;
+    workarea_h = h;
 
-    /*cout << " workarea w   workarea h  " << _workarea_w << " " << _workarea_h << " \n";*/
+    /*cout << " workarea w   workarea h  " << workarea_w << " " << workarea_h << " \n";*/
 
     return;
 }
 
 void cls::persist_interaction_state(interactionstate* interaction_ctx) {
-    if(_interactionstate_previous) {
-        delete _interactionstate_previous;
+    if(interactionstate_previous) {
+        delete interactionstate_previous;
     }
 
-    _interactionstate_previous = new interactionstate(*interaction_ctx);
+    interactionstate_previous = new interactionstate(*interaction_ctx);
 
     return;
 }
@@ -316,7 +316,7 @@ void cls::draw_visual_vertical_widget(const double x1,
     if(!label_text.empty()) {
         const double font_x = (x1 + _default_label_margin_left);
 
-        ALLEGRO_FONT* Font = load_sized_font(_default_font_size, _font_file_location);
+        ALLEGRO_FONT* Font = load_sized_font(default_font_size, _font_file_location);
 
         if(Font) {
             al_draw_text(Font, label_color, font_x, y1, ALLEGRO_ALIGN_LEFT, label_text.data());
@@ -443,10 +443,10 @@ void cls::initialize_allegro_graphics_engine(interactionstate* interaction_ctx, 
         bool IsMonitorInfoAvailable = al_get_monitor_info(0, &_win_screen_info);
 
         if(IsMonitorInfoAvailable) {
-            _screen_w = _win_screen_info.x2 - _win_screen_info.x1;
-            _screen_h = _win_screen_info.y2 - _win_screen_info.y1;
-            interaction_ctx->MonitorWidth = _screen_w;
-            interaction_ctx->MonitorHeight = _screen_h;
+            screen_w = _win_screen_info.x2 - _win_screen_info.x1;
+            screen_h = _win_screen_info.y2 - _win_screen_info.y1;
+            interaction_ctx->MonitorWidth = screen_w;
+            interaction_ctx->MonitorHeight = screen_h;
 
             _win_ctx = al_create_display(interaction_ctx->MonitorWidth, interaction_ctx->MonitorHeight);
 
@@ -456,12 +456,12 @@ void cls::initialize_allegro_graphics_engine(interactionstate* interaction_ctx, 
 
                 interaction_ctx->WindowDimensions = dlib::drectangle(0, 0, interaction_ctx->WindowWidth, interaction_ctx->WindowHeight);
 
-                al_set_window_title(_win_ctx, _DefaultWindowTitle.data());
+                al_set_window_title(_win_ctx, _default_window_title.data());
                 al_set_window_position(_win_ctx, interaction_ctx->WindowPosition.x(), interaction_ctx->WindowPosition.y());
 
                 _win_msg_evt_src = al_get_display_event_source(_win_ctx);
                 _win_msg_evt_queue = al_create_event_queue();
-                kytr->_keyboard_evt_queue = al_create_event_queue();
+                kytr->keyboard_evt_queue = al_create_event_queue();
                 _mouse_evt_queue = al_create_event_queue();
 
                 al_register_event_source(_win_msg_evt_queue, _win_msg_evt_src);
@@ -477,9 +477,9 @@ void cls::initialize_allegro_graphics_engine(interactionstate* interaction_ctx, 
                 if(!al_is_keyboard_installed()) {
                     al_install_keyboard();
 
-                    kytr->_keyboard_evt_src = al_get_keyboard_event_source();
+                    kytr->keyboard_evt_src = al_get_keyboard_event_source();
 
-                    al_register_event_source(kytr->_keyboard_evt_queue, kytr->_keyboard_evt_src);
+                    al_register_event_source(kytr->keyboard_evt_queue, kytr->keyboard_evt_src);
                 }
             } else {
                 std::cout << __FILE__ " " << __func__ << " " << "(" << __LINE__ << ") ";
@@ -516,8 +516,8 @@ void cls::activate_allegro_graphics_engine(interactionstate* interaction_ctx, in
                 interaction_ctx->WindowHeight = _winmsg_event.display.height;
                 interaction_ctx->WindowDimensions = dlib::drectangle(0, 0, interaction_ctx->WindowWidth, interaction_ctx->WindowHeight);
 
-                interaction_ctx->IsWindowResized = (interaction_ctx->WindowWidth != _interactionstate_previous->WindowWidth ||
-                                                    interaction_ctx->WindowHeight != _interactionstate_previous->WindowHeight);
+                interaction_ctx->IsWindowResized = (interaction_ctx->WindowWidth != interactionstate_previous->WindowWidth ||
+                                                    interaction_ctx->WindowHeight != interactionstate_previous->WindowHeight);
                 //cout << "resize " << interaction_ctx->IsWindowResized << "\n";
                 break;
             }
@@ -597,8 +597,8 @@ double cls::get_screen_dpi() {
      *
      * 		diag_res / diagonal screen size in inches (the average of (11, 12, 13.3, 14, 15.6, and 17) )
      */
-    double diagres = std::hypot(_screen_w, _screen_h);
-    const double scrdpi = diagres/_AvgPhysicalScreenSize;
+    double diagres = std::hypot(screen_w, screen_h);
+    const double scrdpi = diagres/_avg_physical_screen_size;
 
     return scrdpi;
 }
@@ -616,7 +616,7 @@ ALLEGRO_FONT* cls::load_sized_font(const int font_size, const char* font_file_lo
         //cout << "adding font to _fonts\n";
         const double screen_dpi = get_screen_dpi();
 
-        const double scaled_font_size = (font_size / _PrintPointSize) * screen_dpi;
+        const double scaled_font_size = (font_size / _print_point_size) * screen_dpi;
 
         Font = al_load_font(font_file_location, scaled_font_size, 0);
 

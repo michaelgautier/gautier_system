@@ -22,23 +22,6 @@ namespace visualfunc {
 namespace formulation {
 using namespace std;
 class visualcallable {
-  private:
-    int _id = 0;
-    int _type_id = 0;
-
-    double _x = 0;
-    double _y = 0;
-    double _w = 0;
-    double _h = 0;
-
-    double _line_stroke_width_left = 1;
-    double _line_stroke_width_top = 1;
-    double _line_stroke_width_right = 1;
-    double _line_stroke_width_bottom = 1;
-
-    string _label;
-
-    vector<visualcallable> _callables;
   public:
     visualcallable(const int id) {
         _id = id;
@@ -93,6 +76,23 @@ class visualcallable {
     vector<visualcallable> callables();
     void callables(vector<visualcallable> v);
     void add_descendant(visualcallable v);
+  private:
+    int _id = 0;
+    int _type_id = 0;
+
+    double _x = 0;
+    double _y = 0;
+    double _w = 0;
+    double _h = 0;
+
+    double _line_stroke_width_left = 1;
+    double _line_stroke_width_top = 1;
+    double _line_stroke_width_right = 1;
+    double _line_stroke_width_bottom = 1;
+
+    string _label;
+
+    vector<visualcallable> _callables;
 };
 }
 }
