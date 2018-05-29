@@ -30,16 +30,16 @@ using namespace std;
 using cls = ::rss::ui::mainscreengenerator;
 
 void cls::get_screen_wh() {
-        auto display = Gdk::Display::get_default();
-        auto screen = display->get_default_screen();
+    auto display = Gdk::Display::get_default();
+    auto screen = display->get_default_screen();
 
-        screen_w = screen->get_width();
-        screen_h = screen->get_height();
+    screen_w = screen->get_width();
+    screen_h = screen->get_height();
 
-        screen_max_w = (screen_w - (screen_w / 8));
-        screen_max_h = (screen_h - (screen_h / 8));
+    screen_max_w = (screen_w - (screen_w / 8));
+    screen_max_h = (screen_h - (screen_h / 8));
 
-        return;
+    return;
 }
 
 cls::mainscreengenerator() {
@@ -60,7 +60,7 @@ void cls::generate() {
 
     _feed_articles_requested = true;
 
-        show_screen();
+    show_screen();
 
     return;
 }
@@ -122,23 +122,21 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<materi
 }
 
 int cls::show_screen() {
-        int gtk_app_err = 0;
+    int gtk_app_err = 0;
 
-        try
-        {
-                auto app = Gtk::Application::create("gautier.rss");
+    try {
+        auto app = Gtk::Application::create("gautier.rss");
 
-                auto gautier_rss_window = Gtk::ApplicationWindow();
+        auto gautier_rss_window = Gtk::ApplicationWindow();
 
-                get_screen_wh();
+        get_screen_wh();
 
-                int headline_region_h = 0;
-                int contents_region_h = 0;
+        int headline_region_h = 0;
+        int contents_region_h = 0;
 
-                headline_region_h = screen_h / 3;
-                
-                contents_region_h = ((screen_h - headline_region_h) - (headline_region_h - (headline_region_h / 3) ) );
+        headline_region_h = screen_h / 3;
 
+        contents_region_h = ((screen_h - headline_region_h) - (headline_region_h - (headline_region_h / 3) ) );
 
 
 
@@ -146,191 +144,186 @@ int cls::show_screen() {
 
 
 
-                gautier_rss_window.set_title("Gautier RSS");
-                
-                gautier_rss_window.set_default_size(screen_max_w,screen_max_h);
-                gautier_rss_window.maximize();
 
-                auto gautier_rss_area = Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL);
-                /*
-                        5/27/2018
-                        Unlike other UI toolkits, GTK will NOT show a background color on an empty widget.
-                        Other issues:
-                                - Cannot directly change visual appearance with high granularity.
-                                - Forces you to use CSS.
-                                - Not really a software developer friendly API.
-                                - It starts out good (make a hello world window), but GTK has usability problems not overcome by tutorials.
-                                - A UI toolkit more like FLTK in that you can make basic UI fairly easily, but is far behind
-                                        other UI toolkits in the expedient creation of even a moderately sophisticated UI.
-                                - The toolkit is solid at a technical level but fails to drive visually compelling UI by foregoing
-                                        many of the conventions and results apparent in other UI toolkits.
-                */
-                //gautier_rss_area.override_background_color(Gdk::RGBA("60,122,158"));
-                
-                gautier_rss_window.add(gautier_rss_area);
+        gautier_rss_window.set_title("Gautier RSS");
 
-                /*
-                        5/27/2018
-                        You only get a modicum of a background color when you add content. It should not be that way.
-                        You should be able to get background color on just the window itself or at least a container
-                        that auto sizes to the width and height of the container. GTK provides no direct, intuitive way to achieve this.
-                        At its core, all GTK offers is auto widget arrangement and basic widgets but not a straightforward path to making slick UI.
-                */
-                //auto feed_button = Gtk::Button("test"); 
-                //gautier_rss_area.add(feed_button);
+        gautier_rss_window.set_default_size(screen_max_w,screen_max_h);
+        gautier_rss_window.maximize();
 
-                /*Header*/
-                auto header_region = Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-                //header_region.override_background_color(Gdk::RGBA("255,153,85"));
-                auto header_text = Gtk::Label("Gautier RSS");
-                header_region.add(header_text);
-                gautier_rss_area.add(header_region);
+        auto gautier_rss_area = Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL);
+        /*
+                5/27/2018
+                Unlike other UI toolkits, GTK will NOT show a background color on an empty widget.
+                Other issues:
+                        - Cannot directly change visual appearance with high granularity.
+                        - Forces you to use CSS.
+                        - Not really a software developer friendly API.
+                        - It starts out good (make a hello world window), but GTK has usability problems not overcome by tutorials.
+                        - A UI toolkit more like FLTK in that you can make basic UI fairly easily, but is far behind
+                                other UI toolkits in the expedient creation of even a moderately sophisticated UI.
+                        - The toolkit is solid at a technical level but fails to drive visually compelling UI by foregoing
+                                many of the conventions and results apparent in other UI toolkits.
+        */
+        //gautier_rss_area.override_background_color(Gdk::RGBA("60,122,158"));
 
-                /*Headlines*/
-                auto headlines_region = Gtk::ScrolledWindow();
-                headlines_region.set_size_request(screen_max_w,headline_region_h);
-                
-                auto headlines = Gtk::ListBox();
-                headlines_region.add(headlines);
-                
-                Gtk::Label headline_label;
-                
-                /*for(int headline_index = 0; headline_index < 100; headline_index++) {
-                        auto test_row_text = "test " + std::to_string(headline_index+1);
-                        headline_label = Gtk::Label(test_row_text);
-                        headlines.append(headline_label);
-                }*/
+        gautier_rss_window.add(gautier_rss_area);
 
-                const int articles_size = _feed_articles.size();
+        /*
+                5/27/2018
+                You only get a modicum of a background color when you add content. It should not be that way.
+                You should be able to get background color on just the window itself or at least a container
+                that auto sizes to the width and height of the container. GTK provides no direct, intuitive way to achieve this.
+                At its core, all GTK offers is auto widget arrangement and basic widgets but not a straightforward path to making slick UI.
+        */
+        //auto feed_button = Gtk::Button("test");
+        //gautier_rss_area.add(feed_button);
 
-int headline_index = 0;
+        /*Header*/
+        auto header_region = Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+        //header_region.override_background_color(Gdk::RGBA("255,153,85"));
+        auto header_text = Gtk::Label("Gautier RSS");
+        header_region.add(header_text);
+        gautier_rss_area.add(header_region);
 
-                for(int article_index = 0; article_index < articles_size; article_index++) {
-                        auto feed_article_entry = _feed_articles[article_index];
+        /*Headlines*/
+        auto headlines_region = Gtk::ScrolledWindow();
+        headlines_region.set_size_request(screen_max_w,headline_region_h);
 
-                        string headline = feed_article_entry.headline;
+        auto headlines = Gtk::ListBox();
+        headlines_region.add(headlines);
 
-                        headline_label = Gtk::Label(headline, Gtk::Align::ALIGN_START);
-                        headlines.append(headline_label);
-                }
+        Gtk::Label headline_label;
 
-                gautier_rss_area.add(headlines_region);
+        /*for(int headline_index = 0; headline_index < 100; headline_index++) {
+                auto test_row_text = "test " + std::to_string(headline_index+1);
+                headline_label = Gtk::Label(test_row_text);
+                headlines.append(headline_label);
+        }*/
 
-                /*Content*/
-                auto content_region = Gtk::ScrolledWindow();
-                content_region.set_size_request(screen_max_w,contents_region_h);
+        const int articles_size = _feed_articles.size();
 
-                auto content = Gtk::Label();
-                _article_content = &content;
-                content.set_lines(-1);
-                content.set_line_wrap(true);
-                content.set_single_line_mode(false);
-                
-                content_region.add(content);
+        int headline_index = 0;
 
-                gautier_rss_area.add(content_region);
+        for(int article_index = 0; article_index < articles_size; article_index++) {
+            auto feed_article_entry = _feed_articles[article_index];
 
-                /*RSS Feed Edit*/
-                auto feed_edit_region = Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-                auto feed_name_label = Gtk::Label("Feed Name");
-                auto feed_name_edit = Gtk::Entry();
-                auto feed_url_label = Gtk::Label("Feed website address");
-                auto feed_url_edit = Gtk::Entry();
-                auto feed_edit_button = Gtk::Button("Save");
-                
-                feed_edit_region.add(feed_name_label);
-                feed_edit_region.add(feed_name_edit);
-                feed_edit_region.add(feed_url_label);
-                feed_edit_region.add(feed_url_edit);
-                feed_edit_region.add(feed_edit_button);
-                
-                gautier_rss_area.add(feed_edit_region);
+            string headline = feed_article_entry.headline;
 
-                
-                /*Signals*/
-                headlines.signal_row_selected().connect([=](Gtk::ListBoxRow* row){
-                        if(row) {
-                                int article_index = row->get_index();
-
-                                auto feed_article_entry = _feed_articles[article_index];
-
-                                string article_content = feed_article_entry.description;
-
-                                _article_content->set_text(article_content);
-                        }
-                });
-                
-
-                /*GTK Styles*/
-                auto css_provider = Gtk::CssProvider::create();
-
-                auto style_ctx_window = gautier_rss_window.get_style_context();
-                style_ctx_window->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_window->add_class("window");
-
-                auto style_ctx_header = header_region.get_style_context();
-                style_ctx_header->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_header->add_class("header");
-
-                auto style_ctx_headlines_region = headlines_region.get_style_context();
-                style_ctx_headlines_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_headlines_region->add_class("headlines_region");
-
-                auto style_ctx_contents_region = content_region.get_style_context();
-                style_ctx_contents_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_contents_region->add_class("contents_region");
-
-                auto style_ctx_feed_changes_region = feed_edit_region.get_style_context();
-                style_ctx_feed_changes_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_changes_region->add_class("feed_changes_region");
-
-                auto style_ctx_feed_name_label = feed_name_label.get_style_context();
-                style_ctx_feed_name_label->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_name_label->add_class("feed_change_label");
-
-                auto style_ctx_feed_name_edit = feed_name_edit.get_style_context();
-                style_ctx_feed_name_edit->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_name_edit->add_class("feed_change_field");
-
-                auto style_ctx_feed_url_label = feed_url_label.get_style_context();
-                style_ctx_feed_url_label->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_url_label->add_class("feed_change_label");
-
-                auto style_ctx_feed_url_edit = feed_url_edit.get_style_context();
-                style_ctx_feed_url_edit->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_url_edit->add_class("feed_change_field");
-                feed_url_edit.set_size_request(screen_w/3);
-
-                auto style_ctx_feed_change_button = feed_edit_button.get_style_context();
-                style_ctx_feed_change_button->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feed_change_button->add_class("feed_change_button");
-
-                /*auto style_ctx_feeds_list_region = .get_style_context();
-                style_ctx_feeds_list_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-                style_ctx_feeds_list_region->add_class("feeds_list_region");*/
-
-                /*Use this when the css is final for the compile.*/
-                css_provider->load_from_resource("/styles/styles.css");
-
-                /*Use to quickly test out css changes.*/
-                //css_provider->load_from_path("styles.css");
-
-                gautier_rss_window.show_all();
-
-                gtk_app_err = app->run(gautier_rss_window);
+            headline_label = Gtk::Label(headline, Gtk::Align::ALIGN_START);
+            headlines.append(headline_label);
         }
-        catch(const Gtk::CssProviderError& ex)
-        {
-                std::cout << "CssProviderError, Gtk::CssProvider::load_from_path() failed: " << ex.what() << "\n";
-        }
-        catch(const Glib::Error& ex)
-        {
-                std::cout << "Error, Gtk::CssProvider::load_from_path() failed: " << ex.what() << "\n";
-        }
-        catch(const std::exception& e)
-        {
-                std::cout << e.what();
-        }
-        
-        return gtk_app_err;
+
+        gautier_rss_area.add(headlines_region);
+
+        /*Content*/
+        auto content_region = Gtk::ScrolledWindow();
+        content_region.set_size_request(screen_max_w,contents_region_h);
+
+        auto content = Gtk::Label();
+        _article_content = &content;
+        content.set_lines(-1);
+        content.set_line_wrap(true);
+        content.set_single_line_mode(false);
+
+        content_region.add(content);
+
+        gautier_rss_area.add(content_region);
+
+        /*RSS Feed Edit*/
+        auto feed_edit_region = Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+        auto feed_name_label = Gtk::Label("Feed Name");
+        auto feed_name_edit = Gtk::Entry();
+        auto feed_url_label = Gtk::Label("Feed website address");
+        auto feed_url_edit = Gtk::Entry();
+        auto feed_edit_button = Gtk::Button("Save");
+
+        feed_edit_region.add(feed_name_label);
+        feed_edit_region.add(feed_name_edit);
+        feed_edit_region.add(feed_url_label);
+        feed_edit_region.add(feed_url_edit);
+        feed_edit_region.add(feed_edit_button);
+
+        gautier_rss_area.add(feed_edit_region);
+
+
+        /*Signals*/
+        headlines.signal_row_selected().connect([=](Gtk::ListBoxRow* row) {
+            if(row) {
+                int article_index = row->get_index();
+
+                auto feed_article_entry = _feed_articles[article_index];
+
+                string article_content = feed_article_entry.description;
+
+                _article_content->set_text(article_content);
+            }
+        });
+
+
+        /*GTK Styles*/
+        auto css_provider = Gtk::CssProvider::create();
+
+        auto style_ctx_window = gautier_rss_window.get_style_context();
+        style_ctx_window->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_window->add_class("window");
+
+        auto style_ctx_header = header_region.get_style_context();
+        style_ctx_header->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_header->add_class("header");
+
+        auto style_ctx_headlines_region = headlines_region.get_style_context();
+        style_ctx_headlines_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_headlines_region->add_class("headlines_region");
+
+        auto style_ctx_contents_region = content_region.get_style_context();
+        style_ctx_contents_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_contents_region->add_class("contents_region");
+
+        auto style_ctx_feed_changes_region = feed_edit_region.get_style_context();
+        style_ctx_feed_changes_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_changes_region->add_class("feed_changes_region");
+
+        auto style_ctx_feed_name_label = feed_name_label.get_style_context();
+        style_ctx_feed_name_label->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_name_label->add_class("feed_change_label");
+
+        auto style_ctx_feed_name_edit = feed_name_edit.get_style_context();
+        style_ctx_feed_name_edit->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_name_edit->add_class("feed_change_field");
+
+        auto style_ctx_feed_url_label = feed_url_label.get_style_context();
+        style_ctx_feed_url_label->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_url_label->add_class("feed_change_label");
+
+        auto style_ctx_feed_url_edit = feed_url_edit.get_style_context();
+        style_ctx_feed_url_edit->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_url_edit->add_class("feed_change_field");
+        feed_url_edit.set_size_request(screen_w/3);
+
+        auto style_ctx_feed_change_button = feed_edit_button.get_style_context();
+        style_ctx_feed_change_button->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feed_change_button->add_class("feed_change_button");
+
+        /*auto style_ctx_feeds_list_region = .get_style_context();
+        style_ctx_feeds_list_region->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feeds_list_region->add_class("feeds_list_region");*/
+
+        /*Use this when the css is final for the compile.*/
+        css_provider->load_from_resource("/styles/styles.css");
+
+        /*Use to quickly test out css changes.*/
+        //css_provider->load_from_path("styles.css");
+
+        gautier_rss_window.show_all();
+
+        gtk_app_err = app->run(gautier_rss_window);
+    } catch(const Gtk::CssProviderError& ex) {
+        std::cout << "CssProviderError, Gtk::CssProvider::load_from_path() failed: " << ex.what() << "\n";
+    } catch(const Glib::Error& ex) {
+        std::cout << "Error, Gtk::CssProvider::load_from_path() failed: " << ex.what() << "\n";
+    } catch(const std::exception& e) {
+        std::cout << e.what();
+    }
+
+    return gtk_app_err;
 }

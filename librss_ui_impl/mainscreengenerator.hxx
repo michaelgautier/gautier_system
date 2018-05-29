@@ -41,7 +41,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <gdkmm/displaymanager.h>
 #include <gtkmm/listviewtext.h>
 
-#include "visualcallable.hxx"
 #include "request.hxx"
 #include "material.hxx"
 
@@ -63,8 +62,8 @@ class mainscreengenerator {
     int _feed_index = 0;//Defaults to the first feed, if available;
     int _headline_index = -1;
 
-        bool _article_contents_enlarge = false;
-        bool _feed_articles_requested = false;
+    bool _article_contents_enlarge = false;
+    bool _feed_articles_requested = false;
 
     string _feed_names_location = "feeds.txt";
 
@@ -75,15 +74,15 @@ class mainscreengenerator {
     bool update_feed_source();
     void get_rss_feed_names_and_articles();
     void get_screen_wh();
-    
-    Gtk::Label* _article_content;
-        
-        int screen_w = 0;
-        int screen_h = 0;
-        int screen_max_w = 0;
-        int screen_max_h = 0;
 
-        int show_screen();
+    Gtk::Label* _article_content;
+
+    int screen_w = 0;
+    int screen_h = 0;
+    int screen_max_w = 0;
+    int screen_max_h = 0;
+
+    int show_screen();
 
 };
 }
