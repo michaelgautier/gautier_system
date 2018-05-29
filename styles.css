@@ -1,0 +1,44 @@
+.window {
+        background-color: #dbe3db;
+}
+
+.header {
+        background-color: #ffb380;
+        font-size: 18pt;
+        font-weight: bold;
+        padding: 20px;
+}
+
+.headlines_region {
+        background-color: #f9f9f9;
+}
+
+.contents_region {
+        background-color: #ffffff;
+}
+
+.feed_changes_region {
+        background-color: #552200;
+        padding: 8px;
+}
+
+.feed_change_label {
+        color: #fff6d5;
+        margin-right: 8px;
+}
+
+.feed_change_field {
+        min-height: 14px;
+        margin-right: 8px;
+        min-width: 300px;
+}
+
+.feed_change_button {
+        background-color: #f9f9f9;
+        min-height: 14px;
+}
+
+.feeds_list_region {
+        background-color: #aa4400;
+}
+

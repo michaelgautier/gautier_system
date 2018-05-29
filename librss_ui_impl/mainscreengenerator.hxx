@@ -17,24 +17,33 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #define __rss_ui_mainscreengenerator__
 #include <vector>
 #include <map>
+#include <string>
+#include <iostream>
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_color.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_native_dialog.h>
-
-#include <dlib/geometry.h>
+#include <gdkmm/general.h>
+#include <gtkmm/application.h>
+#include <gtkmm/applicationwindow.h>
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
+#include <gtkmm/listbox.h>
+#include <gtkmm/listboxrow.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/textbuffer.h>
+#include <gtkmm/button.h>
+#include <gtkmm/layout.h>
+#include <gtkmm/viewport.h>
+#include <gdkmm/rgba.h>
+#include <gtkmm/cssprovider.h>
+#include <gdkmm/screen.h>
+#include <gdkmm/display.h>
+#include <gdkmm/displaymanager.h>
+#include <gtkmm/listviewtext.h>
 
 #include "visualcallable.hxx"
 #include "request.hxx"
 #include "material.hxx"
-
-#include "textbuffer.hxx"
-#include "interactionstate.hxx"
-#include "keyboardtr.hxx"
-#include "interactionengine.hxx"
 
 namespace rss {
 namespace ui {
@@ -44,40 +53,18 @@ class mainscreengenerator {
     using material = ::rss::material;
     using request = ::rss::request;
 
-    using interactionstate = ::visualfunc::formulation::InteractionState;
-    using textbuffer = ::visualfunc::formulation::textbuffer;
-    using visualcallable = ::visualfunc::formulation::visualcallable;
-    using keyboardtr = ::visualfunc::formulation::keyboardtr;
-    using interactionengine = ::visualfunc::formulation::interactionengine;
-
     mainscreengenerator();
     ~mainscreengenerator();
 
     void init();
     void generate();
 
-    /*Application Logic*/
-    void process_updates(interactionstate* interaction_ctx);
-
   private:
-    interactionstate* _interaction_ctx;
-    interactionengine::interaction_callback_type _interaction_callback;
-    interactionengine _uiengine;
-    keyboardtr _keyboardtr;
-
-    bool _article_contents_enlarge = false;
-    bool _article_selected = false;
-    bool _feed_articles_requested = false;
-    bool _keyboard_field_active = false;
-    bool _processing = false;
-    bool _render_is_requested = false;
-
-    const char* _font_file_location = "NotoSans-Regular.ttf";
-    const double _default_label_margin_left = 4;
-    const int _default_widget_font_size = 12;
-
     int _feed_index = 0;//Defaults to the first feed, if available;
     int _headline_index = -1;
+
+        bool _article_contents_enlarge = false;
+        bool _feed_articles_requested = false;
 
     string _feed_names_location = "feeds.txt";
 
@@ -85,25 +72,19 @@ class mainscreengenerator {
     vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
     vector<string> _feednames;
 
-    vector<visualcallable> _callables;
-    vector<visualcallable> get_visual_definitions(int screen_x, int screen_y, int screen_w, int screen_h);
-
-    void build_visual_model();
-    void process_interactions(interactionstate* interaction_ctx);
-    void update_visual_output();
-
     bool update_feed_source();
     void get_rss_feed_names_and_articles();
+    void get_screen_wh();
+    
+    Gtk::Label* _article_content;
+        
+        int screen_w = 0;
+        int screen_h = 0;
+        int screen_max_w = 0;
+        int screen_max_h = 0;
 
-    /*Widget geometry and visualization*/
-    enum visual_index_rss_reader_region {
-        header = 0,//RSS Reader Header
-        headlines = 1,//RSS Reader Headlines
-        article_content = 2,//RSS Reader article content
-        control_bar = 3,//RSS Reader Control Bar
-        change_bar = 4,//RSS Reader RSS Change Bar
-        choice_bar = 5//RSS Reader Feed Choice Bar
-    };
+        int show_screen();
+
 };
 }
 }
