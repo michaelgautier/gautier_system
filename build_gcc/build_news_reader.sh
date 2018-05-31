@@ -7,11 +7,11 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 reset
-echo "Building rss_requestor library"
-./build_news_lib.sh
+#echo "Building rss_requestor library"
+#./build_news_lib.sh
 
 echo "Building visual function library"
-#./build_news_reader_lib.sh
+./build_news_reader_lib.sh
 ./build_librssui_mainscreengenerator.sh
 
 cp ../styles.css .
@@ -22,4 +22,5 @@ rm styles.css
 echo "Building rss reader"
 g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ `pkg-config gtkmm-3.0 --cflags --libs` -o obj/newsreader.o ../news_reader.cxx
 g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle `pkg-config gtkmm-3.0 --cflags --libs` -Wl,-rpath,. -o bin/newsreader obj/newsreader.o obj/gautier_rss_styles.o obj/librssui_mainscreengenerator.o
-
+ls -gGh obj/*.*o
+ls -gGh bin/newsreader*

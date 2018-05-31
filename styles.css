@@ -1,12 +1,16 @@
 .window {
-        background-color: #dbe3db;
+        background-color: #f4e1c3;
 }
 
 .header {
         background-color: #ffb380;
         font-size: 18pt;
         font-weight: bold;
-        padding: 20px;
+        padding-left: 14px;
+        padding-top: 11px;
+        padding-right: 2px;
+        padding-bottom: 11px;
+        color: #554400;
 }
 
 .headlines_region {
@@ -33,12 +37,47 @@
         min-width: 300px;
 }
 
+/*
+        GtkButtons can not be directly styled with just a background color.
+        The issue is explained by StackOverflow user sciamp on 9/9/2013.
+        https://stackoverflow.com/questions/14983385/why-css-style-dont-work-on-gtkbutton
+*/
 .feed_change_button {
-        background-color: #f9f9f9;
-        min-height: 14px;
+        border-image: none;
+        background-image: none;
+        background-color: #ffcc00;
+        color: #800000;
+        font-weight: bold;
 }
 
 .feeds_list_region {
+        padding: 12px;
+}
+
+.feeds_list {
+        border: none;
+        border-image: none;
         background-color: #aa4400;
 }
 
+.feed_button {
+        border: none;
+        border-image: none;
+        background-image: none;
+        background-color: #ffcc00;
+        color: #800000;
+        margin: 0px;
+        padding-left: 8px;
+        padding-right: 8px;
+}
+
+.headline_button {
+        border: none;
+        border-image: none;
+        background-image: none;
+        background-color: #fffdfa;
+        color: #2b1100;
+        margin: 0px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+}

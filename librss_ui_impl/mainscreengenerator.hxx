@@ -20,26 +20,35 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <string>
 #include <iostream>
 
+
+/*GDK*/
+#include <gdkmm/display.h>
+#include <gdkmm/displaymanager.h>
 #include <gdkmm/general.h>
+#include <gdkmm/rgba.h>
+#include <gdkmm/screen.h>
+
+/*GLib*/
+#include <glibmm/ustring.h>
+
+/*GTK*/
 #include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/flowbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/layout.h>
+#include <gtkmm/linkbutton.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/listboxrow.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/button.h>
-#include <gtkmm/layout.h>
-#include <gtkmm/viewport.h>
-#include <gdkmm/rgba.h>
-#include <gtkmm/cssprovider.h>
-#include <gdkmm/screen.h>
-#include <gdkmm/display.h>
-#include <gdkmm/displaymanager.h>
 #include <gtkmm/listviewtext.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/textbuffer.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/viewport.h>
 
 #include "request.hxx"
 #include "material.hxx"
@@ -76,6 +85,17 @@ class mainscreengenerator {
     void get_screen_wh();
 
     Gtk::Label* _article_content;
+    Gtk::Layout* _headlines;
+
+    Glib::RefPtr<Gtk::CssProvider> _css_provider;
+
+    Gtk::ApplicationWindow* _gautier_rss_window;
+    Gtk::Box* _gautier_rss_area;
+    Gtk::Box* _header_region;
+    Gtk::ScrolledWindow* _headlines_region;
+    Gtk::ScrolledWindow* _content_region;
+    Gtk::Box* _feed_edit_region;
+    Gtk::ScrolledWindow* _feed_names_region;
 
     int screen_w = 0;
     int screen_h = 0;
@@ -84,6 +104,10 @@ class mainscreengenerator {
 
     int show_screen();
 
+    void show_feed(int feed_index);
+    void show_headlines();
+    void show_article_summary_selected_row(Gtk::ListBoxRow* row);
+    void show_article_summary(int article_index);
 };
 }
 }

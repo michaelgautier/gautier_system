@@ -7,9 +7,8 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 rm obj/librssui_mainscreengenerator.o
-rm bin/librssui_mainscreengenerator.so
 echo "build main screen generator"
 
 g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
 #g++ -g -c -L./bin -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` -Wl,-rpath,. -o bin/librssui_mainscreengenerator.o obj/librssui_mainscreengenerator.o
-ls -gGh bin/librssui_mainscreengenerator*
+ls -gGh obj/librssui_mainscreengenerator*
