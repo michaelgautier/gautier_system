@@ -65,32 +65,14 @@ void cls::generate() {
     return;
 }
 
-bool cls::update_feed_source() {
-    bool feed_sources_updated = false;
-
-    string feedname;
-    string feedurl;
-
-    if((feedname != "name a new feed" && feedurl != "new feed url") && (!feedname.empty() && !feedurl.empty())) {
-        feedscycle feeds_group;
-        vector<string> added_feednames = feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
-
-        if(added_feednames.size() > 0) {
-            get_rss_feed_names_and_articles();
-
-            feed_sources_updated = true;
-        }
-    }
-
-    return feed_sources_updated;
-}
-
 void cls::get_rss_feed_names_and_articles() {
     vector<material> feed_articles;
     vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
     _feed_articles = feed_articles;
 
     const int feed_source_size = feed_parameters.size();
+
+    _feednames.clear();
 
     for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
         request feedsource = feed_parameters[feed_source_index];
@@ -134,21 +116,19 @@ void cls::show_feed(int feed_index) {
 }
 
 void cls::show_headlines() {
-    auto headline_buttons = _headlines->get_children();
-    int headline_buttons_size = headline_buttons.size();
-
-    for(int i = 0; i < headline_buttons_size; i++) {
-        auto headlinebtn = headline_buttons[i];
-
-        headlinebtn->hide();
-
-        _headlines->remove(*headlinebtn);
+    if(_headlines) {
+        _headlines_region->remove_with_viewport();
     }
+
+    _headlines_region->set_size_request(_screen_max_w,_headline_region_h);
+
+    _headlines = new Gtk::Layout();
+    _headlines_region->add(*_headlines);
 
     Gtk::Label headline_label;
     Gtk::Button headline_button;
 
-    const int articles_size = _feed_articles.size();
+    int articles_size = _feed_articles.size();
 
     int headline_label_y = 0;
     int headline_height = 0;
@@ -189,10 +169,11 @@ void cls::show_headlines() {
         style_ctx_headline_button->add_class("headline_button");
     }
 
+    _headlines_region->show_all();
     _headlines->set_size(_screen_w, headline_label_y);
 
-    headline_buttons = _headlines->get_children();
-    headline_buttons_size = headline_buttons.size();
+    auto headline_buttons = _headlines->get_children();
+    auto headline_buttons_size = headline_buttons.size();
 
     for(int i = 0; i < headline_buttons_size; i++) {
         auto headlinebtn = (Gtk::Button*)headline_buttons[i];
@@ -205,21 +186,45 @@ void cls::show_headlines() {
     return;
 }
 
-void cls::show_feed_names() {
-    auto feed_buttons = _feed_names_field->get_children();
-    int feed_buttons_size = feed_buttons.size();
+bool cls::update_feed_source() {
+    bool feed_sources_updated = false;
 
-    for(int i = 0; i < feed_buttons_size; i++) {
-        auto feedbtn = feed_buttons[i];
+    string feedname = _feed_name_edit->get_text();
+    string feedurl = _feed_url_edit->get_text();
 
-        feedbtn->hide();
+    if(!feedname.empty() && !feedurl.empty()) {
+        feedscycle feeds_group;
+        vector<string> added_feednames = feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
 
-        _feed_names_field->remove(*feedbtn);
+        if(added_feednames.size() > 0) {
+            get_rss_feed_names_and_articles();
+
+            feed_sources_updated = true;
+        }
     }
+
+    return feed_sources_updated;
+}
+
+void cls::show_feed_names() {
+    if(_feed_names_field) {
+        _feed_names_region->remove_with_viewport();
+    }
+
+    _feed_names_field = new Gtk::Layout();
+    _feed_names_field->set_size(_screen_w, 36);
+
+    _feed_names_region->add(*_feed_names_field);
 
     Gtk::Button feedname_label;
 
-    const int feednames_size = _feednames.size();
+    /*
+       Hack workaround for GTK. The GTK framework will not show the last button in the Layout instance.
+       Problem noticed 6/1/2018.
+    */
+    _feednames.push_back("");
+
+    int feednames_size = _feednames.size();
 
     int feedname_label_width = 8;
 
@@ -249,6 +254,9 @@ void cls::show_feed_names() {
         style_ctx_feedname_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
         style_ctx_feedname_button->add_class("feed_button");
     }
+
+    _feed_names_field->set_size(feedname_label_width + 22, 36);
+    _feed_names_field->show_all();
 
     /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
     auto feedname_buttons = _feed_names_field->get_children();
@@ -293,19 +301,10 @@ int cls::show_screen() {
 
         create_ui_window();
 
-        /*Header*/
         create_ui_header();
-
-        /*Headlines*/
         create_ui_headline_region();
-
-        /*Content*/
         create_ui_article_content_region();
-
-        /*RSS Feed Edit*/
         create_ui_feed_edit_region();
-
-        /*RSS feed names*/
         create_ui_feed_names_region();
 
         _gautier_rss_window->show_all();
@@ -371,14 +370,10 @@ void cls::create_ui_header() {
 
 void cls::create_ui_headline_region() {
     _headlines_region = new Gtk::ScrolledWindow();
-    _headlines_region->set_size_request(_screen_max_w,_headline_region_h);
-
-    _headlines = new Gtk::Layout();
-    _headlines_region->add(*_headlines);
-
-    show_headlines();
 
     _gautier_rss_area->add(*_headlines_region);
+
+    show_headlines();
 
     auto style_ctx_headlines_region = _headlines_region->get_style_context();
     style_ctx_headlines_region->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -421,6 +416,12 @@ void cls::create_ui_feed_edit_region() {
     _feed_edit_region->add(*_feed_url_edit);
     _feed_edit_region->add(*_feed_edit_button);
 
+
+    _feed_edit_button->signal_clicked().connect([=]() {
+        update_feed_source();
+        show_feed_names();
+    });
+
     _gautier_rss_area->add(*_feed_edit_region);
 
     auto style_ctx_feed_changes_region = _feed_edit_region->get_style_context();
@@ -453,13 +454,10 @@ void cls::create_ui_feed_edit_region() {
 
 void cls::create_ui_feed_names_region() {
     _feed_names_region = new Gtk::ScrolledWindow();
-    _feed_names_field = new Gtk::Layout();
-
-    _feed_names_region->add(*_feed_names_field);
-
-    show_feed_names();
 
     _gautier_rss_area->add(*_feed_names_region);
+
+    show_feed_names();
 
     auto style_ctx_feeds_list_region = _feed_names_region->get_style_context();
     style_ctx_feeds_list_region->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
