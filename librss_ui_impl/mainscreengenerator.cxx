@@ -201,6 +201,66 @@ void cls::show_headlines() {
     return;
 }
 
+void cls::show_feed_names() {
+    auto feed_buttons = _feed_names_field->get_children();
+    int feed_buttons_size = feed_buttons.size();
+
+    for(int i = 0; i < feed_buttons_size; i++) {
+        auto feedbtn = feed_buttons[i];
+
+        feedbtn->hide();
+
+        _feed_names_field->remove(*feedbtn);
+    }
+
+    Gtk::Button feedname_label;
+
+    const int feednames_size = _feednames.size();
+
+    int feedname_label_width = 8;
+
+    for(int feedname_index = 0; feedname_index < feednames_size; feedname_index++) {
+        string feedname = _feednames[feedname_index];
+
+        feedname_label = Gtk::Button(feedname);
+
+        /*
+                Measure the label pixels to layout them out horizontally.
+                https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-text.html.en
+                https://developer.gnome.org/gtk3/stable/gtk-question-index.html
+        */
+        auto pglyt = feedname_label.create_pango_layout(feedname);
+
+        int feedtext_width = 0;
+        int feedtext_height = 0;
+
+        pglyt->get_pixel_size(feedtext_width, feedtext_height);
+
+        _feed_names_field->put(feedname_label, feedname_label_width, 0);
+
+        feedname_label_width = feedname_label_width + feedtext_width + 22;
+
+        /*GTK Styles*/
+        auto style_ctx_feedname_button = feedname_label.get_style_context();
+        style_ctx_feedname_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx_feedname_button->add_class("feed_button");
+    }
+
+    /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
+    auto feedname_buttons = _feed_names_field->get_children();
+    int feedname_buttons_size = feedname_buttons.size();
+
+    /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
+    for(int i = 0; i < feedname_buttons_size; i++) {
+        auto feedbtn = (Gtk::Button*)feedname_buttons[i];
+        feedbtn->signal_clicked().connect([=]() {
+            show_feed(i);
+        });
+    }
+
+    return;
+}
+
 void cls::show_article_summary(int article_index) {
     auto feed_article_entry = _feed_articles[article_index];
 
@@ -265,7 +325,6 @@ void cls::setup_ui_layout_parameters() {
     _css_provider->load_from_resource("/styles/styles.css");
 
     get_screen_wh();
-
 
     _headline_region_h = _screen_h / 3;
 
@@ -394,50 +453,7 @@ void cls::create_ui_feed_names_region() {
 
     _feed_names_region->add(*_feed_names_field);
 
-    Gtk::Button feedname_label;
-
-    const int feednames_size = _feednames.size();
-
-    int feedname_label_width = 8;
-
-    for(int feedname_index = 0; feedname_index < feednames_size; feedname_index++) {
-        string feedname = _feednames[feedname_index];
-
-        feedname_label = Gtk::Button(feedname);
-
-        /*
-                Measure the label pixels to layout them out horizontally.
-                https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-text.html.en
-                https://developer.gnome.org/gtk3/stable/gtk-question-index.html
-        */
-        auto pglyt = feedname_label.create_pango_layout(feedname);
-
-        int feedtext_width = 0;
-        int feedtext_height = 0;
-
-        pglyt->get_pixel_size(feedtext_width, feedtext_height);
-
-        _feed_names_field->put(feedname_label, feedname_label_width, 0);
-
-        feedname_label_width = feedname_label_width + feedtext_width + 22;
-
-        /*GTK Styles*/
-        auto style_ctx_feedname_button = feedname_label.get_style_context();
-        style_ctx_feedname_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-        style_ctx_feedname_button->add_class("feed_button");
-    }
-
-    /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
-    auto feedname_buttons = _feed_names_field->get_children();
-    int feedname_buttons_size = feedname_buttons.size();
-
-    /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
-    for(int i = 0; i < feedname_buttons_size; i++) {
-        auto feedbtn = (Gtk::Button*)feedname_buttons[i];
-        feedbtn->signal_clicked().connect([=]() {
-            show_feed(i);
-        });
-    }
+    show_feed_names();
 
     _gautier_rss_area->add(*_feed_names_region);
 

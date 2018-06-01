@@ -105,7 +105,6 @@ class mainscreengenerator {
     Gtk::Button* _feed_edit_button;
     Gtk::Layout* _feed_names_field;
 
-
     int _screen_w = 0;
     int _screen_h = 0;
     int _screen_max_w = 0;
@@ -116,6 +115,7 @@ class mainscreengenerator {
     int show_screen();
 
     void show_feed(int feed_index);
+    void show_feed_names();
     void show_headlines();
     void show_article_summary_selected_row(Gtk::ListBoxRow* row);
     void show_article_summary(int article_index);
