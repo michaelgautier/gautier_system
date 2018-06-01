@@ -145,8 +145,8 @@ void cls::show_headlines() {
         _headlines->remove(*headlinebtn);
     }
 
-    /*GTK ListBox is extremely unreliable.*/
-    Gtk::Button headline_label;
+    Gtk::Label headline_label;
+    Gtk::Button headline_button;
 
     const int articles_size = _feed_articles.size();
 
@@ -156,14 +156,18 @@ void cls::show_headlines() {
     for(int article_index = 0; article_index < articles_size; article_index++) {
         string headline = _feed_articles[article_index].headline;
 
-        headline_label = Gtk::Button(headline);
+        headline_label = Gtk::Label(headline, Gtk::Align::ALIGN_START);
+        headline_label.show();
+
+        headline_button = Gtk::Button();
+        headline_button.add(headline_label);
 
         /*
                 Measure the label pixels to layout them out horizontally.
                 https://developer.gnome.org/gtkmm-tutorial/stable/sec-drawing-text.html.en
                 https://developer.gnome.org/gtk3/stable/gtk-question-index.html
         */
-        auto pglyt = headline_label.create_pango_layout(headline);
+        auto pglyt = headline_button.create_pango_layout(headline);
 
         if(headline_label_y < 1) {
             int headline_width = 0;
@@ -173,14 +177,14 @@ void cls::show_headlines() {
             headline_height = headline_height + 22;
         }
 
-        _headlines->put(headline_label, 0, headline_label_y);
+        _headlines->put(headline_button, 0, headline_label_y);
 
         headline_label_y = headline_label_y + headline_height;
 
-        headline_label.set_size_request(_screen_w,headline_height);
-        headline_label.show();
+        headline_button.set_size_request(_screen_w,headline_height);
+        headline_button.show();
         /*GTK Styles*/
-        auto style_ctx_headline_button = headline_label.get_style_context();
+        auto style_ctx_headline_button = headline_button.get_style_context();
         style_ctx_headline_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
         style_ctx_headline_button->add_class("headline_button");
     }
