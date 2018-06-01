@@ -6,10 +6,5 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-./build_libui_interactionengine.sh
-./build_libui_interactionstate.sh
-./build_libui_keyboardtr.sh
-./build_libui_textbuffer.sh
-./build_libui_visualcallable.sh
 ./build_librssui_mainscreengenerator.sh
 

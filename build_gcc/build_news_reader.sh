@@ -8,11 +8,11 @@
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 reset
 #echo "Building rss_requestor library"
+#uncomment the following line to build the rss parser library for the user interface.
 #./build_news_lib.sh
 
 echo "Building visual function library"
 ./build_news_reader_lib.sh
-./build_librssui_mainscreengenerator.sh
 
 cp ../styles.css .
 glib-compile-resources --target=../styles.cxx --generate-source ../styles.xml
