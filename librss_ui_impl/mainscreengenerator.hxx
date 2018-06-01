@@ -97,10 +97,12 @@ class mainscreengenerator {
     Gtk::Box* _feed_edit_region;
     Gtk::ScrolledWindow* _feed_names_region;
 
-    int screen_w = 0;
-    int screen_h = 0;
-    int screen_max_w = 0;
-    int screen_max_h = 0;
+    int _screen_w = 0;
+    int _screen_h = 0;
+    int _screen_max_w = 0;
+    int _screen_max_h = 0;
+    int _headline_region_h = 0;
+    int _contents_region_h = 0;
 
     int show_screen();
 
@@ -108,6 +110,15 @@ class mainscreengenerator {
     void show_headlines();
     void show_article_summary_selected_row(Gtk::ListBoxRow* row);
     void show_article_summary(int article_index);
+
+    void setup_ui_layout_parameters();
+
+    void create_ui_window();
+    void create_ui_header();
+    void create_ui_headline_region();
+    void create_ui_article_content_region();
+    void create_ui_feed_edit_region();
+    void create_ui_feed_names_region();
 };
 }
 }
