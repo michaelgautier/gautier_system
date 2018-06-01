@@ -98,6 +98,13 @@ class mainscreengenerator {
     Gtk::ScrolledWindow* _feed_names_region;
 
     Gtk::Label* _header_text;
+    Gtk::Label* _feed_name_label;
+    Gtk::Entry* _feed_name_edit;
+    Gtk::Label* _feed_url_label;
+    Gtk::Entry* _feed_url_edit;
+    Gtk::Button* _feed_edit_button;
+    Gtk::Layout* _feed_names_field;
+
 
     int _screen_w = 0;
     int _screen_h = 0;

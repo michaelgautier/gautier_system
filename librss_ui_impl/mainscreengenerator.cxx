@@ -296,7 +296,7 @@ void cls::create_ui_header() {
     _header_region = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
 
     _header_text = new Gtk::Label("Gautier RSS");
-    _header_region->add(*_header_text);//You must use pointers with GTK+ unless you go to an obsessive extent to subclass each thing.
+    _header_region->add(*_header_text);
     _gautier_rss_area->add(*_header_region);
 
     auto style_ctx_header = _header_region->get_style_context();
@@ -346,17 +346,17 @@ void cls::create_ui_article_content_region() {
 
 void cls::create_ui_feed_edit_region() {
     _feed_edit_region = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-    auto feed_name_label = Gtk::Label("Feed Name");
-    auto feed_name_edit = Gtk::Entry();
-    auto feed_url_label = Gtk::Label("Feed website address");
-    auto feed_url_edit = Gtk::Entry();
-    auto feed_edit_button = Gtk::Button("Save");
+    _feed_name_label = new Gtk::Label("Feed Name");
+    _feed_name_edit = new Gtk::Entry();
+    _feed_url_label = new Gtk::Label("Feed website address");
+    _feed_url_edit = new Gtk::Entry();
+    _feed_edit_button = new Gtk::Button("Save");
 
-    _feed_edit_region->add(feed_name_label);
-    _feed_edit_region->add(feed_name_edit);
-    _feed_edit_region->add(feed_url_label);
-    _feed_edit_region->add(feed_url_edit);
-    _feed_edit_region->add(feed_edit_button);
+    _feed_edit_region->add(*_feed_name_label);
+    _feed_edit_region->add(*_feed_name_edit);
+    _feed_edit_region->add(*_feed_url_label);
+    _feed_edit_region->add(*_feed_url_edit);
+    _feed_edit_region->add(*_feed_edit_button);
 
     _gautier_rss_area->add(*_feed_edit_region);
 
@@ -364,24 +364,24 @@ void cls::create_ui_feed_edit_region() {
     style_ctx_feed_changes_region->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_changes_region->add_class("feed_changes_region");
 
-    auto style_ctx_feed_name_label = feed_name_label.get_style_context();
+    auto style_ctx_feed_name_label = _feed_name_label->get_style_context();
     style_ctx_feed_name_label->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_name_label->add_class("feed_change_label");
 
-    auto style_ctx_feed_name_edit = feed_name_edit.get_style_context();
+    auto style_ctx_feed_name_edit = _feed_name_edit->get_style_context();
     style_ctx_feed_name_edit->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_name_edit->add_class("feed_change_field");
 
-    auto style_ctx_feed_url_label = feed_url_label.get_style_context();
+    auto style_ctx_feed_url_label = _feed_url_label->get_style_context();
     style_ctx_feed_url_label->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_url_label->add_class("feed_change_label");
 
-    auto style_ctx_feed_url_edit = feed_url_edit.get_style_context();
+    auto style_ctx_feed_url_edit = _feed_url_edit->get_style_context();
     style_ctx_feed_url_edit->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_url_edit->add_class("feed_change_field");
-    feed_url_edit.set_size_request(_screen_w/3);
+    _feed_url_edit->set_size_request(_screen_w/3);
 
-    auto style_ctx_feed_change_button = feed_edit_button.get_style_context();
+    auto style_ctx_feed_change_button = _feed_edit_button->get_style_context();
     style_ctx_feed_change_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feed_change_button->add_class("feed_change_button");
 
@@ -390,9 +390,9 @@ void cls::create_ui_feed_edit_region() {
 
 void cls::create_ui_feed_names_region() {
     _feed_names_region = new Gtk::ScrolledWindow();
-    auto feed_names_field = Gtk::Layout();
+    _feed_names_field = new Gtk::Layout();
 
-    _feed_names_region->add(feed_names_field);
+    _feed_names_region->add(*_feed_names_field);
 
     Gtk::Button feedname_label;
 
@@ -417,7 +417,7 @@ void cls::create_ui_feed_names_region() {
 
         pglyt->get_pixel_size(feedtext_width, feedtext_height);
 
-        feed_names_field.put(feedname_label, feedname_label_width, 0);
+        _feed_names_field->put(feedname_label, feedname_label_width, 0);
 
         feedname_label_width = feedname_label_width + feedtext_width + 22;
 
@@ -428,7 +428,7 @@ void cls::create_ui_feed_names_region() {
     }
 
     /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
-    auto feedname_buttons = feed_names_field.get_children();
+    auto feedname_buttons = _feed_names_field->get_children();
     int feedname_buttons_size = feedname_buttons.size();
 
     /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
@@ -445,7 +445,7 @@ void cls::create_ui_feed_names_region() {
     style_ctx_feeds_list_region->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feeds_list_region->add_class("feeds_list_region");
 
-    auto style_ctx_feeds_list = feed_names_field.get_style_context();
+    auto style_ctx_feeds_list = _feed_names_field->get_style_context();
     style_ctx_feeds_list->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_feeds_list->add_class("feeds_list");
 
