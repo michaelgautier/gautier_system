@@ -97,6 +97,8 @@ class mainscreengenerator {
     Gtk::Box* _feed_edit_region;
     Gtk::ScrolledWindow* _feed_names_region;
 
+    Gtk::Label* _header_text;
+
     int _screen_w = 0;
     int _screen_h = 0;
     int _screen_max_w = 0;

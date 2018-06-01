@@ -291,13 +291,12 @@ void cls::create_ui_window() {
 
     return;
 }
-//With this refactoring -- The layout is broken even though the code is not really changed.
-//Weakness of GTK+ combined with C++.
+
 void cls::create_ui_header() {
     _header_region = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
 
-    auto header_text = Gtk::Label("Gautier RSS");
-    _header_region->add(header_text);
+    _header_text = new Gtk::Label("Gautier RSS");
+    _header_region->add(*_header_text);//You must use pointers with GTK+ unless you go to an obsessive extent to subclass each thing.
     _gautier_rss_area->add(*_header_region);
 
     auto style_ctx_header = _header_region->get_style_context();
