@@ -110,12 +110,8 @@ vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<materi
     if(feed_parameters.size() > 0) {
         request feedsource = feed_parameters[feed_source_index];
 
-        //cout << "feedsource " << feedsource.feedname << "\n";
-
         collector rss_requestor;
         feed_articles = rss_requestor.pull(feedsource);
-
-        //cout << "_feed_articles.size() " << _feed_articles.size() << "\n";
     }
 
     return feed_parameters;
@@ -232,11 +228,7 @@ int cls::show_screen() {
         /*GTK Styles*/
         _css_provider = Gtk::CssProvider::create();
 
-        /*Use this when the css is final for the compile.*/
         _css_provider->load_from_resource("/styles/styles.css");
-
-        /*Use to quickly test out css changes.*/
-        //_css_provider->load_from_path("styles.css");
 
         _gautier_rss_window = new Gtk::ApplicationWindow();
 
@@ -262,82 +254,12 @@ int cls::show_screen() {
         _gautier_rss_window->maximize();
 
         _gautier_rss_area = new Gtk::Box(Gtk::Orientation::ORIENTATION_VERTICAL);
-        /*
-
-        ---------------------------------------------------------------------
-
-        5/31/2018
-
-        I decided to use gtkmm as the software framework for the user interface.
-        At the time this was written, I only use Linux operating systems in my private life.
-        I do not use Microsoft Windows or Apple MacOS.
-
-        Previously, I was using Allegro as the software framework. I preferred Allegro or similar
-        but the requirements to use Allegro was too granular for the intended result.
-
-        My original intent was to use one software framework that could be applied across all UI operating system environments.
-        FLTK, Allegro, SFML, and SDL allows this, but each had tradeoffs that worked well for some situations but not others.
-
-        GTK+ is not better than those, it is simply more convenient to use as a software framework under Linux.
-        That said, GTK+ has problems.
-                - I do not like the CSS (Cascading Style Sheets) approach to the user interface.
-                - I am beyond accepting of CSS as a suppliment to HTML but it is not a solid implementation in GTK+.
-                - The CSS approach is misleading because it is approximately 70% of the CSS specification
-                        and simple things like width, height does not work well.
-                - Style sheet errors will actually cause the program to abruptly render the UI as if no styles are active.
-                - The official manual/tutorial "Programming with GTKMM" seems incomplete and does not fully explain certain aspects.
-                - No good books in early/mid 2018 on GTK. The most recent book is 10 years old.
-                - Too much of an emphasis on web-based documentation. Some people "need" to code without a constant Internet connection.
-                - Inconsistent API when it comes to list style controls compared to similar controls in other UI toolkits.
-                - Unexplainable visual rendering problems as in ListBox widget showing list items at regular size in the beginning
-                        but when you clear those items out and add new items, the new items are rendered at a height so small
-                        that rows almost seems invisible.
-                - The [biggest] problem is that GTK+ seems designed to nudge you to design UI software a certain way.
-                        * Subclassing. GTK+ documentation/tutorials strongly slanted towards inheriting from Widgets.
-                        * Overcomplicating data binding with TreeModels when what you need is a simple list with a selection event.
-                        * Signals on widgets that have very weak callback signatures. You have to concoct hacks using C++11 lambda capturing.
-                        * Noticable widget rendering issues depending on if the widget is heap vs stack allocated.
-                        * Moving you in the direction of not using pointers but then using RefPtr types that require use of the indirection operator.
-
-                - Despite those issues, the GTK+ software framework is useable. Definitely useful in a Linux/UNIX environment.
-                        I most certainly think that GTK+ sucks but that it is at the same time convenient. As a result, I have
-                        made a practical decision to use GTK+.
-
-        ---------------------------------------------------------------------
-
-                Original comments*****
-
-                5/27/2018
-                Unlike other UI toolkits, GTK will NOT show a background color on an empty widget.
-                Other issues:
-                        - Cannot directly change visual appearance with high granularity.
-                        - Forces you to use CSS.
-                        - Not really a software developer friendly API.
-                        - It starts out good (make a hello world window), but GTK has usability problems not overcome by tutorials.
-                        - A UI toolkit more like FLTK in that you can make basic UI fairly easily, but is far behind
-                                other UI toolkits in the expedient creation of even a moderately sophisticated UI.
-                        - The toolkit is solid at a technical level but fails to drive visually compelling UI by foregoing
-                                many of the conventions and results apparent in other UI toolkits.
-        */
-        //gautier_rss_area.override_background_color(Gdk::RGBA("60,122,158"));
 
         _gautier_rss_window->add(*_gautier_rss_area);
 
-        /*
-                Original comments*****
-
-                5/27/2018
-                You only get a modicum of a background color when you add content. It should not be that way.
-                You should be able to get background color on just the window itself or at least a container
-                that auto sizes to the width and height of the container. GTK provides no direct, intuitive way to achieve this.
-                At its core, all GTK offers is auto widget arrangement and basic widgets but not a straightforward path to making slick UI.
-        */
-        //auto feed_button = Gtk::Button("test");
-        //gautier_rss_area.add(feed_button);
-
         /*Header*/
         _header_region = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
-        //header_region.override_background_color(Gdk::RGBA("255,153,85"));
+
         auto header_text = Gtk::Label("Gautier RSS");
         _header_region->add(header_text);
         _gautier_rss_area->add(*_header_region);
