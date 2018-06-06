@@ -115,12 +115,17 @@ class mainscreengenerator {
     int _window_w = 0;
     int _window_h = 0;
 
+    int _last_window_w = -1;
+    int _last_window_h = -1;
+
     int _screen_max_w = 0;
     int _screen_max_h = 0;
 
     const int _feed_name_button_h = 34;
 
     const int _widget_xy_offset = 22;
+
+    const int _article_summary_max_chars = 180;
 
     int _region_header_w = 0;
     int _region_header_h = 0;

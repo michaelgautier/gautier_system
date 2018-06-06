@@ -187,10 +187,7 @@ void cls::show_headlines() {
     }
 
     resize_headlines();
-    _region_headlines->show_all();
-//    _region_headlines->queue_draw();
-//
-//    _headlines->show_all_children(true);
+    //_region_headlines->show_all();
 
     return;
 }
@@ -286,7 +283,17 @@ void cls::show_article_summary(int article_index) {
     string headline_description = feed_article_entry.description;
     string article_content = feed_article_entry.content;
 
+    if(headline_description.size() > _article_summary_max_chars) {
+        headline_description = headline_description.substr(0, _article_summary_max_chars);
+    }
+
+    _region_article_summary->set_lines(1);
+    _region_article_summary->set_max_width_chars(_article_summary_max_chars);
+    _region_article_summary->set_single_line_mode(true);
     _region_article_summary->set_text(headline_description);
+
+    //_article_content->set_lines(80);
+    _article_content->set_single_line_mode(false);
     _article_content->set_text(article_content);
 
     return;
@@ -357,100 +364,105 @@ void cls::setup_ui_layout_parameters() {
 }
 
 void cls::setup_ui_region_layout_parameters() {
-    int window_h = _screen_h;
+    if(_last_window_h != _window_h || _last_window_w != _window_w) {
+        int window_h = _screen_h;
 
-    _region_header_w = 0;
-    _region_header_h = 0;
+        _region_header_w = 0;
+        _region_header_h = 0;
 
-    _region_headlines_w = _screen_w/2;
-    _region_headlines_h = 0;
+        _region_headlines_w = _screen_w/2;
+        _region_headlines_h = 0;
 
-    _region_article_summary_w = 0;
-    _region_article_summary_h = 0;
+        _region_article_summary_w = 0;
+        _region_article_summary_h = 0;
 
-    _region_content_w = _screen_w/2;
-    _region_content_h = 0;
+        _region_content_w = _screen_w/2;
+        _region_content_h = 0;
 
-    _region_feed_edit_w = 0;
-    _region_feed_edit_h = 0;
+        _region_feed_edit_w = 0;
+        _region_feed_edit_h = 0;
 
-    _region_feed_names_w = _screen_w/2;
-    _region_feed_names_h = 36;
+        _region_feed_names_w = _screen_w/2;
+        _region_feed_names_h = 36;
 
-    int next_y = 0;
-    int accumulated_h = 0;
-    int remaining_h = 0;
+        int next_y = 0;
+        int accumulated_h = 0;
+        int remaining_h = 0;
 
-    int y = 0;
-    int h = 0;
+        int y = 0;
+        int h = 0;
 
-    int rh = 0;
+        int rh = 0;
 
-    const int max_elems = 6;
+        const int max_elems = 6;
 
-    if(_window_h > 0) {
-        window_h = _window_h;
+        if(_window_h > 0) {
+            window_h = _window_h;
+        }
+
+        for(int index = 0; index < max_elems; index++) {
+            y = next_y;
+
+            switch(index) {
+            case 0: { //RSS Reader Header
+            }
+            break;
+            case 1: { //RSS Reader Headlines
+                h = remaining_h / 3;
+                _region_headlines_h = h;
+            }
+            break;
+            case 2: { //RSS Reader article content
+                double dv = 2;
+                h = remaining_h / dv;
+
+                _region_content_h = h;
+            }
+            break;
+            case 3: {//article headline and control
+                double dv = 2;
+                rh = remaining_h / dv;
+
+                h = rh;
+                _region_article_summary_h = h;
+            }
+            break;
+            case 4: {//feed edit
+                h = rh;
+
+                _region_feed_edit_h = h;
+            }
+            break;
+            case 5: {//feed names
+                h = rh;
+
+                _region_feed_names_h = h;
+            }
+            break;
+            }
+
+            accumulated_h = (accumulated_h + h);
+            next_y = (next_y + h);
+
+            remaining_h = (window_h - accumulated_h);
+        }
+
+        if(_region_content) {
+            _region_content->set_size_request(_region_content_w,_region_content_h);
+        }
+
+        if(_region_headlines) {
+            _region_headlines->set_size_request(_region_headlines_w, _region_headlines_h);
+
+            resize_headlines();
+        }
+        //_feed_names_field->set_size(_region_feed_names_w,_region_feed_names_h);
+        /*
+        _feed_names_field->set_size(feedname_label_width + _widget_xy_offset, _feed_name_button_h);*/
+
+        _last_window_w = _window_w;
+        _last_window_h = _window_h;
     }
-
-    for(int index = 0; index < max_elems; index++) {
-        y = next_y;
-
-        switch(index) {
-        case 0: { //RSS Reader Header
-        }
-        break;
-        case 1: { //RSS Reader Headlines
-            h = remaining_h / 3;
-            _region_headlines_h = h;
-        }
-        break;
-        case 2: { //RSS Reader article content
-            double dv = 2;
-            h = remaining_h / dv;
-
-            _region_content_h = h;
-        }
-        break;
-        case 3: {//article headline and control
-            double dv = 2;
-            rh = remaining_h / dv;
-
-            h = rh;
-            _region_article_summary_h = h;
-        }
-        break;
-        case 4: {//feed edit
-            h = rh;
-
-            _region_feed_edit_h = h;
-        }
-        break;
-        case 5: {//feed names
-            h = rh;
-
-            _region_feed_names_h = h;
-        }
-        break;
-        }
-
-        accumulated_h = (accumulated_h + h);
-        next_y = (next_y + h);
-
-        remaining_h = (window_h - accumulated_h);
-    }
-
-    if(_region_content) {
-        _region_content->set_size_request(_region_content_w,_region_content_h);
-    }
-
-    if(_region_headlines) {
-        _region_headlines->set_size_request(_region_headlines_w, _region_headlines_h);
-
-        resize_headlines();
-    }
-    //_feed_names_field->set_size(_region_feed_names_w,_region_feed_names_h);
-    /*
-    _feed_names_field->set_size(feedname_label_width + _widget_xy_offset, _feed_name_button_h);*/
 
     return;
 }
