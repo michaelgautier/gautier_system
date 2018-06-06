@@ -17,8 +17,13 @@
         background-color: #f9f9f9;
 }
 
+.article_summary_region {
+        background-color: #ffffff;
+}
+
 .contents_region {
         background-color: #ffffff;
+        padding: 4px;
 }
 
 .feed_changes_region {
