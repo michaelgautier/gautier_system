@@ -38,6 +38,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <gtkmm/button.h>
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/eventbox.h>
 #include <gtkmm/flowbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/layout.h>
@@ -86,6 +87,8 @@ class mainscreengenerator {
 
     Glib::RefPtr<Gtk::CssProvider> _css_provider;
 
+    Gtk::EventBox* _events = nullptr;
+
     Gtk::Label* _article_content = nullptr;
     Gtk::Layout* _headlines = nullptr;
 
@@ -93,6 +96,7 @@ class mainscreengenerator {
     Gtk::Box* _gautier_rss_area = nullptr;
     Gtk::Box* _region_header = nullptr;
     Gtk::ScrolledWindow* _region_headlines = nullptr;
+    Gtk::Label* _region_article_summary = nullptr;
     Gtk::ScrolledWindow* _region_content = nullptr;
     Gtk::Box* _region_feed_edit = nullptr;
     Gtk::ScrolledWindow* _region_feed_names = nullptr;
@@ -147,9 +151,13 @@ class mainscreengenerator {
     void setup_ui_layout_parameters();
     void setup_ui_region_layout_parameters();
 
+    void resize_headlines();
+    void remove_headlines();
+
     void create_ui_window();
     void create_ui_region_header();
     void create_ui_region_headlines();
+    void create_ui_region_article_summary();
     void create_ui_region_content();
     void create_ui_region_feed_edit();
     void create_ui_region_feed_names();

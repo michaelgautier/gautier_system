@@ -102,14 +102,34 @@ void cls::show_feed(int feed_index) {
     return;
 }
 
-void cls::show_headlines() {
-    if(_headlines) {
-        _region_headlines->remove_with_viewport();
+void cls::remove_headlines() {
+    auto headline_items = _headlines->get_children();
+    auto headline_items_size = headline_items.size();
+
+    for(int i = 0; i < headline_items_size; i++) {
+        auto headlinebtn = (Gtk::Button*)headline_items[i];
+
+        _headlines->remove(*headlinebtn);
     }
 
-    _headlines = new Gtk::Layout();
-    _region_headlines->add(*_headlines);
+    return;
+}
 
+void cls::show_headlines() {
+    if(!_headlines) {
+        _headlines = new Gtk::Layout();
+        _region_headlines->add(*_headlines);
+
+        _headlines->show();
+    }
+
+    if(_headlines) {
+        //_region_headlines->remove_with_viewport();
+
+        remove_headlines();
+    }
+
+    Gtk::EventBox headline_event;
     Gtk::Label headline_label;
     Gtk::Button headline_button;
 
@@ -148,13 +168,12 @@ void cls::show_headlines() {
 
         headline_button.set_size_request(_screen_w,headline_height);
         headline_button.show();
-        /*GTK Styles*/
-        auto style_ctx_headline_button = headline_button.get_style_context();
-        style_ctx_headline_button->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-        style_ctx_headline_button->add_class("headline_button");
-    }
 
-    _region_headlines->show_all();
+        /*GTK Styles*/
+        auto style_ctx = headline_button.get_style_context();
+        style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx->add_class("headline_button");
+    }
 
     auto headline_buttons = _headlines->get_children();
     auto headline_buttons_size = headline_buttons.size();
@@ -166,6 +185,12 @@ void cls::show_headlines() {
             show_article_summary(i);
         });
     }
+
+    resize_headlines();
+    _region_headlines->show_all();
+//    _region_headlines->queue_draw();
+//
+//    _headlines->show_all_children(true);
 
     return;
 }
@@ -238,7 +263,7 @@ void cls::show_feed_names() {
         style_ctx_feedname_button->add_class("feed_button");
     }
 
-    _feed_names_field->show_all();
+    _gautier_rss_window->show_all();
 
     /*You have to do this in this way because none but the last feedname_index value is captured in the previous loop.*/
     auto feedname_buttons = _feed_names_field->get_children();
@@ -258,8 +283,10 @@ void cls::show_feed_names() {
 void cls::show_article_summary(int article_index) {
     auto feed_article_entry = _feed_articles[article_index];
 
-    string article_content = feed_article_entry.description;
+    string headline_description = feed_article_entry.description;
+    string article_content = feed_article_entry.content;
 
+    _region_article_summary->set_text(headline_description);
     _article_content->set_text(article_content);
 
     return;
@@ -285,6 +312,7 @@ int cls::show_screen() {
 
         create_ui_region_header();
         create_ui_region_headlines();
+        create_ui_region_article_summary();
         create_ui_region_content();
         create_ui_region_feed_edit();
         create_ui_region_feed_names();
@@ -418,20 +446,26 @@ void cls::setup_ui_region_layout_parameters() {
     if(_region_headlines) {
         _region_headlines->set_size_request(_region_headlines_w, _region_headlines_h);
 
-        auto pglyt = _headlines->create_pango_layout("H");
-
-        int headline_width = 0;
-        int headline_height = 0;
-
-        pglyt->get_pixel_size(headline_width, headline_height);
-
-        int headlines_h = _feed_articles.size() * headline_height;
-
-        _headlines->set_size(_screen_w, headlines_h);
+        resize_headlines();
     }
     //_feed_names_field->set_size(_region_feed_names_w,_region_feed_names_h);
     /*
     _feed_names_field->set_size(feedname_label_width + _widget_xy_offset, _feed_name_button_h);*/
+
+    return;
+}
+
+void cls::resize_headlines() {
+    auto pglyt = _headlines->create_pango_layout("H");
+
+    int headline_width = 0;
+    int headline_height = 0;
+
+    pglyt->get_pixel_size(headline_width, headline_height);
+
+    int headlines_h = _feed_articles.size() * headline_height;
+
+    _headlines->set_size(_screen_w, headlines_h);
 
     return;
 }
@@ -447,9 +481,18 @@ void cls::create_ui_window() {
 
     _gautier_rss_window->add(*_gautier_rss_area);
 
+    _events = new Gtk::EventBox();
+
     auto style_ctx_window = _gautier_rss_window->get_style_context();
     style_ctx_window->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_window->add_class("window");
+
+
+    /*
+    Causes real issues/problems
+        The headlines area won't show correctly after when another feed is clicked.
+
+        Don't do this.
 
     _gautier_rss_window->signal_size_allocate().connect([=](Gtk::Allocation& allo) {
         _window_w = _gautier_rss_window->get_width();
@@ -457,7 +500,9 @@ void cls::create_ui_window() {
 
         setup_ui_region_layout_parameters();
     });
+    */
 
+    //However, this works just fine.
     _gautier_rss_window->signal_check_resize().connect([=]() {
         _window_w = _gautier_rss_window->get_width();
         _window_h = _gautier_rss_window->get_height();
@@ -475,9 +520,9 @@ void cls::create_ui_region_header() {
     _region_header->add(*_header_text);
     _gautier_rss_area->add(*_region_header);
 
-    auto style_ctx_header = _region_header->get_style_context();
-    style_ctx_header->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    style_ctx_header->add_class("header");
+    auto style_ctx = _region_header->get_style_context();
+    style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    style_ctx->add_class("header");
 
     return;
 }
@@ -489,9 +534,21 @@ void cls::create_ui_region_headlines() {
 
     show_headlines();
 
-    auto style_ctx_region_headlines = _region_headlines->get_style_context();
-    style_ctx_region_headlines->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    style_ctx_region_headlines->add_class("headlines_region");
+    auto style_ctx = _region_headlines->get_style_context();
+    style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    style_ctx->add_class("headlines_region");
+
+    return;
+}
+
+void cls::create_ui_region_article_summary() {
+    _region_article_summary = new Gtk::Label();
+
+    _gautier_rss_area->add(*_region_article_summary);
+
+    auto style_ctx = _region_article_summary->get_style_context();
+    style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    style_ctx->add_class("article_summary_region");
 
     return;
 }
@@ -508,9 +565,9 @@ void cls::create_ui_region_content() {
 
     _gautier_rss_area->add(*_region_content);
 
-    auto style_ctx_contents_region = _region_content->get_style_context();
-    style_ctx_contents_region->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    style_ctx_contents_region->add_class("contents_region");
+    auto style_ctx = _region_content->get_style_context();
+    style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    style_ctx->add_class("contents_region");
 
     return;
 }
