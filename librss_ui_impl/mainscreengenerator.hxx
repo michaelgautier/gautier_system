@@ -84,26 +84,26 @@ class mainscreengenerator {
     void get_rss_feed_names_and_articles();
     void get_screen_wh();
 
-    Gtk::Label* _article_content;
-    Gtk::Layout* _headlines;
-
     Glib::RefPtr<Gtk::CssProvider> _css_provider;
 
-    Gtk::ApplicationWindow* _gautier_rss_window;
-    Gtk::Box* _gautier_rss_area;
-    Gtk::Box* _region_header;
-    Gtk::ScrolledWindow* _region_headlines;
-    Gtk::ScrolledWindow* _region_content;
-    Gtk::Box* _region_feed_edit;
-    Gtk::ScrolledWindow* _region_feed_names;
+    Gtk::Label* _article_content = nullptr;
+    Gtk::Layout* _headlines = nullptr;
 
-    Gtk::Label* _header_text;
-    Gtk::Label* _feed_name_label;
-    Gtk::Entry* _feed_name_edit;
-    Gtk::Label* _feed_url_label;
-    Gtk::Entry* _feed_url_edit;
-    Gtk::Button* _feed_edit_button;
-    Gtk::Layout* _feed_names_field;
+    Gtk::ApplicationWindow* _gautier_rss_window = nullptr;
+    Gtk::Box* _gautier_rss_area = nullptr;
+    Gtk::Box* _region_header = nullptr;
+    Gtk::ScrolledWindow* _region_headlines = nullptr;
+    Gtk::ScrolledWindow* _region_content = nullptr;
+    Gtk::Box* _region_feed_edit = nullptr;
+    Gtk::ScrolledWindow* _region_feed_names = nullptr;
+
+    Gtk::Label* _header_text = nullptr;
+    Gtk::Label* _feed_name_label = nullptr;
+    Gtk::Entry* _feed_name_edit = nullptr;
+    Gtk::Label* _feed_url_label = nullptr;
+    Gtk::Entry* _feed_url_edit = nullptr;
+    Gtk::Button* _feed_edit_button = nullptr;
+    Gtk::Layout* _feed_names_field = nullptr;
 
     int _screen_w = 0;
     int _screen_h = 0;
