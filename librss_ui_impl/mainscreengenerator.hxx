@@ -91,11 +91,11 @@ class mainscreengenerator {
 
     Gtk::ApplicationWindow* _gautier_rss_window;
     Gtk::Box* _gautier_rss_area;
-    Gtk::Box* _header_region;
-    Gtk::ScrolledWindow* _headlines_region;
-    Gtk::ScrolledWindow* _content_region;
-    Gtk::Box* _feed_edit_region;
-    Gtk::ScrolledWindow* _feed_names_region;
+    Gtk::Box* _region_header;
+    Gtk::ScrolledWindow* _region_headlines;
+    Gtk::ScrolledWindow* _region_content;
+    Gtk::Box* _region_feed_edit;
+    Gtk::ScrolledWindow* _region_feed_names;
 
     Gtk::Label* _header_text;
     Gtk::Label* _feed_name_label;
@@ -107,10 +107,34 @@ class mainscreengenerator {
 
     int _screen_w = 0;
     int _screen_h = 0;
+
+    int _window_w = 0;
+    int _window_h = 0;
+
     int _screen_max_w = 0;
     int _screen_max_h = 0;
-    int _headline_region_h = 0;
-    int _contents_region_h = 0;
+
+    const int _feed_name_button_h = 34;
+
+    const int _widget_xy_offset = 22;
+
+    int _region_header_w = 0;
+    int _region_header_h = 0;
+
+    int _region_headlines_w = 0;
+    int _region_headlines_h = 0;
+
+    int _region_article_summary_w = 0;
+    int _region_article_summary_h = 0;
+
+    int _region_content_w = 0;
+    int _region_content_h = 0;
+
+    int _region_feed_edit_w = 0;
+    int _region_feed_edit_h = 0;
+
+    int _region_feed_names_w = 0;
+    int _region_feed_names_h = 0;
 
     int show_screen();
 
@@ -121,13 +145,14 @@ class mainscreengenerator {
     void show_article_summary(int article_index);
 
     void setup_ui_layout_parameters();
+    void setup_ui_region_layout_parameters();
 
     void create_ui_window();
-    void create_ui_header();
-    void create_ui_headline_region();
-    void create_ui_article_content_region();
-    void create_ui_feed_edit_region();
-    void create_ui_feed_names_region();
+    void create_ui_region_header();
+    void create_ui_region_headlines();
+    void create_ui_region_content();
+    void create_ui_region_feed_edit();
+    void create_ui_region_feed_names();
 };
 }
 }
