@@ -26,6 +26,7 @@ class material {
     std::string url{};
     std::string description{};
     std::string article_date{};
+    std::string content{};
 };
 }
 #endif

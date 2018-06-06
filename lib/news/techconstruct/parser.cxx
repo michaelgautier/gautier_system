@@ -115,6 +115,8 @@ void process_node(Node* node, vector<material>& v) {
             news->description = text;
         } else if(name == "pub_date" || name == "pubdate") {
             news->article_date = text;
+        } else if(name == "content") {
+            news->content = text;
         }
     }
 
