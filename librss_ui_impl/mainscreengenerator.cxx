@@ -292,9 +292,11 @@ void cls::show_article_summary(int article_index) {
     _region_article_summary->set_single_line_mode(true);
     _region_article_summary->set_text(headline_description);
 
-    //_article_content->set_lines(80);
-    _article_content->set_single_line_mode(false);
-    _article_content->set_text(article_content);
+    /*_article_content->set_single_line_mode(false);
+    _article_content->set_text(article_content);*/
+
+    //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
+    webkit_web_view_load_uri(_article_content_web_backend, string(feed_article_entry.url).data());
 
     return;
 }
@@ -568,12 +570,18 @@ void cls::create_ui_region_article_summary() {
 void cls::create_ui_region_content() {
     _region_content = new Gtk::ScrolledWindow();
 
-    _article_content = new Gtk::Label();
+    /*_article_content = new Gtk::Label();
     _article_content->set_lines(-1);
     _article_content->set_line_wrap(true);
     _article_content->set_single_line_mode(false);
 
-    _region_content->add(*_article_content);
+    _region_content->add(*_article_content);*/
+
+    //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
+    _article_content_web_backend = WEBKIT_WEB_VIEW( webkit_web_view_new() );
+    _article_content_web = Glib::wrap( GTK_WIDGET( _article_content_web_backend ) );
+
+    _region_content->add(*_article_content_web);
 
     _gautier_rss_area->add(*_region_content);
 

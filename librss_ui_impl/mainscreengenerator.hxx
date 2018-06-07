@@ -20,6 +20,8 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <string>
 #include <iostream>
 
+/*WebKit*/
+#include <webkit2/webkit2.h>
 
 /*GDK*/
 #include <gdkmm/display.h>
@@ -108,6 +110,10 @@ class mainscreengenerator {
     Gtk::Entry* _feed_url_edit = nullptr;
     Gtk::Button* _feed_edit_button = nullptr;
     Gtk::Layout* _feed_names_field = nullptr;
+
+    //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
+    WebKitWebView* _article_content_web_backend = nullptr;
+    Gtk::Widget* _article_content_web = nullptr;
 
     int _screen_w = 0;
     int _screen_h = 0;

@@ -9,6 +9,6 @@
 rm obj/librssui_mainscreengenerator.o
 echo "build main screen generator"
 
-g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
+g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
 #g++ -g -c -L./bin -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` -Wl,-rpath,. -o bin/librssui_mainscreengenerator.o obj/librssui_mainscreengenerator.o
 ls -gGh obj/librssui_mainscreengenerator*
