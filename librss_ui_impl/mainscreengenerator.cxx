@@ -568,7 +568,7 @@ void cls::create_ui_region_article_summary() {
 }
 
 void cls::create_ui_region_content() {
-    _region_content = new Gtk::ScrolledWindow();
+    //_region_content = new Gtk::ScrolledWindow();
 
     /*_article_content = new Gtk::Label();
     _article_content->set_lines(-1);
@@ -581,7 +581,27 @@ void cls::create_ui_region_content() {
     _article_content_web_backend = WEBKIT_WEB_VIEW( webkit_web_view_new() );
     _article_content_web = Glib::wrap( GTK_WIDGET( _article_content_web_backend ) );
 
-    _region_content->add(*_article_content_web);
+    _region_content = _article_content_web;
+    //_region_content->add(*_article_content_web);
+
+    _article_content_web_backend_settings = webkit_settings_new();
+
+    webkit_settings_set_allow_modal_dialogs(_article_content_web_backend_settings, false);
+    webkit_settings_set_auto_load_images (_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_developer_extras(_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_frame_flattening(_article_content_web_backend_settings, true);
+    webkit_settings_set_enable_html5_database(_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_html5_local_storage(_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_javascript (_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_java (_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_plugins (_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_webaudio (_article_content_web_backend_settings, false);
+    webkit_settings_set_enable_webgl (_article_content_web_backend_settings, false);
+    webkit_settings_set_javascript_can_access_clipboard(_article_content_web_backend_settings, false);
+    webkit_settings_set_javascript_can_open_windows_automatically(_article_content_web_backend_settings, false);
+    webkit_settings_set_media_playback_allows_inline(_article_content_web_backend_settings, false);
+
+    webkit_web_view_set_settings (_article_content_web_backend, _article_content_web_backend_settings);
 
     _gautier_rss_area->add(*_region_content);
 
@@ -605,7 +625,6 @@ void cls::create_ui_region_feed_edit() {
     _region_feed_edit->add(*_feed_url_label);
     _region_feed_edit->add(*_feed_url_edit);
     _region_feed_edit->add(*_feed_edit_button);
-
 
     _feed_edit_button->signal_clicked().connect([=]() {
         update_feed_source();

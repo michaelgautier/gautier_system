@@ -99,7 +99,7 @@ class mainscreengenerator {
     Gtk::Box* _region_header = nullptr;
     Gtk::ScrolledWindow* _region_headlines = nullptr;
     Gtk::Label* _region_article_summary = nullptr;
-    Gtk::ScrolledWindow* _region_content = nullptr;
+    Gtk::Widget* _region_content = nullptr;
     Gtk::Box* _region_feed_edit = nullptr;
     Gtk::ScrolledWindow* _region_feed_names = nullptr;
 
@@ -114,6 +114,8 @@ class mainscreengenerator {
     //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
     WebKitWebView* _article_content_web_backend = nullptr;
     Gtk::Widget* _article_content_web = nullptr;
+
+    WebKitSettings* _article_content_web_backend_settings = nullptr;
 
     int _screen_w = 0;
     int _screen_h = 0;
