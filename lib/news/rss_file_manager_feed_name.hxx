@@ -28,6 +28,7 @@ namespace news {
 using namespace std;
 class rss_file_manager_feed_name {
   private:
+    string _file_location;
   public:
     void init(const string& file_location);
     rss_data_feed_name_set get_set();

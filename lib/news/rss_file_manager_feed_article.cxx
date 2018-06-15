@@ -19,12 +19,24 @@ using namespace std;
 using cls = news::rss_file_manager_feed_article;
 
 void cls::init(const string& file_location) {
+    _file_location = file_location;
+
     return;
 }
 
-news::rss_data_feed_name_set cls::get_set() {
+news::rss_data_feed_article_set cls::get_set(news::rss_data_feed_name_spec& rss_spec) {
+    news::rss_data_feed_article_set fa_set;
+
+    //Read the file, get the feed article, update the set.
+
+    return fa_set;
 }
 
-news::rss_consequence_set cls::save_set(news::rss_data_feed_name_set& rss_set) {
+news::rss_consequence_set cls::save_set(news::rss_data_feed_name_spec& rss_nm_spec, news::rss_data_feed_headline_spec& rss_hdln_spec, news::rss_data_feed_article_set& rss_set) {
+    news::rss_consequence_set cs;
+
+    //Read the feed articles and create/replace the file.
+
+    return cs;
 }
 

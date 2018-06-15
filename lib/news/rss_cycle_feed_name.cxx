@@ -27,7 +27,7 @@ void cls::init(string file_location) {
 }
 
 news::rss_data_feed_name_spec cls::get_single_feed_name(const unsigned short int feed_index) {
-    news::rss_data_feed_name_spec n;
+    news::rss_data_feed_name_spec n("", "");
 
     if(_set) {
         //Find the spec in the set and assign to n.

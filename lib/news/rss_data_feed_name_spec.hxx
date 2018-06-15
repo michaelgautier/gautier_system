@@ -26,6 +26,9 @@ using namespace std;
 class rss_data_feed_name_spec {
   private:
   public:
+    rss_data_feed_name_spec(string name, string url);
+    string name;
+    string url;
 };
 }
 #endif

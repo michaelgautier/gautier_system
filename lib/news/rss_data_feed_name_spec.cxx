@@ -18,3 +18,9 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_data_feed_name_spec;
 
+cls::rss_data_feed_name_spec(string name, string url) {
+    this->name = name;
+    this->url = url;
+
+    return;
+}

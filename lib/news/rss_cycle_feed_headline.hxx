@@ -23,14 +23,17 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "rss_data_feed_headline_spec.hxx"
 #include "rss_data_feed_headline_set.hxx"
+#include "rss_file_manager_feed_headline.hxx"
 #include "rss_consequence_set.hxx"
 
 namespace news {
 using namespace std;
 class rss_cycle_feed_headline {
   private:
+    rss_data_feed_headline_set* _set = nullptr;
+    string _file_location;
   public:
-    void init();
+    void init(string file_location);
     rss_data_feed_headline_spec get_single_feed_headline(const string& feed_name, const unsigned short int headline_index);
     rss_data_feed_headline_set get_feed_headlines(const string& feed_name);
     rss_consequence_set set_single_feed_headline(const string& feed_name, const rss_data_feed_headline_spec& feed_headline);

@@ -18,22 +18,78 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_cycle_feed_article;
 
-void cls::init() {
+void cls::init(string file_location) {
+    _file_location = file_location;
+
+    _set = new news::rss_data_feed_article_set;
+
     return;
 }
 
 news::rss_data_feed_article_spec cls::get_single_feed_article(const string& feed_name, const unsigned short int headline_index) {
+    news::rss_data_feed_article_spec a;
+
+    if(_set) {
+        //Find the spec in the set and assign to n.
+    }
+
+    return a;
 }
 
 news::rss_data_feed_article_set cls::get_feed_articles(const string& feed_name) {
+    news::rss_file_manager_feed_article fm;
+    fm.init(_file_location);
+
+    news::rss_data_feed_article_set fa;
+
+    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
+
+    fa = fm.get_set(feed_name_spec);
+
+    _set = &fa;
+
+    return fa;
 }
 
 news::rss_consequence_set cls::set_single_feed_article(const string& feed_name, const news::rss_data_feed_article_spec& feed_article) {
+    news::rss_file_manager_feed_article fm;
+    fm.init(_file_location);
+
+    //Add the spec to the set.
+
+    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
+    news::rss_data_feed_headline_spec feed_headline_spec;
+
+    news::rss_consequence_set cs = fm.save_set(feed_name_spec, feed_headline_spec, *_set);
+
+    return cs;
 }
 
 news::rss_consequence_set cls::set_multiple_feed_articles(const string& feed_name, const news::rss_data_feed_article_set& rss_set) {
+    news::rss_file_manager_feed_article fm;
+    fm.init(_file_location);
+
+    //Add specs to the set.
+
+    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
+    news::rss_data_feed_headline_spec feed_headline_spec;
+
+    news::rss_consequence_set cs = fm.save_set(feed_name_spec, feed_headline_spec, *_set);
+
+    return cs;
 }
 
 news::rss_consequence_set cls::remove_multiple_feed_articles(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
+    news::rss_file_manager_feed_article fm;
+    fm.init(_file_location);
+
+    //Remove the specs from the set.
+
+    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
+    news::rss_data_feed_headline_spec feed_headline_spec;
+
+    news::rss_consequence_set cs = fm.save_set(feed_name_spec, feed_headline_spec, *_set);
+
+    return cs;
 }
 

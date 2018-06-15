@@ -21,17 +21,20 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <vector>
 #include <map>
 
-#include "rss_data_feed_name_set.hxx"
+#include "rss_data_feed_article_set.hxx"
+#include "rss_data_feed_name_spec.hxx"
+#include "rss_data_feed_headline_spec.hxx"
 #include "rss_consequence_set.hxx"
 
 namespace news {
 using namespace std;
 class rss_file_manager_feed_article {
   private:
+    string _file_location;
   public:
     void init(const string& file_location);
-    rss_data_feed_name_set get_set();
-    rss_consequence_set save_set(rss_data_feed_name_set& rss_set);
+    rss_data_feed_article_set get_set(rss_data_feed_name_spec& rss_spec);
+    rss_consequence_set save_set(rss_data_feed_name_spec& rss_nm_spec, rss_data_feed_headline_spec& rss_hdln_spec, rss_data_feed_article_set& rss_set);
 };
 }
 #endif
