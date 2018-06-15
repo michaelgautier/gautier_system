@@ -23,6 +23,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "rss_data_feed_name_set.hxx"
 #include "rss_data_feed_name_spec.hxx"
+#include "rss_file_manager_feed_name.hxx"
 #include "rss_consequence_set.hxx"
 
 /*
