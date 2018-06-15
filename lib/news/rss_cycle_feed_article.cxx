@@ -18,7 +18,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_cycle_feed_article;
 
-void cls::init(news::rss_data_feed_article_set& rss_set) {
+void cls::init() {
     return;
 }
 

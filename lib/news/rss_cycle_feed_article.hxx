@@ -30,7 +30,7 @@ using namespace std;
 class rss_cycle_feed_article {
   private:
   public:
-    void init(rss_data_feed_article_set& rss_set);
+    void init();
     rss_data_feed_article_spec get_single_feed_article(const string& feed_name, const unsigned short int headline_index);
     rss_data_feed_article_set get_feed_articles(const string& feed_name);
     rss_consequence_set set_single_feed_article(const string& feed_name, const rss_data_feed_article_spec& feed_article);

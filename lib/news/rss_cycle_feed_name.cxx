@@ -18,19 +18,56 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_cycle_feed_name;
 
-void cls::init(news::rss_data_feed_name_set& rss_set) {
+void cls::init(string file_location) {
+    _file_location = file_location;
+
+    _set = new news::rss_data_feed_name_set;
+
     return;
 }
 
 news::rss_data_feed_name_spec cls::get_single_feed_name(const unsigned short int feed_index) {
+    news::rss_data_feed_name_spec n;
+
+    if(_set) {
+        //Find the spec in the set and assign to n.
+    }
+
+    return n;
 }
 
 news::rss_data_feed_name_set cls::get_feed_names() {
+    news::rss_file_manager_feed_name fm;
+    fm.init(_file_location);
+
+    news::rss_data_feed_name_set fs;
+
+    fs = fm.get_set();
+
+    _set = &fs;
+
+    return fs;
 }
 
 news::rss_consequence_set cls::set_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
+    news::rss_file_manager_feed_name fm;
+    fm.init(_file_location);
+
+    //Add the spec to the set.
+
+    news::rss_consequence_set cs = fm.save_set(*_set);
+
+    return cs;
 }
 
 news::rss_consequence_set cls::remove_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
+    news::rss_file_manager_feed_name fm;
+    fm.init(_file_location);
+
+    //Remove the spec from the set.
+
+    news::rss_consequence_set cs = fm.save_set(*_set);
+
+    return cs;
 }
 

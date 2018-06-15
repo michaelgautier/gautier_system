@@ -31,17 +31,19 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
                 You need RSS feeds first.
                 The feed is the location on the Internet where the feed articles reside.
                 In this process, this "feed name cycle" + "feed name file manager" is the starting point for the entire process.
-                
+
                 Use get_feed_names to start the process.
-                
+
                 Use get_single_feed_name as a means to refresh feed information after a process has started.
 */
 namespace news {
 using namespace std;
 class rss_cycle_feed_name {
   private:
+    rss_data_feed_name_set* _set = nullptr;
+    string _file_location;
   public:
-    void init(rss_data_feed_name_set& rss_set);
+    void init(string file_location);
     rss_data_feed_name_spec get_single_feed_name(const unsigned short int feed_index);
     rss_data_feed_name_set get_feed_names();
     rss_consequence_set set_single_feed_name(const rss_data_feed_name_spec& feed_name);
