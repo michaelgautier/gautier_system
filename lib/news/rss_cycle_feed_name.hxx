@@ -14,8 +14,8 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2018, Ap
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 
-#ifndef __news_rss_enactor_feed_name_cycle__
-#define __news_rss_enactor_feed_name_cycle__
+#ifndef __news_rss_cycle_feed_name__
+#define __news_rss_cycle_feed_name__
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,18 +23,18 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "rss_data_feed_name_set.hxx"
 #include "rss_data_feed_name_spec.hxx"
-#include "rss_check_feed_name.hxx"
+#include "rss_consequence_set.hxx"
 
 namespace news {
 using namespace std;
-class rss_enactor_feed_name_cycle {
+class rss_cycle_feed_name {
   private:
   public:
     void init(rss_data_feed_name_set& rss_set);
     rss_data_feed_name_spec get_single_feed_name(const unsigned short int feed_index);
     rss_data_feed_name_set get_feed_names();
-    rss_check_feed_name set_single_feed_name(const rss_data_feed_name_spec& feed_name);
-    rss_check_feed_name remove_single_feed_name(const rss_data_feed_name_spec& feed_name);
+    rss_consequence_set set_single_feed_name(const rss_data_feed_name_spec& feed_name);
+    rss_consequence_set remove_single_feed_name(const rss_data_feed_name_spec& feed_name);
 };
 }
 #endif

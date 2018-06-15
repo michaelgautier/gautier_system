@@ -26,7 +26,7 @@ news::rss_data_feed_name_set cls::get_set() {
 
 }
 
-news::rss_check_feed_name cls::save_set(news::rss_data_feed_name_set& rss_set) {
+news::rss_consequence_set cls::save_set(news::rss_data_feed_name_set& rss_set) {
 
 }
 

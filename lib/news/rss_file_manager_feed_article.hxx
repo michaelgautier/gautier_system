@@ -22,7 +22,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <map>
 
 #include "rss_data_feed_name_set.hxx"
-#include "rss_check_feed_name.hxx"
+#include "rss_consequence_set.hxx"
 
 namespace news {
 using namespace std;
@@ -31,7 +31,7 @@ class rss_file_manager_feed_article {
   public:
     void init(const string& file_location);
     rss_data_feed_name_set get_set();
-    rss_check_feed_name save_set(rss_data_feed_name_set& rss_set);
+    rss_consequence_set save_set(rss_data_feed_name_set& rss_set);
 };
 }
 #endif

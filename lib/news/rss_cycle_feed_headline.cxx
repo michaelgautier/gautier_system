@@ -13,10 +13,10 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#include "rss_enactor_feed_headline_cycle.hxx"
+#include "rss_cycle_feed_headline.hxx"
 
 using namespace std;
-using cls = news::rss_enactor_feed_headline_cycle;
+using cls = news::rss_cycle_feed_headline;
 
 void cls::init(news::rss_data_feed_headline_set& rss_set) {
     return;
@@ -28,15 +28,15 @@ news::rss_data_feed_headline_spec cls::get_single_feed_headline(const string& fe
 news::rss_data_feed_headline_set cls::get_feed_headlines(const string& feed_name) {
 }
 
-news::rss_check_feed_headline cls::set_single_feed_headline(const string& feed_name, const news::rss_data_feed_headline_spec& feed_headline) {
+news::rss_consequence_set cls::set_single_feed_headline(const string& feed_name, const news::rss_data_feed_headline_spec& feed_headline) {
 }
 
-news::rss_check_feed_headline cls::set_multiple_feed_headlines(const string& feed_name, const news::rss_data_feed_headline_set& rss_set) {
+news::rss_consequence_set cls::set_multiple_feed_headlines(const string& feed_name, const news::rss_data_feed_headline_set& rss_set) {
 }
 
-news::rss_check_feed_headline cls::remove_single_feed_headline(const string& feed_name, const unsigned short int headline_index) {
+news::rss_consequence_set cls::remove_single_feed_headline(const string& feed_name, const unsigned short int headline_index) {
 }
 
-news::rss_check_feed_headline cls::remove_multiple_feed_headlines(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
+news::rss_consequence_set cls::remove_multiple_feed_headlines(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
 }
 

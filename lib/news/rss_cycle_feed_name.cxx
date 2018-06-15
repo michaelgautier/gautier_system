@@ -13,10 +13,10 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#include "rss_enactor_feed_name_cycle.hxx"
+#include "rss_cycle_feed_name.hxx"
 
 using namespace std;
-using cls = news::rss_enactor_feed_name_cycle;
+using cls = news::rss_cycle_feed_name;
 
 void cls::init(news::rss_data_feed_name_set& rss_set) {
     return;
@@ -28,9 +28,9 @@ news::rss_data_feed_name_spec cls::get_single_feed_name(const unsigned short int
 news::rss_data_feed_name_set cls::get_feed_names() {
 }
 
-news::rss_check_feed_name cls::set_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
+news::rss_consequence_set cls::set_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
 }
 
-news::rss_check_feed_name cls::remove_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
+news::rss_consequence_set cls::remove_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
 }
 

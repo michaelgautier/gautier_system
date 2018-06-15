@@ -13,8 +13,8 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#include "rss_data_feed_status_set.hxx"
+#include "rss_consequence_set.hxx"
 
 using namespace std;
-using cls = news::rss_data_feed_status_set;
+using cls = news::rss_consequence_set;
 

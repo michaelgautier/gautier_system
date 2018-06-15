@@ -14,8 +14,8 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2018, Ap
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 
-#ifndef __news_rss_enactor_feed_article_cycle__
-#define __news_rss_enactor_feed_article_cycle__
+#ifndef __news_rss_cycle_feed_article__
+#define __news_rss_cycle_feed_article__
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,19 +23,19 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "rss_data_feed_article_set.hxx"
 #include "rss_data_feed_article_spec.hxx"
-#include "rss_check_feed_article.hxx"
+#include "rss_consequence_set.hxx"
 
 namespace news {
 using namespace std;
-class rss_enactor_feed_article_cycle {
+class rss_cycle_feed_article {
   private:
   public:
     void init(rss_data_feed_article_set& rss_set);
     rss_data_feed_article_spec get_single_feed_article(const string& feed_name, const unsigned short int headline_index);
     rss_data_feed_article_set get_feed_articles(const string& feed_name);
-    rss_check_feed_article set_single_feed_article(const string& feed_name, const rss_data_feed_article_spec& feed_article);
-    rss_check_feed_article set_multiple_feed_articles(const string& feed_name, const rss_data_feed_article_set& rss_set);
-    rss_check_feed_article remove_multiple_feed_articles(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
+    rss_consequence_set set_single_feed_article(const string& feed_name, const rss_data_feed_article_spec& feed_article);
+    rss_consequence_set set_multiple_feed_articles(const string& feed_name, const rss_data_feed_article_set& rss_set);
+    rss_consequence_set remove_multiple_feed_articles(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
 };
 }
 #endif
