@@ -25,6 +25,16 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_consequence_set.hxx"
 
+/*
+        Core mechanism for RSS.
+                You need RSS feeds first.
+                The feed is the location on the Internet where the feed articles reside.
+                In this process, this "feed name cycle" + "feed name file manager" is the starting point for the entire process.
+                
+                Use get_feed_names to start the process.
+                
+                Use get_single_feed_name as a means to refresh feed information after a process has started.
+*/
 namespace news {
 using namespace std;
 class rss_cycle_feed_name {
