@@ -26,7 +26,7 @@ void cls::init(string file_location) {
     return;
 }
 
-news::rss_data_feed_headline_spec cls::get_single_feed_headline(const string& feed_name, const unsigned short int headline_index) {
+news::rss_data_feed_headline_spec cls::get_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index) {
     news::rss_data_feed_headline_spec h;
 
     if(_set) {
@@ -36,69 +36,59 @@ news::rss_data_feed_headline_spec cls::get_single_feed_headline(const string& fe
     return h;
 }
 
-news::rss_data_feed_headline_set cls::get_feed_headlines(const string& feed_name) {
+news::rss_data_feed_headline_set cls::get_feed_headlines(const news::rss_data_feed_name_spec& feed_name) {
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
     news::rss_data_feed_headline_set fh;
 
-    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
-
-    fh = fm.get_set(feed_name_spec);
+    fh = fm.get_set(feed_name);
 
     _set = &fh;
 
     return fh;
 }
 
-news::rss_consequence_set cls::set_single_feed_headline(const string& feed_name, const news::rss_data_feed_headline_spec& feed_headline) {
+news::rss_consequence_set cls::set_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const news::rss_data_feed_headline_spec& feed_headline) {
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
     //Add the spec to the set.
 
-    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
-
-    news::rss_consequence_set cs = fm.save_set(feed_name_spec, *_set);
+    news::rss_consequence_set cs = fm.save_set(feed_name, *_set);
 
     return cs;
 }
 
-news::rss_consequence_set cls::set_multiple_feed_headlines(const string& feed_name, const news::rss_data_feed_headline_set& rss_set) {
+news::rss_consequence_set cls::set_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const news::rss_data_feed_headline_set& rss_set) {
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
     //Pass along the set.
 
-    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
-
-    news::rss_consequence_set cs = fm.save_set(feed_name_spec, *_set);
+    news::rss_consequence_set cs = fm.save_set(feed_name, *_set);
 
     return cs;
 }
 
-news::rss_consequence_set cls::remove_single_feed_headline(const string& feed_name, const unsigned short int headline_index) {
+news::rss_consequence_set cls::remove_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index) {
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
     //Remove the spec from the set.
 
-    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
-
-    news::rss_consequence_set cs = fm.save_set(feed_name_spec, *_set);
+    news::rss_consequence_set cs = fm.save_set(feed_name, *_set);
 
     return cs;
 }
 
-news::rss_consequence_set cls::remove_multiple_feed_headlines(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
+news::rss_consequence_set cls::remove_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
     //Change and pass along the set.
 
-    news::rss_data_feed_name_spec feed_name_spec(feed_name, "");
-
-    news::rss_consequence_set cs = fm.save_set(feed_name_spec, *_set);
+    news::rss_consequence_set cs = fm.save_set(feed_name, *_set);
 
     return cs;
 }

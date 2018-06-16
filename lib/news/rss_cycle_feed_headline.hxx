@@ -34,12 +34,12 @@ class rss_cycle_feed_headline {
     string _file_location;
   public:
     void init(string file_location);
-    rss_data_feed_headline_spec get_single_feed_headline(const string& feed_name, const unsigned short int headline_index);
-    rss_data_feed_headline_set get_feed_headlines(const string& feed_name);
-    rss_consequence_set set_single_feed_headline(const string& feed_name, const rss_data_feed_headline_spec& feed_headline);
-    rss_consequence_set set_multiple_feed_headlines(const string& feed_name, const rss_data_feed_headline_set& rss_set);
-    rss_consequence_set remove_single_feed_headline(const string& feed_name, const unsigned short int headline_index);
-    rss_consequence_set remove_multiple_feed_headlines(const string& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
+    rss_data_feed_headline_spec get_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
+    rss_data_feed_headline_set get_feed_headlines(const news::rss_data_feed_name_spec& feed_name);
+    rss_consequence_set set_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const rss_data_feed_headline_spec& feed_headline);
+    rss_consequence_set set_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const rss_data_feed_headline_set& rss_set);
+    rss_consequence_set remove_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
+    rss_consequence_set remove_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
 };
 }
 #endif

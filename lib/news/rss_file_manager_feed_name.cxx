@@ -32,7 +32,7 @@ news::rss_data_feed_name_set cls::get_set() {
     return fn_set;
 }
 
-news::rss_consequence_set cls::save_set(news::rss_data_feed_name_set& rss_set) {
+news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_set& rss_set) {
     news::rss_consequence_set cs;
 
     //Read the feed name/feed url combinations and create/replace the file.

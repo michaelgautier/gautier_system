@@ -21,11 +21,17 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <vector>
 #include <map>
 
+#include "rss_data_feed_name_spec.hxx"
+
 namespace news {
 using namespace std;
 class rss_data_feed_headline_spec {
   private:
   public:
+    rss_data_feed_name_spec feed_name;
+
+    string headline;
+    string url;
 };
 }
 #endif
