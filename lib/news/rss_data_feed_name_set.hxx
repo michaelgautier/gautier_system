@@ -29,6 +29,7 @@ class rss_data_feed_name_set {
   private:
     vector<rss_data_feed_name_spec> _set;
   public:
+    void add(const rss_data_feed_name_spec spec);
     vector<rss_data_feed_name_spec> get_specs();
 };
 }
