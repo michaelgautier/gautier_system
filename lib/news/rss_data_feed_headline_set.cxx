@@ -18,3 +18,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_data_feed_headline_set;
 
+vector<news::rss_data_feed_headline_spec> cls::get_specs() {
+    return _set;
+}

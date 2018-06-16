@@ -29,6 +29,7 @@ class rss_data_feed_headline_set {
   private:
     vector<rss_data_feed_headline_spec> _set;
   public:
+    vector<rss_data_feed_headline_spec> get_specs();
 };
 }
 #endif
