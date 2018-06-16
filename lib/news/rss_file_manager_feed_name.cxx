@@ -32,10 +32,26 @@ news::rss_data_feed_name_set cls::get_set() {
     return fn_set;
 }
 
-news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_set& rss_set) {
+news::rss_consequence_set cls::save_set(news::rss_data_feed_name_set& rss_set) {
     news::rss_consequence_set cs;
 
     //Read the feed name/feed url combinations and create/replace the file.
+
+    string feed_file_name(_file_location.data(), ios_base::out | ios_base::trunc);
+
+    ofstream feed_offline_file(feed_file_name.data());
+
+    bool feed_added = false;
+
+    vector<news::rss_data_feed_name_spec> v = rss_set.get_specs();
+
+    for(news::rss_data_feed_name_spec& feed_name : v) {
+        feed_offline_file << feed_name.name << "\t" << feed_name.url << "\n";
+    }
+
+    feed_offline_file.flush();
+
+    feed_offline_file.close();
 
     return cs;
 }

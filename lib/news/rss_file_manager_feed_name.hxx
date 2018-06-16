@@ -17,6 +17,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #ifndef __news_rss_file_manager_feed_name__
 #define __news_rss_file_manager_feed_name__
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -32,7 +33,7 @@ class rss_file_manager_feed_name {
   public:
     void init(const string& file_location);
     rss_data_feed_name_set get_set();
-    rss_consequence_set save_set(const rss_data_feed_name_set& rss_set);
+    rss_consequence_set save_set(rss_data_feed_name_set& rss_set);
 };
 }
 #endif
