@@ -17,6 +17,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #ifndef __file__
 #define __file__
 
+#include <functional>
 #include <string>
 #include <fstream>
 
@@ -26,9 +27,11 @@ using namespace std;
 class file {
   public:
     void get_stream(string location, string& output);
-    void persist_stream(string filesystem_location, string data_to_persist);
+    void persist_stream(string location, string data_to_persist);
+    void persist_stream(string location, function<void(ofstream&)> file_callable);
     void read_istream_into_string(istream& input, string& output);
     void read_file_into_string(string location, string& output);
+    void read_file_into_string(string location, function<void(string&)> file_callable);
 };
 }
 #endif
