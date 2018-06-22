@@ -28,6 +28,29 @@ news::rss_data_feed_article_set cls::get_set(const news::rss_data_feed_name_spec
     news::rss_data_feed_article_set fa_set;
 
     //Read the file, get the feed article, update the set.
+    auto call_rss_line = [=,&fa_set](string& data) {
+        if(data.size() > 1 && string(&data[0]) == _comment_char) {
+            return;
+        }
+
+        auto tab_pos = data.find_first_of(_tab_char);
+
+        if(tab_pos == string::npos) {
+            return;
+        }
+
+        string name = data.substr(0, tab_pos);
+        string url = data.substr(tab_pos+1);
+
+        news::rss_data_feed_article_spec spec;
+
+        spec.content = "";
+
+        fa_set.add(spec);
+    };
+
+    rss_techconstruct::file rssfile;
+    rssfile.read_file_into_string(_file_location, call_rss_line);
 
     return fa_set;
 }
@@ -36,6 +59,16 @@ news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_spec& fee
     news::rss_consequence_set cs;
 
     //Read the feed articles and create/replace the file.
+    vector<news::rss_data_feed_article_spec> v = rss_set.get_specs();
+
+    auto call_rss_line = [=,&v](ofstream& data) {
+        for(news::rss_data_feed_article_spec& spec : v) {
+            data << spec.content << _newline_char;
+        }
+    };
+
+    rss_techconstruct::file rssfile;
+    rssfile.persist_stream(_file_location, call_rss_line);
 
     return cs;
 }

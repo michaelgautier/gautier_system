@@ -29,6 +29,45 @@ news::rss_data_feed_headline_set cls::get_set(const news::rss_data_feed_name_spe
 
     //Read the file, get the feed headline, update the set.
 
+    bool feed_match = false;
+
+    auto call_rss_line = [=,&fh_set,&feed_match](string& data) {
+        if(data.size() < 1) {
+            return;
+        }
+
+        //At least 1 tab expected most lines
+        auto tab_pos = data.find_first_of(_tab_char);
+
+        string first_char = string(&data[0]);
+
+        if(first_char == _comment_char) {
+            return;
+        } else if (first_char == _feedname_start_char) {
+            string name = data.substr(1, tab_pos);
+            string last_checked_date_time = data.substr(tab_pos+1);
+
+            feed_match = (feed_name.name == name);
+
+            if(feed_match) {
+                fh_set.last_checked_date_time_string = last_checked_date_time;
+            }
+        } else if (feed_match && first_char == _headline_start_char) {
+            string headline = data.substr(1, tab_pos);
+            string url = data.substr(tab_pos+1);
+
+            news::rss_data_feed_headline_spec spec;
+
+            spec.headline = headline;
+            spec.url = url;
+
+            fh_set.add(spec);
+        }
+    };
+
+    rss_techconstruct::file rssfile;
+    rssfile.read_file_into_string(_file_location, call_rss_line);
+
     return fh_set;
 }
 
@@ -36,6 +75,18 @@ news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_spec& fee
     news::rss_consequence_set cs;
 
     //Read the feed headlines and create/replace the file.
+    vector<news::rss_data_feed_headline_spec> v = rss_set.get_specs();
+
+    auto call_rss_line = [=,&v](ofstream& data) {
+        data << _feedname_start_char << feed_name.name << _tab_char << rss_set.last_checked_date_time_string << _newline_char;
+
+        for(news::rss_data_feed_headline_spec& spec : v) {
+            data << _headline_start_char << spec.headline << _tab_char << spec.url << _newline_char;
+        }
+    };
+
+    rss_techconstruct::file rssfile;
+    rssfile.persist_stream(_file_location, call_rss_line);
 
     return cs;
 }

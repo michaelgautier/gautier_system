@@ -28,26 +28,24 @@ news::rss_data_feed_name_set cls::get_set() {
     news::rss_data_feed_name_set fn_set;
 
     //Read the file, get the feed name/feed url combinations, update the set.
-    auto call_rss_line = [=,&fn_set](string& output) {
-        string feeds_data = output;
-
-        if(feeds_data.size() > 1 && feeds_data[0] == '#') {
+    auto call_rss_line = [=,&fn_set](string& data) {
+        if(data.size() > 1 && string(&data[0]) == _comment_char) {
             return;
         }
 
-        auto separator_pos = feeds_data.find_first_of("\t");
+        auto tab_pos = data.find_first_of(_tab_char);
 
-        if(separator_pos == string::npos) {
+        if(tab_pos == string::npos) {
             return;
         }
 
-        string feed_name = feeds_data.substr(0, separator_pos);
-        string feed_url = feeds_data.substr(separator_pos+1);
+        string name = data.substr(0, tab_pos);
+        string url = data.substr(tab_pos+1);
 
         news::rss_data_feed_name_spec spec;
 
-        spec.name = feed_name;
-        spec.url = feed_url;
+        spec.name = name;
+        spec.url = url;
 
         fn_set.add(spec);
     };
@@ -64,9 +62,9 @@ news::rss_consequence_set cls::save_set(news::rss_data_feed_name_set& rss_set) {
     //Read the feed name/feed url combinations and create/replace the file.
     vector<news::rss_data_feed_name_spec> v = rss_set.get_specs();
 
-    auto call_rss_line = [=,&v](ofstream& output) {
-        for(news::rss_data_feed_name_spec& feed_name : v) {
-            output << feed_name.name << "\t" << feed_name.url << "\n";
+    auto call_rss_line = [=,&v](ofstream& data) {
+        for(news::rss_data_feed_name_spec& spec : v) {
+            data << spec.name << _tab_char << spec.url << _newline_char;
         }
     };
 

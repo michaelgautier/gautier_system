@@ -23,6 +23,7 @@ void cls::add(const news::rss_data_feed_name_spec spec) {
 
     return;
 }
+
 vector<news::rss_data_feed_name_spec> cls::get_specs() {
     return _set;
 }
