@@ -24,47 +24,55 @@ void cls::init(const string& file_location) {
     return;
 }
 
-news::rss_data_feed_article_set cls::get_set(const news::rss_data_feed_name_spec& feed_name) {
-    news::rss_data_feed_article_set fa_set;
+news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headline_spec& feed_headline) {
+    news::rss_data_feed_article_spec spec;
+    spec.feed_headline = feed_headline;
 
     //Read the file, get the feed article, update the set.
-    auto call_rss_line = [=,&fa_set](string& data) {
-        if(data.size() > 1 && string(&data[0]) == _comment_char) {
+    bool feed_match = false;
+    bool headline_match = false;
+
+    auto call_rss_line = [=,&spec,&feed_match,&headline_match](string& data) {
+        if(data.size() < 1) {
             return;
         }
 
+        //At least 1 tab expected most lines
         auto tab_pos = data.find_first_of(_tab_char);
 
-        if(tab_pos == string::npos) {
+        string first_char = string(&data[0]);
+
+        if(first_char == _comment_char) {
             return;
+        } else if (first_char == _feedname_start_char) {
+            string name = data.substr(1, tab_pos);
+            string last_checked_date_time = data.substr(tab_pos+1);
+
+            feed_match = (feed_headline.feed_name.name == name);
+        } else if (feed_match && first_char == _headline_start_char) {
+            string headline = data.substr(1, tab_pos);
+            string url = data.substr(tab_pos+1);
+
+            if (headline == feed_headline.headline) {
+                headline_match = true;
+            }
+        } else if (headline_match) {
+            //
         }
-
-        string name = data.substr(0, tab_pos);
-        string url = data.substr(tab_pos+1);
-
-        news::rss_data_feed_article_spec spec;
-
-        spec.content = "";
-
-        fa_set.add(spec);
     };
 
     rss_techconstruct::file rssfile;
     rssfile.read_file_into_string(_file_location, call_rss_line);
 
-    return fa_set;
+    return spec;
 }
 
-news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_spec& feed_name, news::rss_data_feed_article_set& rss_set) {
+news::rss_consequence_set cls::save_spec(const news::rss_data_feed_article_spec& feed_article) {
     news::rss_consequence_set cs;
 
     //Read the feed articles and create/replace the file.
-    vector<news::rss_data_feed_article_spec> v = rss_set.get_specs();
-
-    auto call_rss_line = [=,&v](ofstream& data) {
-        for(news::rss_data_feed_article_spec& spec : v) {
-            data << spec.content << _newline_char;
-        }
+    auto call_rss_line = [=,&feed_article](ofstream& data) {
+        data << feed_article.content << _newline_char;
     };
 
     rss_techconstruct::file rssfile;

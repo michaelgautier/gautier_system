@@ -23,9 +23,9 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <functional>
 
 #include "techconstruct/file.hxx"
-#include "rss_data_feed_article_set.hxx"
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_data_feed_headline_spec.hxx"
+#include "rss_data_feed_article_spec.hxx"
 #include "rss_consequence_set.hxx"
 
 namespace news {
@@ -36,10 +36,12 @@ class rss_file_manager_feed_article {
     const string _tab_char = "\t";
     const string _comment_char = "#";
     const string _newline_char = "\n";
+    const string _feedname_start_char = "/";
+    const string _headline_start_char = "_";
   public:
     void init(const string& file_location);
-    rss_data_feed_article_set get_set(const rss_data_feed_name_spec& feed_name);
-    rss_consequence_set save_set(const rss_data_feed_name_spec& feed_name, rss_data_feed_article_set& rss_set);
+    rss_data_feed_article_spec get_spec(const rss_data_feed_headline_spec& feed_headline);
+    rss_consequence_set save_spec(const rss_data_feed_article_spec& feed_article);
 };
 }
 #endif

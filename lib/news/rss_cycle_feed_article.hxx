@@ -21,7 +21,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <vector>
 #include <map>
 
-#include "rss_data_feed_article_set.hxx"
 #include "rss_data_feed_article_spec.hxx"
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_file_manager_feed_article.hxx"
@@ -31,14 +30,11 @@ namespace news {
 using namespace std;
 class rss_cycle_feed_article {
   private:
-    rss_data_feed_article_set* _set = nullptr;
     string _file_location;
   public:
     void init(string file_location);
     rss_data_feed_article_spec get_single_feed_article(const rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
-    rss_data_feed_article_set get_feed_articles(const rss_data_feed_name_spec& feed_name);
     rss_consequence_set set_single_feed_article(const rss_data_feed_article_spec& feed_article);
-    rss_consequence_set set_multiple_feed_articles(const rss_data_feed_name_spec& feed_name, const rss_data_feed_article_set& rss_set);
     rss_consequence_set remove_multiple_feed_articles(const rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
 };
 }
