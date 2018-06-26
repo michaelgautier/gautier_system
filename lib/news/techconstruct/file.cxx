@@ -64,9 +64,23 @@ void cls::read_istream_into_string(istream& input, string& output) {
     return;
 }
 
+void cls::erase_stream(string location) {
+    string feed_file_name(location.data(), ios_base::out | ios_base::trunc);
+
+    ofstream feed_offline_file(feed_file_name.data());
+
+    feed_offline_file << "";
+
+    feed_offline_file.flush();
+
+    feed_offline_file.close();
+
+    return;
+}
+
 void cls::persist_stream(string location, string data_to_persist) {
     if(!data_to_persist.empty()) {
-        string feed_file_name(location.data(), ios_base::out | ios_base::trunc);
+        string feed_file_name(location.data(), ios_base::out | ios_base::app);
 
         ofstream feed_offline_file(feed_file_name.data());
 
@@ -81,7 +95,7 @@ void cls::persist_stream(string location, string data_to_persist) {
 }
 
 void cls::persist_stream(string location, function<void(ofstream&)> file_callable) {
-    string feed_file_name(location.data(), ios_base::out | ios_base::trunc);
+    string feed_file_name(location.data(), ios_base::out | ios_base::app);
 
     ofstream feed_offline_file(feed_file_name.data());
 

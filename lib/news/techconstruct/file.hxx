@@ -27,6 +27,7 @@ using namespace std;
 class file {
   public:
     void get_stream(string location, string& output);
+    void erase_stream(string location);
     void persist_stream(string location, string data_to_persist);
     void persist_stream(string location, function<void(ofstream&)> file_callable);
     void read_istream_into_string(istream& input, string& output);
