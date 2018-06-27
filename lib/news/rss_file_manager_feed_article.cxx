@@ -57,7 +57,7 @@ news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headlin
                 headline_match = true;
             }
         } else if (headline_match) {
-            //
+            spec.content = spec.content + data;
         }
     };
 
