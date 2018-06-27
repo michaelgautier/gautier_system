@@ -40,6 +40,7 @@ class rss_file_manager_feed_headline {
   public:
     void init(const string& file_location);
     rss_set_feed_headline get_set(const rss_data_feed_name_spec& feed_name);
+    rss_set_feed_headline pull_set(const rss_data_feed_name_spec& feed_name);
     rss_set_consequence save_set(const rss_data_feed_name_spec& feed_name, rss_set_feed_headline& rss_set);
 };
 }
