@@ -32,6 +32,8 @@ class rss_data_feed_headline_spec {
 
     string headline;
     string url;
+    string description;
+    string article_date;
 };
 }
 #endif
