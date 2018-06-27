@@ -22,24 +22,24 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <map>
 
 #include "rss_data_feed_headline_spec.hxx"
-#include "rss_data_feed_headline_set.hxx"
+#include "rss_set_feed_headline.hxx"
 #include "rss_file_manager_feed_headline.hxx"
-#include "rss_consequence_set.hxx"
+#include "rss_set_consequence.hxx"
 
 namespace news {
 using namespace std;
 class rss_cycle_feed_headline {
   private:
-    rss_data_feed_headline_set* _set = nullptr;
+    rss_set_feed_headline* _set = nullptr;
     string _file_location;
   public:
     void init(string file_location);
     rss_data_feed_headline_spec get_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
-    rss_data_feed_headline_set get_feed_headlines(const news::rss_data_feed_name_spec& feed_name);
-    rss_consequence_set set_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const rss_data_feed_headline_spec& feed_headline);
-    rss_consequence_set set_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const rss_data_feed_headline_set& rss_set);
-    rss_consequence_set remove_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
-    rss_consequence_set remove_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
+    rss_set_feed_headline get_feed_headlines(const news::rss_data_feed_name_spec& feed_name);
+    rss_set_consequence set_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const rss_data_feed_headline_spec& feed_headline);
+    rss_set_consequence set_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const rss_set_feed_headline& rss_set);
+    rss_set_consequence remove_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index);
+    rss_set_consequence remove_multiple_feed_headlines(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last);
 };
 }
 #endif

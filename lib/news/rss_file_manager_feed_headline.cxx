@@ -24,8 +24,8 @@ void cls::init(const string& file_location) {
     return;
 }
 
-news::rss_data_feed_headline_set cls::get_set(const news::rss_data_feed_name_spec& feed_name) {
-    news::rss_data_feed_headline_set fh_set;
+news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& feed_name) {
+    news::rss_set_feed_headline fh_set;
 
     //Read the file, get the feed headline, update the set.
 
@@ -71,8 +71,8 @@ news::rss_data_feed_headline_set cls::get_set(const news::rss_data_feed_name_spe
     return fh_set;
 }
 
-news::rss_consequence_set cls::save_set(const news::rss_data_feed_name_spec& feed_name, news::rss_data_feed_headline_set& rss_set) {
-    news::rss_consequence_set cs;
+news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& feed_name, news::rss_set_feed_headline& rss_set) {
+    news::rss_set_consequence cs;
 
     //Read the feed headlines and create/replace the file.
     vector<news::rss_data_feed_headline_spec> v = rss_set.get_specs();

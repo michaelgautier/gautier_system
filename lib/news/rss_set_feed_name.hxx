@@ -13,8 +13,25 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#include "rss_consequence_spec.hxx"
 
+#ifndef __news_rss_set_feed_name__
+#define __news_rss_set_feed_name__
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+
+#include "rss_data_feed_name_spec.hxx"
+
+namespace news {
 using namespace std;
-using cls = news::rss_consequence_spec;
+class rss_set_feed_name {
+  private:
+    vector<rss_data_feed_name_spec> _set;
+  public:
+    void add(const rss_data_feed_name_spec spec);
+    vector<rss_data_feed_name_spec> get_specs();
+};
+}
+#endif
 

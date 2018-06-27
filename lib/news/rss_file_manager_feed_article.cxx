@@ -67,8 +67,8 @@ news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headlin
     return spec;
 }
 
-news::rss_consequence_set cls::save_spec(const news::rss_data_feed_article_spec& feed_article) {
-    news::rss_consequence_set cs;
+news::rss_set_consequence cls::save_spec(const news::rss_data_feed_article_spec& feed_article) {
+    news::rss_set_consequence cs;
 
     //Read the feed articles and create/replace the file.
     auto call_rss_line = [=,&feed_article](ofstream& data) {

@@ -26,7 +26,7 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_data_feed_headline_spec.hxx"
 #include "rss_data_feed_article_spec.hxx"
-#include "rss_consequence_set.hxx"
+#include "rss_set_consequence.hxx"
 
 namespace news {
 using namespace std;
@@ -41,7 +41,7 @@ class rss_file_manager_feed_article {
   public:
     void init(const string& file_location);
     rss_data_feed_article_spec get_spec(const rss_data_feed_headline_spec& feed_headline);
-    rss_consequence_set save_spec(const rss_data_feed_article_spec& feed_article);
+    rss_set_consequence save_spec(const rss_data_feed_article_spec& feed_article);
 };
 }
 #endif

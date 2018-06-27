@@ -32,24 +32,24 @@ news::rss_data_feed_article_spec cls::get_single_feed_article(const news::rss_da
     return a;
 }
 
-news::rss_consequence_set cls::set_single_feed_article(const news::rss_data_feed_article_spec& feed_article) {
+news::rss_set_consequence cls::set_single_feed_article(const news::rss_data_feed_article_spec& feed_article) {
     news::rss_file_manager_feed_article fm;
     fm.init(_file_location);
 
     //Add the spec to the set.
 
-    news::rss_consequence_set cs;
+    news::rss_set_consequence cs;
 
     return cs;
 }
 
-news::rss_consequence_set cls::remove_multiple_feed_articles(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
+news::rss_set_consequence cls::remove_multiple_feed_articles(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index_first, const unsigned short int headline_index_last) {
     news::rss_file_manager_feed_article fm;
     fm.init(_file_location);
 
     //Remove the specs from the set.
 
-    news::rss_consequence_set cs;
+    news::rss_set_consequence cs;
 
     return cs;
 }
