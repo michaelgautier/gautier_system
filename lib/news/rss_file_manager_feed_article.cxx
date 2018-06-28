@@ -24,6 +24,20 @@ void cls::init(const string& file_location) {
     return;
 }
 
+news::rss_data_feed_article_spec cls::pull_spec(const news::rss_data_feed_headline_spec& feed_headline) {
+    news::rss_data_feed_article_spec spec;
+
+    /*Do network call*/
+
+    /*Retrieve data*/
+
+    /*Save data*/
+
+    /*Return data*/
+
+    return spec;
+}
+
 news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headline_spec& feed_headline) {
     news::rss_data_feed_article_spec spec;
     spec.feed_headline = feed_headline;
