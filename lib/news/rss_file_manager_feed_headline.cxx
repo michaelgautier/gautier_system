@@ -94,8 +94,13 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
 
 /*Primary logic for rss feed retrieval.*/
 news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& feed_name) {
-    news::rss_set_feed_headline fh_set = get_set(feed_name);
-    vector<news::rss_data_feed_headline_spec> headlines;
+    news::rss_set_feed_headline fh_set_old = get_set(feed_name);
+    news::rss_set_feed_headline fh_set;
+
+    vector<news::rss_data_feed_headline_spec> headlines_old = fh_set_old.get_specs();
+    vector<news::rss_data_feed_headline_spec> headlines_new;
+
+    int headlines_old_size = headlines_old.size();
 
     http http_handler;
 
@@ -106,11 +111,37 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
         http_handler.get_stream(feed_name.url, rss_feed_document_data);
 
         if(!rss_feed_document_data.empty()) {
-            headlines = get_rss_feed(feed_name, rss_feed_document_data);
+            headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
         }
     }
 
-    return fh_set;
+    for (news::rss_data_feed_headline_spec headline_new : headlines_new) {
+        string headline_n = headline_new.headline;
+
+        bool headline_old_found = false;
+
+        for (news::rss_data_feed_headline_spec headline_old : headlines_old) {
+            string headline_o = headline_old.headline;
+
+            headline_old_found =  (headline_n == headline_o);
+
+            if (headline_old_found) {
+                break;
+            }
+        }
+
+        if (!headline_old_found) {
+            fh_set.add(headline_new);
+            fh_set_old.add(headline_new);
+        }
+    }
+
+    if(!headlines_new.empty() && headlines_old_size != headlines_old.size()) {
+        /*If this works right, the data will be added.*/
+        save_set(feed_name, fh_set);
+    }
+
+    return fh_set_old;
 }
 
 news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& feed_name, news::rss_set_feed_headline& rss_set) {
