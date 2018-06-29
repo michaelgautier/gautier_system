@@ -6,13 +6,13 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
-reset
-echo "Building rss_requestor library"
-./build_news_lib.sh
+./build_libnews_rss.sh
 
 echo "Building rss_requestor cli"
+
 g++ -std=c++14 -c -g -I../lib/news -I/usr/include -o obj/newsc.o ../news_cli.cxx
 g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle -Wl,-rpath,. -o bin/newsc obj/newsc.o 
+
 cp --update ../config/feeds.txt bin
 cp --update ../config/*.xml bin
 

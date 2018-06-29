@@ -8,7 +8,11 @@
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 rm obj/libnews_file.o
 rm bin/libnews_file.so
+
 echo "build file lib"
+
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_file.o ../lib/news/techconstruct/file.cxx
 g++ -g -shared -lPocoFoundation -Wl,-rpath,. -o bin/libnews_file.so obj/libnews_file.o
+
 ls -gGh bin/libnews_file*
+

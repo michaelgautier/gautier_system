@@ -8,7 +8,10 @@
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 rm obj/libnews_http.o
 rm bin/libnews_http.so
+
 echo "build http lib"
+
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_http.o ../lib/news/techconstruct/http.cxx
 g++ -g -shared -lPocoFoundation -lPocoUtil -lPocoNet -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
+
 ls -gGh bin/libnews_http*

@@ -9,18 +9,26 @@
 reset
 #echo "Building rss_requestor library"
 #uncomment the following line to build the rss parser library for the user interface.
-#./build_news_lib.sh
-
-echo "Building visual function library"
-./build_news_reader_lib.sh
+./build_libnews_rss.sh
 
 cp ../styles.css .
 glib-compile-resources --target=../styles.cxx --generate-source ../styles.xml
 g++ -c ../styles.cxx -o obj/gautier_rss_styles.o `pkg-config gtkmm-3.0 --cflags --libs`
+
 rm styles.css
+rm obj/librssui_mainscreengenerator.o
+
+echo "build main screen generator"
+
+g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
+#g++ -g -c -L./bin -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` -Wl,-rpath,. -o bin/librssui_mainscreengenerator.o obj/librssui_mainscreengenerator.o
+
+ls -gGh obj/librssui_mainscreengenerator*
 
 echo "Building rss reader"
+
 g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -o obj/newsreader.o ../news_reader.cxx
 g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -Wl,-rpath,. -o bin/newsreader obj/newsreader.o obj/gautier_rss_styles.o obj/librssui_mainscreengenerator.o
+
 ls -gGh obj/*.*o
 ls -gGh bin/newsreader*
