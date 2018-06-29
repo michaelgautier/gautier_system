@@ -11,7 +11,7 @@ echo "Building rss_requestor library"
 ./build_libnews_http.sh
 
 echo "build rss lib"
-rm obj/libnews_rss_*.o
+rm obj/libnews_rss*.o
 
 #Feed Data
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_data_feed_name_spec.o ../lib/news/rss_data_feed_name_spec.cxx
@@ -35,3 +35,4 @@ g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_cycle_feed_article.
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_data_consequence_spec.o ../lib/news/rss_data_consequence_spec.cxx
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_set_consequence.o ../lib/news/rss_set_consequence.cxx
 
+ls -gGh obj/libnews_rss*

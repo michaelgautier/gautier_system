@@ -7,7 +7,6 @@
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 rm obj/libnews_file.o
-rm bin/libnews_file.so
 
 echo "build file lib"
 

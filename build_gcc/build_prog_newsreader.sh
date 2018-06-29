@@ -30,5 +30,5 @@ echo "Building rss reader"
 g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../lib/visualfunc/formulation/ -I../librss_ui_impl/ -I/usr/include/ `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -o obj/newsreader.o ../news_reader.cxx
 g++ -lPocoFoundation -lPocoUtil -lPocoNet -lPocoXML -L./bin -lnews_parser -lnews_http -lnews_file -lnews_collector -lnews_feedscycle `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -Wl,-rpath,. -o bin/newsreader obj/newsreader.o obj/gautier_rss_styles.o obj/librssui_mainscreengenerator.o
 
-ls -gGh obj/*.*o
+ls -gGh obj/newsreader*
 ls -gGh bin/newsreader*
