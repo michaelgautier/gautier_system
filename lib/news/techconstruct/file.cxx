@@ -28,12 +28,14 @@ void cls::read_file_into_string(string location, string& output) {
 void cls::read_file_into_string(string location, function<void(string&)> file_callable) {
     ifstream rss_file(location.data());
 
-    while(!rss_file.eof()) {
-        string line;
+    if(rss_file.rdstate() == ios_base::goodbit) {
+        while(!rss_file.eof()) {
+            string line;
 
-        getline(rss_file, line);
+            getline(rss_file, line);
 
-        file_callable(line);
+            file_callable(line);
+        }
     }
 
     rss_file.close();

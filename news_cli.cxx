@@ -14,40 +14,44 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2018, Ap
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include <iostream>
-
-#include "collector.hxx"
-#include "request.hxx"
-#include "material.hxx"
-#include "feedscycle.hxx"
-
-using collector = rss::collector;
-using material = rss::material;
-using request = rss::request;
-using feedscycle = rss::feedscycle;
+#include "rss_file_manager_feed_name.hxx"
+#include "rss_file_manager_feed_headline.hxx"
 
 using namespace std;
 
 int main() {
-    vector<request> feed_parameters;
-
     string feed_names_location = "feeds.txt";
 
-    collector rss_requestor;
+    news::rss_file_manager_feed_name file_m_feeds;
 
-    feedscycle feeds_group;
+    file_m_feeds.init(feed_names_location);
 
-    feeds_group.get_feed_names_and_addresses(feed_names_location, feed_parameters);
+    news::rss_set_feed_name rss_feeds_set = file_m_feeds.get_set();
 
-    for(auto feedsource : feed_parameters) {
-        cout << "******** feed: \t " << feedsource.feedname << "\n\n\n";
+    vector<news::rss_data_feed_name_spec> rss_feeds = rss_feeds_set.get_specs();
 
-        vector<material> feed_articles = rss_requestor.pull(feedsource);
+    news::rss_file_manager_feed_headline file_m_headlines;
 
-        for(auto feed_article_entry : feed_articles) {
-            string headline = feed_article_entry.headline;
-            string url = feed_article_entry.url;
-            string description = feed_article_entry.description;
-            string article_date = feed_article_entry.article_date;
+    for(news::rss_data_feed_name_spec feed_name : rss_feeds) {
+        cout << "******** feed: \t " << feed_name.name << "\n\n\n";
+
+        file_m_headlines.init(feed_name.name + ".txt");
+
+        news::rss_set_feed_headline rss_headlines_set = file_m_headlines.get_set(feed_name);
+
+        vector<news::rss_data_feed_headline_spec> feed_headlines = rss_headlines_set.get_specs();
+
+        if(feed_headlines.empty()) {
+            rss_headlines_set = file_m_headlines.pull_set(feed_name);
+
+            feed_headlines = rss_headlines_set.get_specs();
+        }
+
+        for(news::rss_data_feed_headline_spec feed_headline : feed_headlines) {
+            string headline = feed_headline.headline;
+            string url = feed_headline.url;
+            string description = feed_headline.description;
+            string article_date = feed_headline.article_date;
 
             cout << "\t headline: " << headline << "\n";
             cout << "\t date: " << article_date << "\n";
