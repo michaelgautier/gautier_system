@@ -15,8 +15,12 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include "rss_file_manager_feed_article.hxx"
 
+#include "techconstruct/http.hxx"
+#include "techconstruct/file.hxx"
+
 using namespace std;
 using cls = news::rss_file_manager_feed_article;
+using http = rss_techconstruct::http;
 
 void cls::init(const string& file_location) {
     _file_location = file_location;
@@ -26,14 +30,22 @@ void cls::init(const string& file_location) {
 
 news::rss_data_feed_article_spec cls::pull_spec(const news::rss_data_feed_headline_spec& feed_headline) {
     news::rss_data_feed_article_spec spec;
+    spec.feed_headline = feed_headline;
 
-    /*Do network call*/
+    http http_handler;
 
-    /*Retrieve data*/
+    if(http_handler.check_url_is_http(feed_headline.url)) {
+        string rss_feed_document_data;
 
-    /*Save data*/
+        /*Expect an HTML document representing the latest news article.*/
+        http_handler.get_stream(feed_headline.url, rss_feed_document_data);
 
-    /*Return data*/
+        if(!rss_feed_document_data.empty()) {
+            spec.content = rss_feed_document_data;
+
+            save_spec(spec);
+        }
+    }
 
     return spec;
 }
@@ -86,6 +98,10 @@ news::rss_set_consequence cls::save_spec(const news::rss_data_feed_article_spec&
 
     //Read the feed articles and create/replace the file.
     auto call_rss_line = [=,&feed_article](ofstream& data) {
+        data << _feedname_start_char << feed_article.feed_headline.feed_name.name << _tab_char << feed_article.feed_headline.article_date << _newline_char;
+
+        data << _headline_start_char << feed_article.feed_headline.headline << _tab_char << feed_article.feed_headline.url << _newline_char;
+
         data << feed_article.content << _newline_char;
     };
 
