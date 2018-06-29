@@ -22,7 +22,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <map>
 #include <functional>
 
-#include "techconstruct/file.hxx"
 #include "rss_set_feed_headline.hxx"
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_set_consequence.hxx"

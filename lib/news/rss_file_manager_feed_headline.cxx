@@ -27,7 +27,9 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <Poco/SAX/InputSource.h>
 
 #include "rss_file_manager_feed_headline.hxx"
+
 #include "techconstruct/http.hxx"
+#include "techconstruct/file.hxx"
 
 using namespace std;
 using namespace Poco::XML;
