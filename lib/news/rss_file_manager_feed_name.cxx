@@ -33,7 +33,7 @@ news::rss_set_feed_name cls::get_set() {
             return;
         }
 
-        auto tab_pos = data.find_first_of(_tab_char);
+        auto tab_pos = data.find_first_of(_tab_char, 0);
 
         if(tab_pos == string::npos) {
             return;

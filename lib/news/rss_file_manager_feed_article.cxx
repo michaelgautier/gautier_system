@@ -64,7 +64,7 @@ news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headlin
         }
 
         //At least 1 tab expected most lines
-        auto tab_pos = data.find_first_of(_tab_char);
+        auto tab_pos = data.find_first_of(_tab_char, 0);
 
         string first_char = data.substr(0, 1);
 
