@@ -41,6 +41,7 @@ void cls::get_stream(string url, string& output) {
     HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
 
     HTTPRequest http_request(request_method, url);
+    http_request.set("User-Agent", "Googlebot/2.1 (+http://www.google.com/bot.html)");
 
     try {
         http_session.sendRequest(http_request);
