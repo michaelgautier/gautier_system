@@ -66,17 +66,17 @@ news::rss_data_feed_article_spec cls::get_spec(const news::rss_data_feed_headlin
         //At least 1 tab expected most lines
         auto tab_pos = data.find_first_of(_tab_char);
 
-        string first_char = string(&data[0]);
+        string first_char = data.substr(0, 1);
 
         if(first_char == _comment_char) {
             return;
         } else if (first_char == _feedname_start_char) {
-            string name = data.substr(1, tab_pos);
+            string name = data.substr(1, tab_pos-1);
             string last_checked_date_time = data.substr(tab_pos+1);
 
             feed_match = (feed_headline.feed_name.name == name);
         } else if (feed_match && first_char == _headline_start_char) {
-            string headline = data.substr(1, tab_pos);
+            string headline = data.substr(1, tab_pos-1);
             string url = data.substr(tab_pos+1);
 
             if (headline == feed_headline.headline) {
