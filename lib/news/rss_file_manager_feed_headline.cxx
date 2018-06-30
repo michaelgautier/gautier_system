@@ -60,7 +60,7 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
         }
 
         //At least 1 tab expected most lines
-        auto tab_pos = data.find_first_of(_tab_char);
+        auto tab_pos = data.find_first_of(_tab_char, 0);
 
         string first_char = data.substr(0, 1);
 
@@ -77,12 +77,17 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
             }
         } else if (feed_match && first_char == _headline_start_char) {
             string headline = data.substr(1, tab_pos-1);
-            string url = data.substr(tab_pos+1);
+
+            auto tab_pos_next = data.find_first_of(_tab_char, tab_pos+1);
+
+            string url = data.substr(tab_pos+1, tab_pos_next-1);
+            string description = data.substr(tab_pos_next+1);
 
             news::rss_data_feed_headline_spec spec;
 
             spec.headline = headline;
             spec.url = url;
+            spec.description = description;
 
             fh_set.add(spec);
         }
@@ -158,7 +163,7 @@ news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& fee
         data << _feedname_start_char << feed_name.name << _tab_char << rss_set.last_checked_date_time_string << _newline_char;
 
         for(news::rss_data_feed_headline_spec& spec : v) {
-            data << _headline_start_char << spec.headline << _tab_char << spec.url << _newline_char;
+            data << _headline_start_char << spec.headline << _tab_char << spec.url << _tab_char << spec.description << _newline_char;
         }
     };
 
