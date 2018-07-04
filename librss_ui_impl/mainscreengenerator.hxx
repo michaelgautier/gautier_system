@@ -72,8 +72,6 @@ class mainscreengenerator {
     int _feed_index = 0;//Defaults to the first feed, if available;
     int _headline_index = -1;
 
-    bool _article_contents_enlarge = false;
-
     string _feed_names_location = "feeds.txt";
     vector<news::rss_data_feed_headline_spec> _feed_headlines;
 
@@ -105,6 +103,7 @@ class mainscreengenerator {
 
     Gtk::LinkButton* _article_link_button = nullptr;
     Gtk::Label* _article_link_label = nullptr;
+    Gtk::Label* _article_source_label = nullptr;
 
     /*
         //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0

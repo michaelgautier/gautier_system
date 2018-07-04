@@ -39,12 +39,11 @@ cls::~mainscreengenerator() {
 }
 
 void cls::init() {
+    //Previously had something to init. Leave the interface point in place.
     return;
 }
 
 void cls::generate() {
-    _article_contents_enlarge = false;
-
     show_screen();
 
     return;
@@ -70,6 +69,8 @@ int cls::show_screen() {
         setup_ui_region_layout_parameters();
 
         _gautier_rss_window->show_all();
+
+        show_feed(0);
 
         gtk_app_err = app->run(*_gautier_rss_window);
     } catch(const Gtk::CssProviderError& ex) {
@@ -165,8 +166,6 @@ void cls::create_ui_region_headlines() {
 
     _gautier_rss_area->add(*_region_headlines);
 
-    show_headlines();
-
     auto style_ctx = _region_headlines->get_style_context();
     style_ctx->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx->add_class("headlines_region");
@@ -177,9 +176,11 @@ void cls::create_ui_region_headlines() {
 void cls::create_ui_region_article_summary() {
     _region_article_summary = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
 
+    _article_source_label = new Gtk::Label("");
     _article_link_button = new Gtk::LinkButton("http:://about:blank", "Open article page");
     _article_link_label = new Gtk::Label("No article yet");
 
+    _region_article_summary->add(*_article_source_label);
     _region_article_summary->add(*_article_link_button);
     _region_article_summary->add(*_article_link_label);
 
@@ -416,9 +417,6 @@ void cls::setup_ui_region_layout_parameters() {
 
             resize_headlines();
         }
-        //_feed_names_field->set_size(_region_feed_names_w,_region_feed_names_h);
-        /*
-        _feed_names_field->set_size(feedname_label_width + _widget_xy_offset, _feed_name_button_h);*/
 
         _last_window_w = _window_w;
         _last_window_h = _window_h;
@@ -430,9 +428,20 @@ void cls::setup_ui_region_layout_parameters() {
 void cls::show_feed(int feed_index) {
     _feed_index = feed_index;
 
-    show_headlines();
+    if(_feed_index >= 0) {
+        if(!_feed_names_location.empty()) {
+            news::rss_cycle_feed_name rss_c_feed_name;
 
-    show_headline_description(0);
+            rss_c_feed_name.init(_feed_names_location);
+            news::rss_data_feed_name_spec feed_name = rss_c_feed_name.get_single_feed_name(_feed_index);
+
+            _article_source_label->set_text(feed_name.name);
+        }
+
+        show_headlines();
+
+        show_headline_description(0);
+    }
 
     return;
 }
@@ -488,7 +497,7 @@ void cls::show_headlines() {
     */
     _feed_headlines.push_back(news::rss_data_feed_headline_spec());
 
-    int headlines_size = _feed_headlines.size();
+    const int headlines_size = _feed_headlines.size();
 
     int headline_label_y = 0;
     int headline_height = 0;
@@ -542,7 +551,6 @@ void cls::show_headlines() {
     }
 
     resize_headlines();
-    //_region_headlines->show_all();
 
     return;
 }
@@ -565,7 +573,15 @@ void cls::show_feed_names() {
 
     vector<news::rss_data_feed_name_spec> feed_names = feed_name_set.get_specs();
 
-    int feednames_size = feed_names.size();
+    /*
+        Add an empty entry. Addresses a bug in the Gtk rendering process in which the last item added in a loop is not shown.
+        Or, I am indirectly allocating the objects incorrectly.
+        Either way, the faux entry allows all feed names to show. Since the last item added in the loop is not shown, the blank entry is ignored.
+        This may not be the case in all situations, operating systems, etc., but I will start with what I can observe.
+    */
+    feed_names.push_back(news::rss_data_feed_name_spec());
+
+    const int feednames_size = feed_names.size();
 
     int feedname_label_width = 8;
 
@@ -667,20 +683,22 @@ void cls::show_headline_description_selected_row(Gtk::ListBoxRow* row) {
 }
 
 void cls::resize_headlines() {
-    auto pglyt = _headlines->create_pango_layout("H");
+    if(_headlines) {
+        auto pglyt = _headlines->create_pango_layout("H");
 
-    int headline_width = 0;
-    int headline_height = 0;
+        int headline_width = 0;
+        int headline_height = 0;
 
-    pglyt->get_pixel_size(headline_width, headline_height);
+        pglyt->get_pixel_size(headline_width, headline_height);
 
-    /*Gtk Scrolled Window does not handle exact heights in the content consistently but if you add a multiplier
-    twice to double the height, it appears to truncate the viewport to items that can be displayed.*/
-    const int height_multiplier = 2;
+        /*Gtk Scrolled Window does not handle exact heights in the content consistently but if you add a multiplier
+        twice to double the height, it appears to truncate the viewport to items that can be displayed.*/
+        const int height_multiplier = 2;
 
-    int headlines_h = (_feed_headlines.size() * height_multiplier) * headline_height;
+        int headlines_h = (_feed_headlines.size() * height_multiplier) * headline_height;
 
-    _headlines->set_size(_screen_w, headlines_h);
+        _headlines->set_size(_screen_w, headlines_h);
+    }
 
     return;
 }
@@ -692,21 +710,37 @@ bool cls::update_feed_source() {
     string feedurl = _feed_url_edit->get_text();
 
     if(!feedname.empty() && !feedurl.empty()) {
-        news::rss_data_feed_name_spec feed_name;
+        news::rss_data_feed_name_spec feed_name_entry;
 
-        feed_name.name = feedname;
-        feed_name.url = feedurl;
+        feed_name_entry.name = feedname;
+        feed_name_entry.url = feedurl;
 
         news::rss_cycle_feed_name rss_c_feed_name;
 
         rss_c_feed_name.init(_feed_names_location);
-        rss_c_feed_name.set_single_feed_name(feed_name);
+        news::rss_set_feed_name feed_name_set = rss_c_feed_name.get_feed_names();
 
-        //if( check consequence ) {
-        //get_rss_feed_names_and_articles();
+        vector<news::rss_data_feed_name_spec> feed_names = feed_name_set.get_specs();
 
-        feed_sources_updated = true;
-        //}
+        bool feed_name_found = false;
+
+        for(news::rss_data_feed_name_spec feed_name : feed_names) {
+            feed_name_found = (feedname == feed_name.name);
+
+            if(feed_name_found) {
+                break;
+            }
+        }
+
+        if(!feed_name_found) {
+            rss_c_feed_name.set_single_feed_name(feed_name_entry);
+
+            //if( check consequence ) {
+            //get_rss_feed_names_and_articles();
+
+            feed_sources_updated = true;
+            //}
+        }
     }
 
     return feed_sources_updated;
