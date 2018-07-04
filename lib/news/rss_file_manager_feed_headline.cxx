@@ -80,7 +80,7 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
 
             auto tab_pos_next = data.find_first_of(_tab_char, tab_pos+1);
 
-            string url = data.substr(tab_pos+1, tab_pos_next-1);
+            string url = data.substr(tab_pos+1, tab_pos_next-tab_pos);
             string description = data.substr(tab_pos_next+1);
 
             news::rss_data_feed_headline_spec spec;
@@ -88,6 +88,7 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
             spec.headline = headline;
             spec.url = url;
             spec.description = description;
+            spec.article_date = fh_set.last_checked_date_time_string;
 
             fh_set.add(spec);
         }
