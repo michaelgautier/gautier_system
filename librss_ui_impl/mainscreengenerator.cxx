@@ -107,8 +107,6 @@ void cls::create_ui_window() {
 
     _gautier_rss_window->add(*_gautier_rss_area);
 
-    _events = new Gtk::EventBox();
-
     auto style_ctx_window = _gautier_rss_window->get_style_context();
     style_ctx_window->add_provider(_css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     style_ctx_window->add_class("window");
@@ -177,7 +175,13 @@ void cls::create_ui_region_headlines() {
 }
 
 void cls::create_ui_region_article_summary() {
-    _region_article_summary = new Gtk::Label();
+    _region_article_summary = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+
+    _article_link_button = new Gtk::LinkButton("http:://about:blank", "Open article page");
+    _article_link_label = new Gtk::Label("No article yet");
+
+    _region_article_summary->add(*_article_link_button);
+    _region_article_summary->add(*_article_link_label);
 
     _gautier_rss_area->add(*_region_article_summary);
 
@@ -199,6 +203,16 @@ void cls::create_ui_region_content() {
     _region_content->add(*_article_content);
 
     /*
+        Previously used to show the full article web page in the program.
+        Worked well, but I decided that was not the best use of browser rendering capabilities.
+        Better to allow full web browsers like Mozilla Firefox, Google Chrome, Chromium, and Microsoft Edge
+        to show the content. The reasons to defer to full web browsers for rendering articles include:
+
+                1)      Full use of browser extensions.
+                2)      Security against web content injection attacks.
+                3)      A complete security mode does not exist in just the rendering portion of the WebKit API.
+                4)      User-Agent strings sent by web browsers are better recognized.
+
         //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
         _article_content_web_backend = WEBKIT_WEB_VIEW( webkit_web_view_new() );
         _article_content_web = Glib::wrap( GTK_WIDGET( _article_content_web_backend ) );
@@ -307,7 +321,7 @@ void cls::setup_ui_region_layout_parameters() {
         int window_h = _screen_h;
 
         _region_header_w = 0;
-        _region_header_h = 0;
+        _region_header_h = _screen_w/2;
 
         _region_headlines_w = _screen_w/2;
         _region_headlines_h = 0;
@@ -324,14 +338,11 @@ void cls::setup_ui_region_layout_parameters() {
         _region_feed_names_w = _screen_w/2;
         _region_feed_names_h = 36;
 
-        int next_y = 0;
-        int accumulated_h = 0;
-        int remaining_h = 0;
+        double remaining_h1 = window_h;
+        double remaining_h2 = 0;
 
-        int y = 0;
-        int h = 0;
-
-        int rh = 0;
+        double height_ratio = 30;
+        double height = 0;
 
         const int max_elems = 6;
 
@@ -339,55 +350,65 @@ void cls::setup_ui_region_layout_parameters() {
             window_h = _window_h;
         }
 
+//cout << "remaining height start with " << remaining_h1 << "\n";
         for(int index = 0; index < max_elems; index++) {
-            y = next_y;
-
             switch(index) {
             case 0: { //RSS Reader Header
-            }
-            break;
-            case 1: { //RSS Reader Headlines
-                h = remaining_h / 3;
-                _region_headlines_h = h;
-            }
-            break;
-            case 2: { //RSS Reader article content
-                double dv = 2;
-                h = remaining_h / dv;
+                height_ratio = 30;
+                remaining_h2 = remaining_h1 / height_ratio;
 
-                _region_content_h = h;
+                _region_header_h = remaining_h2;
+            }
+            break;
+            case 1: {//feed names
+                height_ratio = 30;
+                remaining_h2 = remaining_h1 / height_ratio;
+
+                _region_feed_names_h = remaining_h2;
+            }
+            break;
+            case 2: {//feed edit
+                height_ratio = 30;
+                remaining_h2 = remaining_h1 / height_ratio;
+
+                _region_feed_edit_h = remaining_h2;
             }
             break;
             case 3: {//article headline and control
-                double dv = 2;
-                rh = remaining_h / dv;
+                height_ratio = 30;
+                remaining_h2 = remaining_h1 / height_ratio;
 
-                h = rh;
-                _region_article_summary_h = h;
+                _region_article_summary_h = remaining_h2;
             }
             break;
-            case 4: {//feed edit
-                h = rh;
+            case 4: { //RSS Reader article content
+                height_ratio = 8;
+                remaining_h2 = remaining_h1 / height_ratio;
 
-                _region_feed_edit_h = h;
+                _region_content_h = remaining_h2;
             }
             break;
-            case 5: {//feed names
-                h = rh;
+            case 5: { //RSS Reader Headlines
+                height_ratio = 1.3;
+                remaining_h2 = remaining_h1 / height_ratio;
 
-                _region_feed_names_h = h;
+                _region_headlines_h = remaining_h2;
             }
             break;
             }
+            //cout << "   index " << index << " " << "remaining h1 " << remaining_h1 << " remaining h2 " << remaining_h2 << "\n";
 
-            accumulated_h = (accumulated_h + h);
-            next_y = (next_y + h);
+            remaining_h1 = (remaining_h1 - remaining_h2);
 
-            remaining_h = (window_h - accumulated_h);
+            //cout << "           remaining h1 final: " << remaining_h1 << "\n";
+        }
+
+        if(_region_header) {
+            _region_header->set_size_request(_region_header_w, _region_header_h);
         }
 
         if(_region_content) {
-            _region_content->set_size_request(_region_content_w,_region_content_h);
+            _region_content->set_size_request(_region_content_w, _region_content_h);
         }
 
         if(_region_headlines) {
@@ -458,6 +479,14 @@ void cls::show_headlines() {
     news::rss_set_feed_headline feed_headline_set = rss_c_feed_headline.get_feed_headlines(feed_name);
 
     _feed_headlines = feed_headline_set.get_specs();
+
+    /*
+        Add an empty entry. Addresses a bug in the Gtk rendering process in which the last item added in a loop is not shown.
+        Or, I am indirectly allocating the objects incorrectly.
+        Either way, the faux entry allows all headlines to show. Since the last item added in the loop is not shown, the blank entry is ignored.
+        This may not be the case in all situations, operating systems, etc., but I will start with what I can observe.
+    */
+    _feed_headlines.push_back(news::rss_data_feed_headline_spec());
 
     int headlines_size = _feed_headlines.size();
 
@@ -587,29 +616,43 @@ void cls::show_feed_names() {
 void cls::show_headline_description(int headline_index) {
     news::rss_data_feed_headline_spec feed_headline_entry;
 
-    if(headline_index < _feed_headlines.size()) {
+    int headlines_size = _feed_headlines.size();
+
+    if(headline_index < headlines_size) {
         feed_headline_entry = _feed_headlines[headline_index];
+
+        _article_link_button->set_uri(feed_headline_entry.url);
+        _article_link_label->set_text(feed_headline_entry.url);
     } else {
+        feed_headline_entry.url = "http://about:blank";
         feed_headline_entry.description = "No headlines yet";
+
+        _article_link_button->set_uri(feed_headline_entry.url);
+        _article_link_label->set_text(feed_headline_entry.description);
     }
 
-    string headline_description = feed_headline_entry.description;
+    string headline_description = feed_headline_entry.url;
 
     if(headline_description.size() > _headline_description_max_chars) {
         headline_description = headline_description.substr(0, _headline_description_max_chars);
     }
 
-    _region_article_summary->set_lines(1);
-    _region_article_summary->set_max_width_chars(_headline_description_max_chars);
-    _region_article_summary->set_single_line_mode(true);
-    _region_article_summary->set_text(headline_description);
+    /*
+        Previously used to just show headline text in the description area.
+            _region_article_summary->set_lines(1);
+            _region_article_summary->set_max_width_chars(_headline_description_max_chars);
+            _region_article_summary->set_single_line_mode(true);
+            _region_article_summary->set_text(headline_description);
+    */
 
     _article_content->set_single_line_mode(false);
     _article_content->set_text(feed_headline_entry.description);
 
     /*
+        Previously used to show the full article web page within the screen.
+
         //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
-        webkit_web_view_load_uri(_article_content_web_backend, string(feed_headline_entry.url).data());
+                webkit_web_view_load_uri(_article_content_web_backend, string(feed_headline_entry.url).data());
     */
 
     return;
@@ -631,7 +674,11 @@ void cls::resize_headlines() {
 
     pglyt->get_pixel_size(headline_width, headline_height);
 
-    int headlines_h = _feed_headlines.size() * headline_height;
+    /*Gtk Scrolled Window does not handle exact heights in the content consistently but if you add a multiplier
+    twice to double the height, it appears to truncate the viewport to items that can be displayed.*/
+    const int height_multiplier = 2;
+
+    int headlines_h = (_feed_headlines.size() * height_multiplier) * headline_height;
 
     _headlines->set_size(_screen_w, headlines_h);
 
