@@ -56,7 +56,7 @@ int main() {
             cout << "\t headline: " << headline << "\n";
             cout << "\t date: " << article_date << "\n";
             cout << "\t url: " << url << "\n";
-            cout << "\t description: " << description << "\n";
+            cout << "\t description: " << description << "\n\n";
         }
 
         cout << "\n\n\n";
