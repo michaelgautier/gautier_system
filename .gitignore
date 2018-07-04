@@ -3,3 +3,6 @@ build_gcc/bin
 build_clang/obj
 build_clang/bin
 config/*.xml
+*.o
+styles.cxx
+
