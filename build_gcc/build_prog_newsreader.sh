@@ -9,20 +9,9 @@
 reset
 #echo "Building rss_requestor library"
 #uncomment the following line to build the rss parser library for the user interface.
-./build_libnews_rss.sh
+#./build_libnews_rss.sh
 
-cp ../styles.css .
-glib-compile-resources --target=../styles.cxx --generate-source ../styles.xml
-g++ -c ../styles.cxx -o obj/gautier_rss_styles.o `pkg-config gtkmm-3.0 --cflags --libs`
-
-rm styles.css
-rm obj/librssui_mainscreengenerator.o
-
-echo "build main screen generator"
-
-g++ -c -g -I../lib/news/ -I../lib/news/techconstruct/ -I../librss_ui_impl/ `pkg-config gtkmm-3.0 --cflags --libs` `pkg-config webkit2gtk-4.0 --cflags --libs` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
-
-ls -gGh obj/librssui_mainscreengenerator*
+./build_libnews_ui.sh
 
 echo "Building newsreader"
 
