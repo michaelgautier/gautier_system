@@ -9,8 +9,7 @@
 reset
 #echo "Building rss_requestor library"
 #uncomment the following line to build the rss parser library for the user interface.
-#./build_libnews_rss.sh
-
+./build_libnews_rss.sh
 ./build_libnews_ui.sh
 
 echo "Building newsreader"

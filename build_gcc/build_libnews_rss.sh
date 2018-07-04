@@ -36,3 +36,4 @@ g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_data_consequence_sp
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_set_consequence.o ../lib/news/rss_set_consequence.cxx
 
 ls -gGh obj/libnews_rss*
+
