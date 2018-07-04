@@ -69,7 +69,6 @@ news::rss_set_consequence cls::save_set(news::rss_set_feed_name& rss_set) {
     };
 
     rss_techconstruct::file rssfile;
-    rssfile.erase_stream(_file_location);
     rssfile.persist_stream(_file_location, call_rss_line);
 
     return cs;
