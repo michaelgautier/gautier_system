@@ -46,7 +46,7 @@ news::rss_set_feed_headline cls::get_feed_headlines(const news::rss_data_feed_na
 
     news::rss_set_feed_headline fhs;
 
-    fhs = fm.get_set(feed_name);
+    fhs = fm.pull_set(feed_name);
 
     _set = &fhs;
 
