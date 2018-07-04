@@ -53,17 +53,15 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <gtkmm/textview.h>
 #include <gtkmm/viewport.h>
 
-#include "request.hxx"
-#include "material.hxx"
+#include "rss_data_feed_name_spec.hxx"
+#include "rss_data_feed_headline_spec.hxx"
+#include "rss_data_feed_article_spec.hxx"
 
 namespace rss {
 namespace ui {
 using namespace std;
 class mainscreengenerator {
   public:
-    using material = ::rss::material;
-    using request = ::rss::request;
-
     mainscreengenerator();
     ~mainscreengenerator();
 
@@ -78,10 +76,7 @@ class mainscreengenerator {
     bool _feed_articles_requested = false;
 
     string _feed_names_location = "feeds.txt";
-
-    vector<material> _feed_articles;
-    vector<request> get_rss_feed_data(int feed_source_index, vector<material>& feed_articles);
-    vector<string> _feednames;
+    vector<news::rss_data_feed_headline_spec> _feed_headlines;
 
     bool update_feed_source();
     void get_rss_feed_names_and_articles();
@@ -133,7 +128,7 @@ class mainscreengenerator {
 
     const int _widget_xy_offset = 22;
 
-    const int _article_summary_max_chars = 180;
+    const int _headline_description_max_chars = 180;
 
     int _region_header_w = 0;
     int _region_header_h = 0;
@@ -158,8 +153,8 @@ class mainscreengenerator {
     void show_feed(int feed_index);
     void show_feed_names();
     void show_headlines();
-    void show_article_summary_selected_row(Gtk::ListBoxRow* row);
-    void show_article_summary(int article_index);
+    void show_headline_description_selected_row(Gtk::ListBoxRow* row);
+    void show_headline_description(int headline_index);
 
     void setup_ui_layout_parameters();
     void setup_ui_region_layout_parameters();

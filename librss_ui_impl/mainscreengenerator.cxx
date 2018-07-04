@@ -20,11 +20,12 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 #include "mainscreengenerator.hxx"
 
-#include "collector.hxx"
-#include "feedscycle.hxx"
+#include "rss_set_feed_name.hxx"
+#include "rss_set_feed_headline.hxx"
 
-using collector = ::rss::collector;
-using feedscycle = ::rss::feedscycle;
+#include "rss_cycle_feed_name.hxx"
+#include "rss_cycle_feed_headline.hxx"
+#include "rss_cycle_feed_article.hxx"
 
 using namespace std;
 using cls = ::rss::ui::mainscreengenerator;
@@ -43,7 +44,6 @@ void cls::init() {
 
 void cls::generate() {
     _article_contents_enlarge = false;
-    get_rss_feed_names_and_articles();
 
     _feed_articles_requested = true;
 
@@ -52,52 +52,12 @@ void cls::generate() {
     return;
 }
 
-void cls::get_rss_feed_names_and_articles() {
-    vector<material> feed_articles;
-    vector<request> feed_parameters = get_rss_feed_data(_feed_index, feed_articles);
-    _feed_articles = feed_articles;
-
-    const int feed_source_size = feed_parameters.size();
-
-    _feednames.clear();
-
-    for(int feed_source_index = 0; feed_source_index < feed_source_size; feed_source_index++) {
-        request feedsource = feed_parameters[feed_source_index];
-
-        _feednames.push_back(feedsource.feedname);
-    }
-
-    return;
-}
-
-vector<rss::request> cls::get_rss_feed_data(int feed_source_index, vector<material>& feed_articles) {
-    feedscycle feeds_group;
-
-    vector<request> feed_parameters;
-    feeds_group.get_feed_names_and_addresses(_feed_names_location, feed_parameters);
-
-    if(feed_parameters.size() > 0) {
-        request feedsource = feed_parameters[feed_source_index];
-
-        collector rss_requestor;
-        feed_articles = rss_requestor.pull(feedsource);
-    }
-
-    return feed_parameters;
-}
-
 void cls::show_feed(int feed_index) {
-    int previous_articles_size = _feed_articles.size();
-
     _feed_index = feed_index;
-
-    vector<material> feed_articles;
-    get_rss_feed_data(_feed_index, feed_articles);
-    _feed_articles = feed_articles;
 
     show_headlines();
 
-    show_article_summary(0);
+    show_headline_description(0);
 
     return;
 }
@@ -133,13 +93,25 @@ void cls::show_headlines() {
     Gtk::Label headline_label;
     Gtk::Button headline_button;
 
-    int articles_size = _feed_articles.size();
+    news::rss_cycle_feed_name rss_c_feed_name;
+
+    rss_c_feed_name.init(_feed_names_location);
+    news::rss_data_feed_name_spec feed_name = rss_c_feed_name.get_single_feed_name(_feed_index);
+
+    news::rss_cycle_feed_headline rss_c_feed_headline;
+
+    rss_c_feed_headline.init(feed_name.name + ".txt");
+    news::rss_set_feed_headline feed_headline_set = rss_c_feed_headline.get_feed_headlines(feed_name);
+
+    _feed_headlines = feed_headline_set.get_specs();
+
+    int headlines_size = _feed_headlines.size();
 
     int headline_label_y = 0;
     int headline_height = 0;
 
-    for(int article_index = 0; article_index < articles_size; article_index++) {
-        string headline = _feed_articles[article_index].headline;
+    for(int headline_index = 0; headline_index < headlines_size; headline_index++) {
+        string headline = _feed_headlines[headline_index].headline;
 
         headline_label = Gtk::Label(headline, Gtk::Align::ALIGN_START);
         headline_label.show();
@@ -182,7 +154,7 @@ void cls::show_headlines() {
         auto headlinebtn = (Gtk::Button*)headline_buttons[i];
 
         headlinebtn->signal_clicked().connect([=]() {
-            show_article_summary(i);
+            show_headline_description(i);
         });
     }
 
@@ -199,14 +171,21 @@ bool cls::update_feed_source() {
     string feedurl = _feed_url_edit->get_text();
 
     if(!feedname.empty() && !feedurl.empty()) {
-        feedscycle feeds_group;
-        vector<string> added_feednames = feeds_group.set_feed_name_and_address(_feed_names_location, feedname, feedurl);
+        news::rss_data_feed_name_spec feed_name;
 
-        if(added_feednames.size() > 0) {
-            get_rss_feed_names_and_articles();
+        feed_name.name = feedname;
+        feed_name.url = feedurl;
 
-            feed_sources_updated = true;
-        }
+        news::rss_cycle_feed_name rss_c_feed_name;
+
+        rss_c_feed_name.init(_feed_names_location);
+        rss_c_feed_name.set_single_feed_name(feed_name);
+
+        //if( check consequence ) {
+        //get_rss_feed_names_and_articles();
+
+        feed_sources_updated = true;
+        //}
     }
 
     return feed_sources_updated;
@@ -223,18 +202,19 @@ void cls::show_feed_names() {
 
     Gtk::Button feedname_label;
 
-    /*
-       Hack workaround for GTK. The GTK framework will not show the last button in the Layout instance.
-       Problem noticed 6/1/2018.
-    */
-    _feednames.push_back("");
+    news::rss_cycle_feed_name rss_c_feed_name;
 
-    int feednames_size = _feednames.size();
+    rss_c_feed_name.init(_feed_names_location);
+    news::rss_set_feed_name feed_name_set = rss_c_feed_name.get_feed_names();
+
+    vector<news::rss_data_feed_name_spec> feed_names = feed_name_set.get_specs();
+
+    int feednames_size = feed_names.size();
 
     int feedname_label_width = 8;
 
     for(int feedname_index = 0; feedname_index < feednames_size; feedname_index++) {
-        string feedname = _feednames[feedname_index];
+        string feedname = feed_names[feedname_index].name;
 
         feedname_label = Gtk::Button(feedname);
 
@@ -277,18 +257,17 @@ void cls::show_feed_names() {
     return;
 }
 
-void cls::show_article_summary(int article_index) {
-    auto feed_article_entry = _feed_articles[article_index];
+void cls::show_headline_description(int headline_index) {
+    auto feed_headline_entry = _feed_headlines[headline_index];
 
-    string headline_description = feed_article_entry.description;
-    string article_content = feed_article_entry.content;
+    string headline_description = feed_headline_entry.description;
 
-    if(headline_description.size() > _article_summary_max_chars) {
-        headline_description = headline_description.substr(0, _article_summary_max_chars);
+    if(headline_description.size() > _headline_description_max_chars) {
+        headline_description = headline_description.substr(0, _headline_description_max_chars);
     }
 
     _region_article_summary->set_lines(1);
-    _region_article_summary->set_max_width_chars(_article_summary_max_chars);
+    _region_article_summary->set_max_width_chars(_headline_description_max_chars);
     _region_article_summary->set_single_line_mode(true);
     _region_article_summary->set_text(headline_description);
 
@@ -296,14 +275,14 @@ void cls::show_article_summary(int article_index) {
     _article_content->set_text(article_content);*/
 
     //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
-    webkit_web_view_load_uri(_article_content_web_backend, string(feed_article_entry.url).data());
+    webkit_web_view_load_uri(_article_content_web_backend, string(feed_headline_entry.url).data());
 
     return;
 }
 
-void cls::show_article_summary_selected_row(Gtk::ListBoxRow* row) {
+void cls::show_headline_description_selected_row(Gtk::ListBoxRow* row) {
     if(row) {
-        show_article_summary(row->get_index());
+        show_headline_description(row->get_index());
     }
 
     return;
@@ -477,7 +456,7 @@ void cls::resize_headlines() {
 
     pglyt->get_pixel_size(headline_width, headline_height);
 
-    int headlines_h = _feed_articles.size() * headline_height;
+    int headlines_h = _feed_headlines.size() * headline_height;
 
     _headlines->set_size(_screen_w, headlines_h);
 
