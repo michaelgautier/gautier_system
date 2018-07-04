@@ -29,8 +29,12 @@ void cls::init(string file_location) {
 news::rss_data_feed_name_spec cls::get_single_feed_name(const unsigned short int feed_index) {
     news::rss_data_feed_name_spec n;
 
-    if(_set) {
-        //Find the spec in the set and assign to n.
+    news::rss_set_feed_name fns = get_feed_names();
+
+    vector<news::rss_data_feed_name_spec> feed_names = fns.get_specs();
+
+    if(feed_index < feed_names.size()) {
+        n = feed_names[feed_index];
     }
 
     return n;
@@ -40,20 +44,22 @@ news::rss_set_feed_name cls::get_feed_names() {
     news::rss_file_manager_feed_name fm;
     fm.init(_file_location);
 
-    news::rss_set_feed_name fs;
+    news::rss_set_feed_name fns;
 
-    fs = fm.get_set();
+    fns = fm.get_set();
 
-    _set = &fs;
+    _set = &fns;
 
-    return fs;
+    return fns;
 }
 
 news::rss_set_consequence cls::set_single_feed_name(const news::rss_data_feed_name_spec& feed_name) {
     news::rss_file_manager_feed_name fm;
     fm.init(_file_location);
 
-    //Add the spec to the set.
+    if(_set && !feed_name.name.empty() && !feed_name.url.empty()) {
+        _set->add(feed_name);
+    }
 
     news::rss_set_consequence cs = fm.save_set(*_set);
 

@@ -29,8 +29,12 @@ void cls::init(string file_location) {
 news::rss_data_feed_headline_spec cls::get_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const unsigned short int headline_index) {
     news::rss_data_feed_headline_spec h;
 
-    if(_set) {
-        //Find the spec in the set and assign to n.
+    news::rss_set_feed_headline fhs = get_feed_headlines(feed_name);
+
+    vector<news::rss_data_feed_headline_spec> fh = fhs.get_specs();
+
+    if(headline_index < fh.size()) {
+        h = fh[headline_index];
     }
 
     return h;
@@ -40,13 +44,13 @@ news::rss_set_feed_headline cls::get_feed_headlines(const news::rss_data_feed_na
     news::rss_file_manager_feed_headline fm;
     fm.init(_file_location);
 
-    news::rss_set_feed_headline fh;
+    news::rss_set_feed_headline fhs;
 
-    fh = fm.get_set(feed_name);
+    fhs = fm.get_set(feed_name);
 
-    _set = &fh;
+    _set = &fhs;
 
-    return fh;
+    return fhs;
 }
 
 news::rss_set_consequence cls::set_single_feed_headline(const news::rss_data_feed_name_spec& feed_name, const news::rss_data_feed_headline_spec& feed_headline) {
