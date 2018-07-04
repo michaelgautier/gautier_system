@@ -189,41 +189,43 @@ void cls::create_ui_region_article_summary() {
 }
 
 void cls::create_ui_region_content() {
-    //_region_content = new Gtk::ScrolledWindow();
+    _region_content = new Gtk::ScrolledWindow();
 
-    /*_article_content = new Gtk::Label();
+    _article_content = new Gtk::Label();
     _article_content->set_lines(-1);
     _article_content->set_line_wrap(true);
     _article_content->set_single_line_mode(false);
 
-    _region_content->add(*_article_content);*/
+    _region_content->add(*_article_content);
 
-    //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
-    _article_content_web_backend = WEBKIT_WEB_VIEW( webkit_web_view_new() );
-    _article_content_web = Glib::wrap( GTK_WIDGET( _article_content_web_backend ) );
+    /*
+        //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
+        _article_content_web_backend = WEBKIT_WEB_VIEW( webkit_web_view_new() );
+        _article_content_web = Glib::wrap( GTK_WIDGET( _article_content_web_backend ) );
 
-    _region_content = _article_content_web;
-    //_region_content->add(*_article_content_web);
+        _region_content = _article_content_web;
 
-    _article_content_web_backend_settings = webkit_settings_new();
+        _region_content->add(*_article_content_web);
 
-    webkit_settings_set_allow_modal_dialogs(_article_content_web_backend_settings, false);
-    webkit_settings_set_auto_load_images (_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_developer_extras(_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_frame_flattening(_article_content_web_backend_settings, true);
-    webkit_settings_set_enable_html5_database(_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_html5_local_storage(_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_javascript (_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_java (_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_plugins (_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_webaudio (_article_content_web_backend_settings, false);
-    webkit_settings_set_enable_webgl (_article_content_web_backend_settings, false);
-    webkit_settings_set_javascript_can_access_clipboard(_article_content_web_backend_settings, false);
-    webkit_settings_set_javascript_can_open_windows_automatically(_article_content_web_backend_settings, false);
-    webkit_settings_set_media_playback_allows_inline(_article_content_web_backend_settings, false);
+        _article_content_web_backend_settings = webkit_settings_new();
 
-    webkit_web_view_set_settings (_article_content_web_backend, _article_content_web_backend_settings);
+        webkit_settings_set_allow_modal_dialogs(_article_content_web_backend_settings, false);
+        webkit_settings_set_auto_load_images (_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_developer_extras(_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_frame_flattening(_article_content_web_backend_settings, true);
+        webkit_settings_set_enable_html5_database(_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_html5_local_storage(_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_javascript (_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_java (_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_plugins (_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_webaudio (_article_content_web_backend_settings, false);
+        webkit_settings_set_enable_webgl (_article_content_web_backend_settings, false);
+        webkit_settings_set_javascript_can_access_clipboard(_article_content_web_backend_settings, false);
+        webkit_settings_set_javascript_can_open_windows_automatically(_article_content_web_backend_settings, false);
+        webkit_settings_set_media_playback_allows_inline(_article_content_web_backend_settings, false);
 
+        webkit_web_view_set_settings (_article_content_web_backend, _article_content_web_backend_settings);
+    */
     _gautier_rss_area->add(*_region_content);
 
     auto style_ctx = _region_content->get_style_context();
@@ -583,7 +585,13 @@ void cls::show_feed_names() {
 }
 
 void cls::show_headline_description(int headline_index) {
-    auto feed_headline_entry = _feed_headlines[headline_index];
+    news::rss_data_feed_headline_spec feed_headline_entry;
+
+    if(headline_index < _feed_headlines.size()) {
+        feed_headline_entry = _feed_headlines[headline_index];
+    } else {
+        feed_headline_entry.description = "No headlines yet";
+    }
 
     string headline_description = feed_headline_entry.description;
 
@@ -596,11 +604,13 @@ void cls::show_headline_description(int headline_index) {
     _region_article_summary->set_single_line_mode(true);
     _region_article_summary->set_text(headline_description);
 
-    /*_article_content->set_single_line_mode(false);
-    _article_content->set_text(article_content);*/
+    _article_content->set_single_line_mode(false);
+    _article_content->set_text(feed_headline_entry.description);
 
-    //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
-    webkit_web_view_load_uri(_article_content_web_backend, string(feed_headline_entry.url).data());
+    /*
+        //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
+        webkit_web_view_load_uri(_article_content_web_backend, string(feed_headline_entry.url).data());
+    */
 
     return;
 }
