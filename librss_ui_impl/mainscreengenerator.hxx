@@ -73,7 +73,6 @@ class mainscreengenerator {
     int _headline_index = -1;
 
     bool _article_contents_enlarge = false;
-    bool _feed_articles_requested = false;
 
     string _feed_names_location = "feeds.txt";
     vector<news::rss_data_feed_headline_spec> _feed_headlines;
