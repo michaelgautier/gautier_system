@@ -13,6 +13,9 @@ Portions of the POCO C++ Libraries utilize the following copyrighted material, t
 POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
+#include <ctime>
+#include <time.h>
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
@@ -25,6 +28,9 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <Poco/URI.h>
 #include <Poco/SAX/SAXException.h>
 #include <Poco/SAX/InputSource.h>
+#include <Poco/File.h>
+#include <Poco/DateTime.h>
+#include <Poco/Timespan.h>
 
 #include "rss_file_manager_feed_headline.hxx"
 
@@ -44,7 +50,38 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 void cls::init(const string& file_location) {
     _file_location = file_location;
 
+    Poco::File rss_file(_file_location);
+
+    if(rss_file.exists() && rss_file.isFile()) {
+        _file_last_write_time = rss_file.getLastModified();
+    }
+
     return;
+}
+
+bool cls::get_can_feed_refresh() {
+    bool can_refresh = false;
+
+    Poco::DateTime rss_file_original_time(_file_last_write_time);
+
+    Poco::DateTime system_time;
+
+    Poco::Timespan rss_file_time_diff_system_time = system_time - rss_file_original_time;
+
+    int hours = rss_file_time_diff_system_time.hours();
+    int minutes = rss_file_time_diff_system_time.minutes();
+
+    /*
+            cout << "rss headline file time " << Poco::DateTimeFormatter::format(rss_file_original_time, "%dd %H:%M:%S.%i") << "\n";
+            cout << "system time " << Poco::DateTimeFormatter::format(system_time, "%dd %H:%M:%S.%i") << "\n";
+    */
+
+    cout << "difference in hours/minutes since last refresh " << rss_file_time_diff_system_time.hours() << " " << rss_file_time_diff_system_time.minutes() << "\n";
+
+    //Only refresh rss feed no earlier than once an hour.
+    can_refresh = hours > 0 && minutes > 0;
+
+    return can_refresh;
 }
 
 news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& feed_name) {
@@ -103,52 +140,55 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
 /*Primary logic for rss feed retrieval.*/
 news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& feed_name) {
     news::rss_set_feed_headline fh_set_old = get_set(feed_name);
-    news::rss_set_feed_headline fh_set;
 
-    vector<news::rss_data_feed_headline_spec> headlines_old = fh_set_old.get_specs();
-    vector<news::rss_data_feed_headline_spec> headlines_new;
+    if(get_can_feed_refresh()) {
+        news::rss_set_feed_headline fh_set;
 
-    int headlines_old_size = headlines_old.size();
+        vector<news::rss_data_feed_headline_spec> headlines_old = fh_set_old.get_specs();
+        vector<news::rss_data_feed_headline_spec> headlines_new;
 
-    http http_handler;
+        int headlines_old_size = headlines_old.size();
 
-    if(http_handler.check_url_is_http(feed_name.url)) {
-        string rss_feed_document_data;
+        http http_handler;
 
-        /*Expect an XML document representing the latest news feed.*/
-        http_handler.get_stream(feed_name.url, rss_feed_document_data);
+        if(http_handler.check_url_is_http(feed_name.url)) {
+            string rss_feed_document_data;
 
-        if(!rss_feed_document_data.empty()) {
-            headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
-        }
-    }
+            /*Expect an XML document representing the latest news feed.*/
+            http_handler.get_stream(feed_name.url, rss_feed_document_data);
 
-    for (news::rss_data_feed_headline_spec headline_new : headlines_new) {
-        string headline_n = headline_new.headline;
-
-        bool headline_old_found = false;
-
-        for (news::rss_data_feed_headline_spec headline_old : headlines_old) {
-            string headline_o = headline_old.headline;
-
-            headline_old_found =  (headline_n == headline_o);
-
-            if (headline_old_found) {
-                break;
+            if(!rss_feed_document_data.empty()) {
+                headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
             }
         }
 
-        if (!headline_old_found) {
-            fh_set.add(headline_new);
-            fh_set_old.add(headline_new);
+        for (news::rss_data_feed_headline_spec headline_new : headlines_new) {
+            string headline_n = headline_new.headline;
+
+            bool headline_old_found = false;
+
+            for (news::rss_data_feed_headline_spec headline_old : headlines_old) {
+                string headline_o = headline_old.headline;
+
+                headline_old_found =  (headline_n == headline_o);
+
+                if (headline_old_found) {
+                    break;
+                }
+            }
+
+            if (!headline_old_found) {
+                fh_set.add(headline_new);
+                fh_set_old.add(headline_new);
+            }
         }
-    }
 
-    headlines_old = fh_set_old.get_specs();
+        headlines_old = fh_set_old.get_specs();
 
-    if(!headlines_new.empty() && headlines_old_size != headlines_old.size()) {
-        /*If this works right, the data will be added.*/
-        save_set(feed_name, fh_set);
+        if(!headlines_new.empty() && headlines_old_size != headlines_old.size()) {
+            /*If this works right, the data will be added.*/
+            save_set(feed_name, fh_set);
+        }
     }
 
     return fh_set_old;
