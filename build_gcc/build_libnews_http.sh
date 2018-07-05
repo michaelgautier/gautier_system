@@ -14,3 +14,4 @@ g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_http.o ..
 g++ -g -shared -lPocoFoundation -lPocoUtil -lPocoNet -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
 
 ls -gGh bin/libnews_http*
+

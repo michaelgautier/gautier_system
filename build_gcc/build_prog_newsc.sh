@@ -6,6 +6,9 @@
 #Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
 #POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors; 
 #C++ Standard Library; Copyright 2018 Standard C++ Foundation.
+
+reset
+
 ./build_libnews_rss.sh
 
 echo "Building newsc"
