@@ -50,6 +50,10 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 void cls::init(const string& file_location) {
     _file_location = file_location;
 
+    Poco::DateTime date_nineteen_hundred(1900, 1, 1);
+    
+    _file_last_write_time = date_nineteen_hundred.timestamp();
+
     Poco::File rss_file(_file_location);
 
     if(rss_file.exists() && rss_file.isFile()) {
@@ -69,7 +73,6 @@ bool cls::get_can_feed_refresh() {
     Poco::Timespan rss_file_time_diff_system_time = system_time - rss_file_original_time;
 
     int hours = rss_file_time_diff_system_time.hours();
-    int minutes = rss_file_time_diff_system_time.minutes();
 
     /*
             cout << "rss headline file time " << Poco::DateTimeFormatter::format(rss_file_original_time, "%dd %H:%M:%S.%i") << "\n";
@@ -79,7 +82,7 @@ bool cls::get_can_feed_refresh() {
     cout << "difference in hours/minutes since last refresh " << rss_file_time_diff_system_time.hours() << " " << rss_file_time_diff_system_time.minutes() << "\n";
 
     //Only refresh rss feed no earlier than once an hour.
-    can_refresh = hours > 0 && minutes > 0;
+    can_refresh = hours > 0;
 
     return can_refresh;
 }
@@ -162,7 +165,7 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
             }
         }
 
-        for (news::rss_data_feed_headline_spec headline_new : headlines_new) {
+        for(news::rss_data_feed_headline_spec headline_new : headlines_new) {
             string headline_n = headline_new.headline;
 
             bool headline_old_found = false;
@@ -170,7 +173,7 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
             for (news::rss_data_feed_headline_spec headline_old : headlines_old) {
                 string headline_o = headline_old.headline;
 
-                headline_old_found =  (headline_n == headline_o);
+                headline_old_found = (headline_n == headline_o);
 
                 if (headline_old_found) {
                     break;
