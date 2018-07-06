@@ -51,7 +51,7 @@ void cls::init(const string& file_location) {
     _file_location = file_location;
 
     Poco::DateTime date_nineteen_hundred(1900, 1, 1);
-    
+
     _file_last_write_time = date_nineteen_hundred.timestamp();
 
     Poco::File rss_file(_file_location);
@@ -142,15 +142,11 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
 
 /*Primary logic for rss feed retrieval.*/
 news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& feed_name) {
-    news::rss_set_feed_headline fh_set_old = get_set(feed_name);
+    news::rss_set_feed_headline fh_set = get_set(feed_name);
 
     if(get_can_feed_refresh()) {
-        news::rss_set_feed_headline fh_set;
-
-        vector<news::rss_data_feed_headline_spec> headlines_old = fh_set_old.get_specs();
+        vector<news::rss_data_feed_headline_spec> headlines_old = fh_set.get_specs();
         vector<news::rss_data_feed_headline_spec> headlines_new;
-
-        int headlines_old_size = headlines_old.size();
 
         http http_handler;
 
@@ -182,19 +178,16 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
 
             if (!headline_old_found) {
                 fh_set.add(headline_new);
-                fh_set_old.add(headline_new);
             }
         }
 
-        headlines_old = fh_set_old.get_specs();
-
-        if(!headlines_new.empty() && headlines_old_size != headlines_old.size()) {
+        if(!headlines_new.empty()) {
             /*If this works right, the data will be added.*/
             save_set(feed_name, fh_set);
         }
     }
 
-    return fh_set_old;
+    return fh_set;
 }
 
 news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& feed_name, news::rss_set_feed_headline& rss_set) {
