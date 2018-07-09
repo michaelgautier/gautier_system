@@ -41,7 +41,10 @@ void cls::get_stream(string url, string& output) {
     HTTPClientSession http_session(request_uri.getHost(), request_uri.getPort());
 
     HTTPRequest http_request(request_method, url);
-    http_request.set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)");
+    http_request.set("user-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0");
+    http_request.set("header", "Accept: text/plain");
+    http_request.set("header", "Connection: keep-alive");
+    http_request.set("robots", "off");
 
     try {
         http_session.sendRequest(http_request);
@@ -54,10 +57,7 @@ void cls::get_stream(string url, string& output) {
 
         filehandler.read_istream_into_string(temp_http_response_stream, output);
     } catch(const exception e) {
-        const string exception_explanation(e.what());
-        if(exception_explanation == "Host not found") {
-            cout << e.what() << " " << "reverting to offline copy if available.\n";
-        }
+        cout << e.what() << " " << __FILE__ << " " << __func__ << " " << __LINE__ << "\n";
     }
 
     return;
