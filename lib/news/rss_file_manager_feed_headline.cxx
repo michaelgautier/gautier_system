@@ -165,17 +165,6 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
 
                 headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
             }
-
-            /*else if (feed_name.name == "TechCrunch") {
-
-                string rss_data_location = feed_name.name + "_temp";
-
-                rss_techconstruct::file rssfile;
-                rssfile.get_stream(string(rss_data_location), rss_feed_document_data);
-
-                headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
-
-            }*/
         }
 
         for(news::rss_data_feed_headline_spec headline_new : headlines_new) {
