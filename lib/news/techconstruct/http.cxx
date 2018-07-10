@@ -42,7 +42,7 @@ void cls::get_stream(string url, string& output) {
 
     HTTPRequest http_request(request_method, url);
     http_request.set("user-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0");
-    http_request.set("header", "Accept: text/plain");
+    http_request.set("header", "Accept: text/plain, text/xml, application/xhtml+xml, application/xml");
     http_request.set("header", "Connection: keep-alive");
     http_request.set("robots", "off");
 
