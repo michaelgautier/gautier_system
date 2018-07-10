@@ -44,7 +44,7 @@ using namespace Poco;
 using cls = news::rss_file_manager_feed_headline;
 using http = rss_techconstruct::http;
 
-void process_node(Node* node, vector<news::rss_data_feed_headline_spec>& v);
+void process_node(const news::rss_data_feed_name_spec& feed_name, Node* node, vector<news::rss_data_feed_headline_spec>& v);
 vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument);
 
 void cls::init(const string& file_location) {
@@ -157,8 +157,25 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
             http_handler.get_stream(feed_name.url, rss_feed_document_data);
 
             if(!rss_feed_document_data.empty()) {
+                string rss_data_location = feed_name.name + "_temp";
+
+                rss_techconstruct::file rssfile;
+                rssfile.erase_stream(string(rss_data_location));
+                rssfile.persist_stream(string(rss_data_location), rss_feed_document_data);
+
                 headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
             }
+
+            /*else if (feed_name.name == "TechCrunch") {
+
+                string rss_data_location = feed_name.name + "_temp";
+
+                rss_techconstruct::file rssfile;
+                rssfile.get_stream(string(rss_data_location), rss_feed_document_data);
+
+                headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
+
+            }*/
         }
 
         for(news::rss_data_feed_headline_spec headline_new : headlines_new) {
@@ -219,62 +236,7 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 
         Document* xdoc = reader.parseString(newsdocument);
 
-        Element* root = xdoc->documentElement();
-
-        Node* currentnode = root->firstChild();
-
-        /*
-                Process:        CONVERT RSS XML TO SEQUENTIAL STRUCTURE
-                Overview:       Translate multi-level Xml hierarchy into a 1-dimensional array
-                Strategies:
-                                Algorithmic approach - Branch and Bound (see Wladston, Ferreira, Filho 2018)
-                                Replace structure processing by recursion with structure processing by iteration
-                                Visits tree nodes through a bounded general graph search algorithm represented as a breadth first search
-                History
-                                9/30/2018 - Implemented as a conventional recursive algorithm. Termination criteria based on
-                                visiting the last node at the first level. The linear array was populated based on all field
-                                values set on a structured passed across recursive function calls.
-                                11/3/2018 - Replaced the recursive process with an iteration modeled on processing a doublely linked list.
-                Notes           Approach was chosen for the following reasons
-                                - Avoid large function call stack accumulations in the event a larger document is input
-                                - Fill output data structures based on the proximity of input elements rather than just their tag values
-                                - Node proximity better determined while eliminating the need to forward a level indicator
-        */
-        while(currentnode != nullptr) {
-            auto type = currentnode->nodeType();
-            string name = Poco::toLower(currentnode->localName());
-
-            if(name == "item" && type == Node::ELEMENT_NODE) {
-                v.emplace_back(news::rss_data_feed_headline_spec());
-
-                news::rss_data_feed_headline_spec* news = &v.back();
-                news->feed_name = feed_name;
-            }
-
-            if(currentnode->hasChildNodes()) {
-                process_node(currentnode, v);
-
-                Node* nextnode = currentnode->firstChild();
-
-                currentnode = nextnode;
-
-                continue;
-            }
-
-            Node* nextnode = currentnode->nextSibling();
-
-            if(nextnode != nullptr) {
-                currentnode = nextnode;
-            } else {
-                currentnode = currentnode->parentNode();
-
-                if(currentnode != nullptr) {
-                    currentnode = currentnode->nextSibling();
-                } else {
-                    currentnode = nullptr;
-                }
-            }
-        }
+        process_node(feed_name, xdoc->documentElement(), v);
     } catch(SAXParseException e) {
         cout << e.name() << " File " << __FILE__ << " Line " << __LINE__ << " in function " << __func__ << "\n";
         cout << "\t" << e.what() << "\n";
@@ -286,26 +248,72 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
     return v;
 }
 
-void process_node(Node* node, vector<news::rss_data_feed_headline_spec>& v) {
-    auto type = node->nodeType();
+void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
+    Node* currentnode = parentnode;
 
-    if(!v.empty() && type == Node::ELEMENT_NODE) {
-        news::rss_data_feed_headline_spec* news = &v.back();
+    while(currentnode != nullptr) {
+        auto type = currentnode->nodeType();
 
-        string name = Poco::toLower(node->localName());
-        string text = node->innerText();
+        if(type == Node::ELEMENT_NODE) {
+            string name = Poco::toLower(currentnode->localName());
+            string text = currentnode->innerText();
 
-        if(name == "title") {
-            news->headline = text;
-        } else if(name == "link") {
-            news->url = text;
-        } else if(name == "description") {
-            news->description = text;
-        } else if(name == "pub_date" || name == "pubdate") {
-            news->article_date = text;
-        }/* else if(name == "encoded") { description should suffice
-            news->content = text;
-        }*/
+            //cout << "node name: " << name << "\n";
+            //cout << "  text: " << text << "\n";
+
+            news::rss_data_feed_headline_spec* news = &v.back();
+
+            if(name == "item") {
+                v.emplace_back(news::rss_data_feed_headline_spec());
+
+                news = &v.back();
+                news->feed_name = feed_name;
+            }
+
+            if(news && !v.empty()) {
+                if(name == "title") {
+                    news->headline = text;
+                } else if(name == "link") {
+                    news->url = text;
+                } else if(name == "description") {
+                    news->description = text;
+                } else if(name == "pub_date" || name == "pubdate") {
+                    news->article_date = text;
+                }
+            }
+        } else {
+            currentnode = currentnode->nextSibling();
+
+            continue;
+        }
+
+        if(currentnode->hasChildNodes()) {
+            Node* previousnode = currentnode;
+
+            NodeList* nodes = currentnode->childNodes();
+
+            auto node_size = nodes->length();
+
+            //cout << "   node size " << node_size << "\n";
+
+            for(decltype(node_size) node_index = 0; node_index < node_size; node_index++) {
+                currentnode = nodes->item(node_index);
+
+                //cout << "               current node " << node_index << "\n";
+
+                type = currentnode->nodeType();
+
+                if(type == Node::ELEMENT_NODE) {
+                    process_node(feed_name, currentnode, v);
+                }
+            }
+
+            currentnode = previousnode;
+        }
+
+        currentnode = currentnode->nextSibling();
+
+        //cout << "                       next sibling\n";
     }
 
     return;
