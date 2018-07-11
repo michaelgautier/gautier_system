@@ -44,6 +44,8 @@ using namespace Poco;
 using cls = news::rss_file_manager_feed_headline;
 using http = rss_techconstruct::http;
 
+const string _headline_node_name = "item";
+
 void process_node(const news::rss_data_feed_name_spec& feed_name, Node* node, vector<news::rss_data_feed_headline_spec>& v);
 vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument);
 
@@ -184,6 +186,8 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
 
             if (!headline_old_found) {
                 fh_set.add(headline_new);
+
+                headlines_old.push_back(headline_new);
             }
         }
 
@@ -240,26 +244,28 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
     Node* currentnode = parentnode;
 
+    const bool parentnode_is_item = (parentnode && Poco::toLower(parentnode->localName()) == _headline_node_name);
+
     while(currentnode != nullptr) {
         auto type = currentnode->nodeType();
 
         if(type == Node::ELEMENT_NODE) {
-            string name = Poco::toLower(currentnode->localName());
-            string text = currentnode->innerText();
+            const string name = Poco::toLower(currentnode->localName());
+            const string text = currentnode->innerText();
 
             //cout << "node name: " << name << "\n";
             //cout << "  text: " << text << "\n";
 
             news::rss_data_feed_headline_spec* news = &v.back();
 
-            if(name == "item") {
+            if(name == _headline_node_name) {
                 v.emplace_back(news::rss_data_feed_headline_spec());
 
                 news = &v.back();
                 news->feed_name = feed_name;
             }
 
-            if(news && !v.empty()) {
+            if(parentnode_is_item && news && !v.empty()) {
                 if(name == "title") {
                     news->headline = text;
                 } else if(name == "link") {
@@ -281,11 +287,11 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
 
             NodeList* nodes = currentnode->childNodes();
 
-            auto node_size = nodes->length();
+            const int node_size = nodes->length();
 
             //cout << "   node size " << node_size << "\n";
 
-            for(decltype(node_size) node_index = 0; node_index < node_size; node_index++) {
+            for(int node_index = 0; node_index < node_size; node_index++) {
                 currentnode = nodes->item(node_index);
 
                 //cout << "               current node " << node_index << "\n";
