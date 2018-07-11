@@ -242,30 +242,43 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 }
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
-    Node* currentnode = parentnode;
+    const string parentnode_name = (parentnode ? Poco::toLower(parentnode->localName()) : "");
+    const bool parentnode_is_item = (parentnode && parentnode_name == _headline_node_name);
 
-    const bool parentnode_is_item = (parentnode && Poco::toLower(parentnode->localName()) == _headline_node_name);
+    if(parentnode->hasChildNodes()) {
+        NodeList* nodes = parentnode->childNodes();
 
-    while(currentnode != nullptr) {
-        auto type = currentnode->nodeType();
+        const int node_size = nodes->length();
 
-        if(type == Node::ELEMENT_NODE) {
-            const string name = Poco::toLower(currentnode->localName());
-            const string text = currentnode->innerText();
+        //cout << "   node size " << node_size << "\n";
+
+        for(int node_index = 0; node_index < node_size; node_index++) {
+            Node* childnode = nodes->item(node_index);
+
+            const auto childnode_type = childnode->nodeType();
+
+            if(childnode_type != Node::ELEMENT_NODE) {
+                continue;
+            }
+
+            //cout << "               current node " << node_index << "\n";
+
+            const string name = Poco::toLower(childnode->localName());
 
             //cout << "node name: " << name << "\n";
-            //cout << "  text: " << text << "\n";
-
-            news::rss_data_feed_headline_spec* news = &v.back();
 
             if(name == _headline_node_name) {
                 v.emplace_back(news::rss_data_feed_headline_spec());
 
-                news = &v.back();
+                news::rss_data_feed_headline_spec* news = &v.back();
                 news->feed_name = feed_name;
-            }
+            } else if(parentnode_is_item && !v.empty()) {
+                news::rss_data_feed_headline_spec* news = &v.back();
 
-            if(parentnode_is_item && news && !v.empty()) {
+                const string text = childnode->innerText();
+
+                //cout << "  text: " << text << "\n";
+
                 if(name == "title") {
                     news->headline = text;
                 } else if(name == "link") {
@@ -276,39 +289,11 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
                     news->article_date = text;
                 }
             }
-        } else {
-            currentnode = currentnode->nextSibling();
 
-            continue;
-        }
-
-        if(currentnode->hasChildNodes()) {
-            Node* previousnode = currentnode;
-
-            NodeList* nodes = currentnode->childNodes();
-
-            const int node_size = nodes->length();
-
-            //cout << "   node size " << node_size << "\n";
-
-            for(int node_index = 0; node_index < node_size; node_index++) {
-                currentnode = nodes->item(node_index);
-
-                //cout << "               current node " << node_index << "\n";
-
-                type = currentnode->nodeType();
-
-                if(type == Node::ELEMENT_NODE) {
-                    process_node(feed_name, currentnode, v);
-                }
+            if(childnode->hasChildNodes()) {
+                process_node(feed_name, childnode, v);
             }
-
-            currentnode = previousnode;
         }
-
-        currentnode = currentnode->nextSibling();
-
-        //cout << "                       next sibling\n";
     }
 
     return;
