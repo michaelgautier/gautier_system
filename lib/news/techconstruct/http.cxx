@@ -2,11 +2,6 @@
 #include <iostream>
 
 #include <Poco/String.h>
-//#include <Poco/URI.h>
-//#include <Poco/Net/HTTPClientSession.h>
-//#include <Poco/Net/HTTPSClientSession.h>
-//#include <Poco/Net/HTTPRequest.h>
-//#include <Poco/Net/HTTPResponse.h>
 
 /*
         C language API for libcurl
@@ -41,6 +36,13 @@ bool cls::check_url_is_http(string url) {
     return result;
 }
 
+/*
+   7/12/2018 1:45AM - Now using cURL.
+   POCO C++ libraries - HTTPSClientSession did not handle ssl well out of the box.
+   The following code was taken 99% verbatim from the cURL Everything pdf published on the curl website http://haxx.se.
+   
+   It is primarily C language code rather than C++ but it works perfectly.
+*/
 struct MemoryStruct {
     char *memory;
     size_t size;
@@ -68,6 +70,14 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 }
 
 void cls::get_stream(string url, string& output) {
+    /*
+       7/12/2018 1:45AM - Based on the actual libcurl example C code shown on https://ec.haxx.se/ on this date.
+       At this time the relevant pages are:
+       
+       https://ec.haxx.se/libcurlexamples.html
+       https://ec.haxx.se/libcurl-http-requests.html
+    */
+
     curl_global_init(CURL_GLOBAL_ALL);
 
     auto curl_client = curl_easy_init();
@@ -119,79 +129,3 @@ void cls::get_stream(string url, string& output) {
 
     return;
 }
-
-//POCO C++ library does not work as well as libcurl
-
-//POCO C++ library does not handle HTTPS  port 443   consistently well across system environments
-//void cls::get_stream(string url, string& output) {
-//    URI request_uri(url);
-
-//    HTTPClientSession* http_session = new HTTPClientSession(request_uri.getHost());
-
-//    HTTPRequest http_request("GET", url);
-
-//    http_request.set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0");
-//    http_request.set("Accept", "application/xhtml+xml, application/xml");
-//    http_request.set("Connection", "keep-alive");
-//    http_request.set("Cache-Control", "max-age=0");
-//    http_request.set("Accept-Encoding", "br");
-//    http_request.set("Upgrade-Insecure-Requests", "0");
-//    http_request.set("Robots", "off");
-
-//    const Context::Ptr context = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_RELAXED, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-
-//    const int found_string_comparison_https = icompare(url, 0, 5, "https");
-
-//    if(found_string_comparison_https == 0) {
-//        /*
-//        Verify ssl on the operating system platform using OpenSSL
-
-//        Phoronix.com is inaccessible through POCO C++ libraries on 7/10/2018. The response is still encoded without corresponding cipher decode to plain-text.
-//        Cannot use standard http with phoronix.com as the server issues a 301 http status code indicating the url is permanently set to https.
-
-//        Tested https://www.phoronix.com using command-line open ssl s_client -tls1 -status parameters and the results showed invalid.
-//        Of course Mozilla Firefox has mitigations built-in but the POCO C++ library cannot handle the scenario.
-
-//        Google's lets encrypt everywhere initiative does not work across the board.
-//        Anyway, the SSL code is here in case things change. Pickup where I left off.
-
-//        https://stackoverflow.com/questions/17354101/trouble-getting-poco-httpsclientsession-to-send-a-request-certificate-verify-f
-
-//        */
-//        Poco::Net::initializeSSL();
-
-//        http_session = new HTTPSClientSession(request_uri.getHost(), request_uri.getPort(), context);
-
-//        http_request.setMethod("POST");
-//        http_request.setContentLength(0);
-//        http_request.setContentType("application/x-www-form-urlencoded\r\n");
-//        http_request.setChunkedTransferEncoding(false);
-//    }
-
-//    try {
-//        http_session->sendRequest(http_request);
-
-//        HTTPResponse http_response;
-
-//        istream& temp_http_response_stream = http_session->receiveResponse(http_response);
-
-//        auto http_status_code = http_response.getStatus();
-
-//        if(http_status_code != 200) {
-//            cout << url << " http response " << http_status_code << " " << http_response.getReason() << " " << http_response.getReasonForStatus(http_status_code) << "\n";
-//        }
-
-//        cls_fs filehandler;
-
-//        filehandler.read_istream_into_string(temp_http_response_stream, output);
-//    } catch(const exception e) {
-//        cout << e.what() << " " << __FILE__ << " " << __func__ << " " << __LINE__ << "\n";
-//    }
-
-//    if(http_session) {
-//        delete http_session;
-//    }
-
-//    return;
-//}
-
