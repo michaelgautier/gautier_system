@@ -14,7 +14,6 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2018, Ap
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include <ctime>
-#include <time.h>
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>

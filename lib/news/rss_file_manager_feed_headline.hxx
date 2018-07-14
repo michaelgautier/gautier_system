@@ -22,8 +22,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <map>
 #include <functional>
 
-#include <Poco/Timestamp.h>
-
 #include "rss_set_feed_headline.hxx"
 #include "rss_data_feed_name_spec.hxx"
 #include "rss_set_consequence.hxx"
@@ -33,7 +31,6 @@ using namespace std;
 class rss_file_manager_feed_headline {
   private:
     string _file_location;
-    Poco::Timestamp _file_last_write_time;
 
     const string _tab_char = "\t";
     const string _comment_char = "#";
