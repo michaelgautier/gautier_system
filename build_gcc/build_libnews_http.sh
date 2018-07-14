@@ -11,7 +11,6 @@ rm obj/libnews_http.o
 echo "build http lib"
 
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_http.o ../lib/news/techconstruct/http.cxx
-g++ -g -shared -lPocoFoundation -lPocoUtil -lcurl -Wl,-rpath,. -o bin/libnews_http.so obj/libnews_http.o
 
-ls -gGh bin/libnews_http*
+ls -gGh obj/libnews_http*
 

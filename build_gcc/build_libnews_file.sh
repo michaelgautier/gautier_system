@@ -11,7 +11,6 @@ rm obj/libnews_file.o
 echo "build file lib"
 
 g++ -std=c++14 -c -fPIC -g -I../lib/news/techconstruct/ -o obj/libnews_file.o ../lib/news/techconstruct/file.cxx
-g++ -g -shared -lPocoFoundation -Wl,-rpath,. -o bin/libnews_file.so obj/libnews_file.o
 
-ls -gGh bin/libnews_file*
+ls -gGh obj/libnews_file*
 
