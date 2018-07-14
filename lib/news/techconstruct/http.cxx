@@ -40,7 +40,7 @@ bool cls::check_url_is_http(string url) {
    7/12/2018 1:45AM - Now using cURL.
    POCO C++ libraries - HTTPSClientSession did not handle ssl well out of the box.
    The following code was taken 99% verbatim from the cURL Everything pdf published on the curl website http://haxx.se.
-   
+
    It is primarily C language code rather than C++ but it works perfectly.
 */
 struct MemoryStruct {
@@ -73,13 +73,15 @@ void cls::get_stream(string url, string& output) {
     /*
        7/12/2018 1:45AM - Based on the actual libcurl example C code shown on https://ec.haxx.se/ on this date.
        At this time the relevant pages are:
-       
+
        https://ec.haxx.se/libcurlexamples.html
        https://ec.haxx.se/libcurl-http-requests.html
     */
 
+    /*Startup*/
     curl_global_init(CURL_GLOBAL_ALL);
 
+    /*HTTP Request*/
     auto curl_client = curl_easy_init();
 
     if(curl_client) {
@@ -89,15 +91,17 @@ void cls::get_stream(string url, string& output) {
         /* will be grown as needed by the realloc above */
         /* no data at this point */
 
-        auto curl_option_verbose /*debug only option*/ = curl_easy_setopt(curl_client, CURLOPT_VERBOSE, 1L);
-        auto curl_option_method = curl_easy_setopt(curl_client, CURLOPT_HTTPGET, 1L);
-        auto curl_option_url = curl_easy_setopt(curl_client, CURLOPT_URL, string(url).data());
+        /*debug only option*/
+        curl_easy_setopt(curl_client, CURLOPT_VERBOSE, 1L);
+
+        curl_easy_setopt(curl_client, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl_client, CURLOPT_URL, string(url).data());
 
         /* send all data to this function*/
-        auto curl_option_writefunction = curl_easy_setopt(curl_client, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        curl_easy_setopt(curl_client, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
         /* we pass our 'chunk' struct to the callback function */
-        auto curl_option_writedata = curl_easy_setopt(curl_client, CURLOPT_WRITEDATA, (void *)&chunk);
+        curl_easy_setopt(curl_client, CURLOPT_WRITEDATA, (void *)&chunk);
 
         /* some servers don't like requests that are made without a user-agent field, so we provide one */
         curl_easy_setopt(curl_client, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0");
@@ -111,20 +115,24 @@ void cls::get_stream(string url, string& output) {
 
         curl_easy_setopt(curl_client, CURLOPT_HTTPHEADER, curl_http_header);
 
+        /*Access the web page*/
         auto curl_response = curl_easy_perform(curl_client);
 
+        /*Check the http response*/
         if(curl_response == CURLE_OK) {
             string response_data(chunk.memory);
 
             output = response_data;
         }
 
+        /*Clean up*/
         curl_slist_free_all(curl_http_header);
         curl_easy_cleanup(curl_client);
 
         free(chunk.memory);
     }
 
+    /*Clean up following startup*/
     curl_global_cleanup();
 
     return;
