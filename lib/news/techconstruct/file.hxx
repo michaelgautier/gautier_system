@@ -33,6 +33,7 @@ class file {
     void read_istream_into_string(istream& input, string& output);
     void read_file_into_string(string location, string& output);
     void read_file_into_string(string location, function<void(string&)> file_callable);
+    void read_file_into_string(string location, function<void(string&,bool&)> file_callable);
 };
 }
 #endif

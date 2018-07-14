@@ -46,6 +46,30 @@ void cls::read_file_into_string(string location, function<void(string&)> file_ca
     return;
 }
 
+void cls::read_file_into_string(string location, function<void(string&,bool&)> file_callable) {
+    ifstream rss_file(location.data());
+
+    if(rss_file.rdstate() == ios_base::goodbit) {
+        bool ended = false;
+
+        while(!rss_file.eof()) {
+            string line;
+
+            getline(rss_file, line);
+
+            file_callable(line,ended);
+
+            if(ended) {
+                break;
+            }
+        }
+    }
+
+    rss_file.close();
+
+    return;
+}
+
 void cls::get_stream(string location, string& output) {
     read_file_into_string(location, output);
 
