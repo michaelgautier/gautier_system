@@ -36,7 +36,8 @@ using namespace Poco::XML;
 using cls = news::rss_file_manager_feed_headline;
 using http = rss_techconstruct::http;
 
-const string _headline_node_name = "item";
+const string _headline_node_name_rss = "item";
+const string _headline_node_name_atom = "entry";
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, Node* node, vector<news::rss_data_feed_headline_spec>& v);
 vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument);
@@ -79,10 +80,10 @@ bool cls::get_can_feed_refresh(const news::rss_data_feed_name_spec& feed_name) {
         }
     };
 
-    if(!last_checked_date_time_string.empty()) {
-        rss_techconstruct::file rssfile;
-        rssfile.read_file_into_string(_file_location, call_rss_line);
+    rss_techconstruct::file rssfile;
+    rssfile.read_file_into_string(_file_location, call_rss_line);
 
+    if(!last_checked_date_time_string.empty()) {
         auto last_checked_date_time_seconds_l = stoll(last_checked_date_time_string);
 
         auto last_checked_date_time_seconds_t = (time_t)last_checked_date_time_seconds_l;
@@ -264,7 +265,11 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
     const string parentnode_name = (parentnode ? Poco::toLower(parentnode->localName()) : "");
-    const bool parentnode_is_item = (parentnode && parentnode_name == _headline_node_name);
+
+    const bool parentnode_is_rss_item = (parentnode_name == _headline_node_name_rss);
+    const bool parentnode_is_atom_entry = (parentnode_name == _headline_node_name_atom);
+
+    const bool parentnode_is_item = (parentnode && (parentnode_is_rss_item || parentnode_is_atom_entry));
 
     if(parentnode->hasChildNodes()) {
         NodeList* nodes = parentnode->childNodes();
@@ -288,7 +293,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
 
             //cout << "node name: " << name << "\n";
 
-            if(name == _headline_node_name) {
+            if(name == _headline_node_name_rss || name == _headline_node_name_atom) {
                 v.emplace_back(news::rss_data_feed_headline_spec());
 
                 news::rss_data_feed_headline_spec* news = &v.back();
@@ -300,14 +305,26 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
 
                 //cout << "  text: " << text << "\n";
 
-                if(name == "title") {
-                    news->headline = text;
-                } else if(name == "link") {
-                    news->url = text;
-                } else if(name == "description") {
-                    news->description = text;
-                } else if(name == "pub_date" || name == "pubdate") {
-                    news->article_date = text;
+                if(parentnode_is_rss_item) {
+                    if(name == "title") {
+                        news->headline = text;
+                    } else if(name == "link") {
+                        news->url = text;
+                    } else if(name == "description") {
+                        news->description = text;
+                    } else if(name == "pub_date" || name == "pubdate") {
+                        news->article_date = text;
+                    }
+                } else if (parentnode_is_atom_entry) {
+                    if(name == "title") {
+                        news->headline = text;
+                    } else if(name == "link") {
+                        news->url = text;
+                    } else if(name == "summary") {
+                        news->description = text;
+                    } else if(name == "published" || name == "updated") {
+                        news->article_date = text;
+                    }
                 }
             }
 
