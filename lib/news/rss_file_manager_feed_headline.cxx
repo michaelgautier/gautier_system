@@ -88,9 +88,13 @@ bool cls::get_can_feed_refresh(const news::rss_data_feed_name_spec& feed_name) {
 
         auto last_checked_date_time_seconds_t = (time_t)last_checked_date_time_seconds_l;
 
+        string last_checked_date_time_str = asctime(localtime(&last_checked_date_time_seconds_t));
+
         auto last_checked_date_time = ctime(&last_checked_date_time_seconds_t);
 
         auto current_time_t = time(NULL);
+
+        string current_time_str = asctime(localtime(&current_time_t));
 
         auto current_time = ctime(&current_time_t);
 
@@ -98,8 +102,8 @@ bool cls::get_can_feed_refresh(const news::rss_data_feed_name_spec& feed_name) {
 
         cout
                 << feed_name.name << "\n"
-                << "\tLast checked: " << last_checked_date_time << " "
-                << "\tCurrent time: " << current_time << " "
+                << "\tLast checked: " << last_checked_date_time_str << " "
+                << "\tCurrent time: " << current_time_str << " "
                 << "\tSeconds since last update: " << elapsed_seconds << " \n";
 
         //Only refresh rss feed no earlier than once an hour = 3,600 seconds.
