@@ -275,7 +275,7 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 }
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
-    const string parentnode_name = (parentnode ? Poco::toLower(string((char*)parentnode->name)) : "");
+    const string parentnode_name = (parentnode ? Poco::toLower(string(reinterpret_cast<const char*>(parentnode->name))) : "");
 
     const bool parentnode_is_rss_item = (parentnode_name == _headline_node_name_rss);
     const bool parentnode_is_atom_entry = (parentnode_name == _headline_node_name_atom);
@@ -292,11 +292,9 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* paren
                 continue;
             }
 
-            //cout << "               current node " << node_index << "\n";
+            const string name = Poco::toLower(string(reinterpret_cast<const char*>(childnode->name)));
 
-            const string name = Poco::toLower(string((char*)childnode->name));
-
-            //cout << "node name: " << name << "\n";
+            cout << "node name: " << name << "\n";
 
             if(name == _headline_node_name_rss || name == _headline_node_name_atom) {
                 v.emplace_back(news::rss_data_feed_headline_spec());
@@ -306,7 +304,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* paren
             } else if(parentnode_is_item && !v.empty()) {
                 news::rss_data_feed_headline_spec* news = &v.back();
 
-                const string text = string((char*)childnode->content);
+                const string text = string(reinterpret_cast<const char*>(xmlNodeGetContent(childnode)));
 
                 //cout << "  text: " << text << "\n";
 
