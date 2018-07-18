@@ -15,15 +15,10 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include <ctime>
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/NodeList.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <Poco/String.h>
-#include <Poco/SAX/SAXException.h>
-#include <Poco/SAX/InputSource.h>
 
 #include "rss_file_manager_feed_headline.hxx"
 
@@ -31,7 +26,6 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include "techconstruct/file.hxx"
 
 using namespace std;
-using namespace Poco::XML;
 
 using cls = news::rss_file_manager_feed_headline;
 using http = rss_techconstruct::http;
@@ -39,7 +33,7 @@ using http = rss_techconstruct::http;
 const string _headline_node_name_rss = "item";
 const string _headline_node_name_atom = "entry";
 
-void process_node(const news::rss_data_feed_name_spec& feed_name, Node* node, vector<news::rss_data_feed_headline_spec>& v);
+void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* node, vector<news::rss_data_feed_headline_spec>& v);
 vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument);
 
 void cls::init(const string& file_location) {
@@ -191,7 +185,7 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
                 rssfile.erase_stream(string(rss_data_location));
                 rssfile.persist_stream(string(rss_data_location), rss_feed_document_data);
 
-                headlines_new = get_rss_feed(feed_name, rss_feed_document_data);
+                headlines_new = get_rss_feed(feed_name, string(rss_data_location));
             }
         }
 
@@ -249,51 +243,58 @@ news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& fee
 vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument) {
     vector<news::rss_data_feed_headline_spec> v;
 
-    try {
-        DOMParser reader;
-        reader.setEncoding("utf-8");
+    LIBXML_TEST_VERSION
 
-        Document* xdoc = reader.parseString(newsdocument);
+    auto xml_parse_options = (XML_PARSE_RECOVER | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA);
 
-        process_node(feed_name, xdoc->documentElement(), v);
-    } catch(SAXParseException e) {
-        cout << e.name() << " File " << __FILE__ << " Line " << __LINE__ << " in function " << __func__ << "\n";
-        cout << "\t" << e.what() << "\n";
-        cout << "\t" << "Exception: Preceding line " << e.getLineNumber() << "\n";
-        cout << "\t" << e.message() << "\n";
-        cout << "\t" << e.displayText() << "\n";
+    xmlDoc* doc = NULL;
+
+    doc = xmlParseFile(newsdocument.data());
+
+    if(doc) {
+        xmlNode* root_element = NULL;
+
+        /*Get the root element node */
+        root_element = xmlDocGetRootElement(doc);
+
+        process_node(feed_name, root_element, v);
     }
+
+    xmlFreeDoc(doc);
+
+    /*
+     * Cleanup function for the XML library.
+     */
+    xmlCleanupParser();
+    /*
+     * this is to debug memory for regression tests
+     */
+    xmlMemoryDump();
 
     return v;
 }
 
-void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
-    const string parentnode_name = (parentnode ? Poco::toLower(parentnode->localName()) : "");
+void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
+    const string parentnode_name = (parentnode ? Poco::toLower(string((char*)parentnode->name)) : "");
 
     const bool parentnode_is_rss_item = (parentnode_name == _headline_node_name_rss);
     const bool parentnode_is_atom_entry = (parentnode_name == _headline_node_name_atom);
 
     const bool parentnode_is_item = (parentnode && (parentnode_is_rss_item || parentnode_is_atom_entry));
 
-    if(parentnode->hasChildNodes()) {
-        NodeList* nodes = parentnode->childNodes();
+    if(parentnode->children) {
+        xmlNode* childnode = NULL;
 
-        const int node_size = nodes->length();
+        for(childnode = parentnode->children; childnode; childnode = childnode->next) {
+            const auto childnode_type = childnode->type;
 
-        //cout << "   node size " << node_size << "\n";
-
-        for(int node_index = 0; node_index < node_size; node_index++) {
-            Node* childnode = nodes->item(node_index);
-
-            const auto childnode_type = childnode->nodeType();
-
-            if(childnode_type != Node::ELEMENT_NODE) {
+            if(childnode_type != XML_ELEMENT_NODE) {
                 continue;
             }
 
             //cout << "               current node " << node_index << "\n";
 
-            const string name = Poco::toLower(childnode->localName());
+            const string name = Poco::toLower(string((char*)childnode->name));
 
             //cout << "node name: " << name << "\n";
 
@@ -305,7 +306,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
             } else if(parentnode_is_item && !v.empty()) {
                 news::rss_data_feed_headline_spec* news = &v.back();
 
-                const string text = childnode->innerText();
+                const string text = string((char*)childnode->content);
 
                 //cout << "  text: " << text << "\n";
 
@@ -332,7 +333,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, Node* parentno
                 }
             }
 
-            if(childnode->hasChildNodes()) {
+            if(childnode->children) {
                 process_node(feed_name, childnode, v);
             }
         }
