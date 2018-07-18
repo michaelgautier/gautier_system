@@ -31,7 +31,7 @@ g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_set_feed_headline.o
 #File Managers
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -o obj/libnews_rss_file_manager_feed_name.o ../lib/news/rss_file_manager_feed_name.cxx
 
-g++ -std=c++14 -c -fPIC -g -I../lib/news/ -I../lib/news/techconstruct/ -o obj/libnews_rss_file_manager_feed_headline.o ../lib/news/rss_file_manager_feed_headline.cxx
+g++ -std=c++14 -c -fPIC -g -I../lib/news/ -I../lib/news/techconstruct/ `xml2-config --cflags` -o obj/libnews_rss_file_manager_feed_headline.o ../lib/news/rss_file_manager_feed_headline.cxx
 g++ -std=c++14 -c -fPIC -g -I../lib/news/ -I../lib/news/techconstruct/ -o obj/libnews_rss_file_manager_feed_article.o ../lib/news/rss_file_manager_feed_article.cxx
 
 #Feed Cycles
