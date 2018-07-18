@@ -14,38 +14,32 @@ POCO C++ Libraries released under the Boost Software License; Copyright 2018, Ap
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include <iostream>
-#include "rss_file_manager_feed_name.hxx"
-#include "rss_file_manager_feed_headline.hxx"
+#include "rss_cycle_feed_name.hxx"
+#include "rss_cycle_feed_headline.hxx"
 
 using namespace std;
 
 int main() {
     string feed_names_location = "feeds.txt";
 
-    news::rss_file_manager_feed_name file_m_feeds;
+    news::rss_cycle_feed_name file_c_feeds;
 
-    file_m_feeds.init(feed_names_location);
+    file_c_feeds.init(feed_names_location);
 
-    news::rss_set_feed_name rss_feeds_set = file_m_feeds.get_set();
+    news::rss_set_feed_name rss_feeds_set = file_c_feeds.get_feed_names();
 
     vector<news::rss_data_feed_name_spec> rss_feeds = rss_feeds_set.get_specs();
 
-    news::rss_file_manager_feed_headline file_m_headlines;
+    news::rss_cycle_feed_headline file_c_headlines;
 
     for(news::rss_data_feed_name_spec feed_name : rss_feeds) {
         cout << "******** feed: \t " << feed_name.name << "\n\n\n";
 
-        file_m_headlines.init(feed_name.name + ".txt");
+        file_c_headlines.init(feed_name.name + ".txt");
 
-        news::rss_set_feed_headline rss_headlines_set = file_m_headlines.get_set(feed_name);
+        news::rss_set_feed_headline rss_headlines_set = file_c_headlines.get_feed_headlines(feed_name);
 
         vector<news::rss_data_feed_headline_spec> feed_headlines = rss_headlines_set.get_specs();
-
-        if(feed_headlines.empty()) {
-            rss_headlines_set = file_m_headlines.pull_set(feed_name);
-
-            feed_headlines = rss_headlines_set.get_specs();
-        }
 
         for(news::rss_data_feed_headline_spec feed_headline : feed_headlines) {
             string headline = feed_headline.headline;
