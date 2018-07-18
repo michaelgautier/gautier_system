@@ -19,6 +19,5 @@ g++ -lPocoFoundation -lPocoUtil -lPocoXML -lcurl -L./bin -Wl,-rpath,. -o bin/new
 #cp --update ../config/feeds.txt bin
 #cp --update ../config/*.xml bin
 
-ls -gGh obj/newsc*
 ls -gGh bin/newsc*
 
