@@ -294,7 +294,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* paren
 
             const string name = Poco::toLower(string(reinterpret_cast<const char*>(childnode->name)));
 
-            cout << "node name: " << name << "\n";
+            //cout << "node name: " << name << "\n";
 
             if(name == _headline_node_name_rss || name == _headline_node_name_atom) {
                 v.emplace_back(news::rss_data_feed_headline_spec());
