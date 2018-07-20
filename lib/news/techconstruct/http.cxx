@@ -14,27 +14,9 @@
 #include "file.hxx"
 
 using namespace std;
-using namespace Poco;
-//using namespace Poco::Net;
 
 using cls = rss_techconstruct::http;
 using cls_fs = rss_techconstruct::file;
-
-bool cls::check_url_is_http(string url) {
-    bool result = false;
-
-    int found_string_comparison_http = icompare(url, 0, 4, "http");
-
-    result = (found_string_comparison_http == 0);
-
-    if(!result) {
-        int found_string_comparison_https = icompare(url, 0, 5, "https");
-
-        result = (found_string_comparison_https == 0);
-    }
-
-    return result;
-}
 
 /*
    7/12/2018 1:45AM - Now using cURL.
@@ -69,7 +51,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
     return realsize;
 }
 
-void cls::get_stream(string url, string& output) {
+void cls::get_stream(const string& url, string& output) {
     /*
        7/12/2018 1:45AM - Based on the actual libcurl example C code shown on https://ec.haxx.se/ on this date.
        At this time the relevant pages are:

@@ -23,8 +23,7 @@ namespace rss_techconstruct {
 using namespace std;
 class http {
   public:
-    bool check_url_is_http(string url);
-    void get_stream(string url, string& output);
+    void get_stream(const string& url, string& output);
 };
 }
 #endif
