@@ -30,7 +30,7 @@ class rss_set_feed_headline {
     vector<rss_data_feed_headline_spec> _set;
   public:
     string last_checked_date_time_string;
-    void add(const rss_data_feed_headline_spec spec);
+    bool add(const rss_data_feed_headline_spec spec);
     vector<rss_data_feed_headline_spec> get_specs();
 };
 }

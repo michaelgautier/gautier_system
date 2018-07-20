@@ -18,10 +18,29 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_set_feed_headline;
 
-void cls::add(const news::rss_data_feed_headline_spec spec) {
-    _set.push_back(spec);
+bool cls::add(const news::rss_data_feed_headline_spec spec) {
+    const string headline_n = spec.headline;
 
-    return;
+    bool spec_found = false;
+    bool spec_added = false;
+
+    for (news::rss_data_feed_headline_spec spec_current : _set) {
+        const string headline_o = spec_current.headline;
+
+        spec_found = (headline_n == headline_o);
+
+        if (spec_found) {
+            break;
+        }
+    }
+
+    if (!spec_found) {
+        _set.push_back(spec);
+
+        spec_added = true;
+    }
+
+    return spec_added;
 }
 
 vector<news::rss_data_feed_headline_spec> cls::get_specs() {
