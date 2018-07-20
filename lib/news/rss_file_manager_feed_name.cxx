@@ -33,14 +33,14 @@ news::rss_set_feed_name cls::get_set() {
             return;
         }
 
-        auto tab_pos = data.find_first_of(_tab_char, 0);
+        const auto tab_pos = data.find_first_of(_tab_char, 0);
 
         if(tab_pos == string::npos) {
             return;
         }
 
-        string name = data.substr(0, tab_pos);
-        string url = data.substr(tab_pos+1);
+        const string name = data.substr(0, tab_pos);
+        const string url = data.substr(tab_pos+1);
 
         news::rss_data_feed_name_spec spec;
 

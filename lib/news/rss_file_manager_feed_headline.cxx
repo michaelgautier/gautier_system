@@ -34,7 +34,7 @@ const string _headline_node_name_rss = "item";
 const string _headline_node_name_atom = "entry";
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* node, vector<news::rss_data_feed_headline_spec>& v);
-vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument);
+vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, const string& newsdocument);
 
 void cls::init(const string& file_location) {
     _file_location = file_location;
@@ -54,15 +54,15 @@ bool cls::get_can_feed_refresh(const news::rss_data_feed_name_spec& feed_name) {
         }
 
         //At least 1 tab expected most lines
-        auto tab_pos = data.find_first_of(_tab_char, 0);
+        const auto tab_pos = data.find_first_of(_tab_char, 0);
 
-        string first_char = data.substr(0, 1);
+        const string first_char = data.substr(0, 1);
 
         if(first_char == _comment_char) {
             return;
         } else if (first_char == _feedname_start_char) {
-            string name = data.substr(1, tab_pos-1);
-            string last_checked_date_time = data.substr(tab_pos+1);
+            const string name = data.substr(1, tab_pos-1);
+            const string last_checked_date_time = data.substr(tab_pos+1);
 
             feed_match = (feed_name.name == name);
 
@@ -78,21 +78,21 @@ bool cls::get_can_feed_refresh(const news::rss_data_feed_name_spec& feed_name) {
     rssfile.read_file_into_string(_file_location, call_rss_line);
 
     if(!last_checked_date_time_string.empty()) {
-        auto last_checked_date_time_seconds_l = stoll(last_checked_date_time_string);
+        const auto last_checked_date_time_seconds_l = stoll(last_checked_date_time_string);
 
-        auto last_checked_date_time_seconds_t = (time_t)last_checked_date_time_seconds_l;
+        const auto last_checked_date_time_seconds_t = (time_t)last_checked_date_time_seconds_l;
 
-        string last_checked_date_time_str = asctime(localtime(&last_checked_date_time_seconds_t));
+        const string last_checked_date_time_str = asctime(localtime(&last_checked_date_time_seconds_t));
 
-        auto last_checked_date_time = ctime(&last_checked_date_time_seconds_t);
+        const auto last_checked_date_time = ctime(&last_checked_date_time_seconds_t);
 
-        auto current_time_t = time(NULL);
+        const auto current_time_t = time(NULL);
 
-        string current_time_str = asctime(localtime(&current_time_t));
+        const string current_time_str = asctime(localtime(&current_time_t));
 
-        auto current_time = ctime(&current_time_t);
+        const auto current_time = ctime(&current_time_t);
 
-        auto elapsed_seconds = difftime(current_time_t, last_checked_date_time_seconds_t);
+        const auto elapsed_seconds = difftime(current_time_t, last_checked_date_time_seconds_t);
 
         cout
                 << feed_name.name << "\n"
@@ -138,9 +138,9 @@ news::rss_set_feed_headline cls::get_set(const news::rss_data_feed_name_spec& fe
                 fh_set.last_checked_date_time_string = last_checked_date_time;
             }
         } else if (feed_match && first_char == _headline_start_char) {
-            string headline = data.substr(1, tab_pos-1);
+            const string headline = data.substr(1, tab_pos-1);
 
-            auto tab_pos_next = data.find_first_of(_tab_char, tab_pos+1);
+            const auto tab_pos_next = data.find_first_of(_tab_char, tab_pos+1);
 
             string url = data.substr(tab_pos+1, tab_pos_next-tab_pos);
             string description = data.substr(tab_pos_next+1);
@@ -167,19 +167,18 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
     news::rss_set_feed_headline fh_set = get_set(feed_name);
 
     if(get_can_feed_refresh(feed_name)) {
-        vector<news::rss_data_feed_headline_spec> headlines_old = fh_set.get_specs();
         vector<news::rss_data_feed_headline_spec> headlines_new;
 
         http http_handler;
 
-        if(http_handler.check_url_is_http(feed_name.url)) {
+        if(!feed_name.url.empty()) {
             string rss_feed_document_data;
 
             /*Expect an XML document representing the latest news feed.*/
             http_handler.get_stream(feed_name.url, rss_feed_document_data);
 
             if(!rss_feed_document_data.empty()) {
-                string rss_data_location = feed_name.name + "_temp";
+                const string rss_data_location = feed_name.name + ".xml";
 
                 rss_techconstruct::file rssfile;
                 rssfile.erase_stream(string(rss_data_location));
@@ -189,30 +188,17 @@ news::rss_set_feed_headline cls::pull_set(const news::rss_data_feed_name_spec& f
             }
         }
 
-        for(news::rss_data_feed_headline_spec headline_new : headlines_new) {
-            string headline_n = headline_new.headline;
+        int added_spec_size = 0;
 
-            bool headline_old_found = false;
+        for(const news::rss_data_feed_headline_spec headline_new : headlines_new) {
+            const bool spec_added = fh_set.add(headline_new);
 
-            for (news::rss_data_feed_headline_spec headline_old : headlines_old) {
-                string headline_o = headline_old.headline;
-
-                headline_old_found = (headline_n == headline_o);
-
-                if (headline_old_found) {
-                    break;
-                }
-            }
-
-            if (!headline_old_found) {
-                fh_set.add(headline_new);
-
-                headlines_old.push_back(headline_new);
+            if(spec_added) {
+                added_spec_size++;
             }
         }
 
-        if(!headlines_new.empty()) {
-            /*If this works right, the data will be added.*/
+        if(added_spec_size > 0) {
             save_set(feed_name, fh_set);
         }
     }
@@ -240,7 +226,7 @@ news::rss_set_consequence cls::save_set(const news::rss_data_feed_name_spec& fee
     return cs;
 }
 
-vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, string newsdocument) {
+vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed_name_spec& feed_name, const string& newsdocument) {
     vector<news::rss_data_feed_headline_spec> v;
 
     LIBXML_TEST_VERSION
