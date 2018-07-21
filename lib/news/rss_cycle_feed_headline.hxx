@@ -30,7 +30,7 @@ namespace news {
 using namespace std;
 class rss_cycle_feed_headline {
   private:
-    rss_set_feed_headline* _set = nullptr;
+    rss_set_feed_headline _set;
     string _file_location;
   public:
     void init(string file_location);

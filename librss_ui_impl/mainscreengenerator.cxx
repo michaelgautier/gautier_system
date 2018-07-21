@@ -34,10 +34,6 @@ cls::mainscreengenerator() {
     return;
 }
 
-cls::~mainscreengenerator() {
-    return;
-}
-
 void cls::init() {
     //Previously had something to init. Leave the interface point in place.
     return;
@@ -454,6 +450,10 @@ void cls::remove_headlines() {
         auto headlinebtn = (Gtk::Button*)headline_items[i];
 
         _headlines->remove(*headlinebtn);
+
+        if(headlinebtn) {
+            delete headlinebtn;
+        }
     }
 
     return;
@@ -558,6 +558,10 @@ void cls::show_headlines() {
 void cls::show_feed_names() {
     if(_feed_names_field) {
         _region_feed_names->remove_with_viewport();
+
+        if(_feed_names_field) {
+            delete _feed_names_field;
+        }
     }
 
     _feed_names_field = new Gtk::Layout();
@@ -744,5 +748,105 @@ bool cls::update_feed_source() {
     }
 
     return feed_sources_updated;
+}
+
+cls::~mainscreengenerator() {
+    if(_region_feed_names) {
+        _region_feed_names->remove_with_viewport();
+
+        delete _region_feed_names;
+    }
+
+    if(_region_feed_edit) {
+        auto region_items = _region_feed_edit->get_children();
+        int region_items_size = region_items.size();
+
+        for(int i = 0; i < region_items_size; i++) {
+            auto region_item = (Gtk::Widget*)region_items[i];
+
+            if(region_item) {
+                _region_feed_edit->remove(*region_item);
+
+                delete region_item;
+            }
+        }
+
+        delete _region_feed_edit;
+    }
+
+    if(_region_content) {
+        _region_content->remove_with_viewport();
+
+        delete _region_content;
+    }
+
+    if(_region_article_summary) {
+        auto region_items = _region_article_summary->get_children();
+        int region_items_size = region_items.size();
+
+        for(int i = 0; i < region_items_size; i++) {
+            auto region_item = (Gtk::Widget*)region_items[i];
+
+            if(region_item) {
+                _region_article_summary->remove(*region_item);
+
+                delete region_item;
+            }
+        }
+
+        delete _region_article_summary;
+    }
+
+    if(_region_headlines) {
+        _region_headlines->remove_with_viewport();
+
+        delete _region_headlines;
+    }
+
+    if(_region_header) {
+        auto region_items = _region_header->get_children();
+        int region_items_size = region_items.size();
+
+        for(int i = 0; i < region_items_size; i++) {
+            auto region_item = (Gtk::Widget*)region_items[i];
+
+            if(region_item) {
+                _region_header->remove(*region_item);
+
+                delete region_item;
+            }
+        }
+
+        delete _region_header;
+    }
+
+    if(_gautier_rss_area) {
+        auto region_items = _gautier_rss_area->get_children();
+        int region_items_size = region_items.size();
+
+        for(int i = 0; i < region_items_size; i++) {
+            auto region_item = (Gtk::Widget*)region_items[i];
+
+            if(region_item) {
+                _gautier_rss_area->remove(*region_item);
+
+                delete region_item;
+            }
+        }
+
+        delete _gautier_rss_area;
+    }
+
+    if(_gautier_rss_window) {
+        auto region_item = _gautier_rss_window->get_child();
+
+        if(region_item) {
+            delete region_item;
+        }
+
+        delete _gautier_rss_window;
+    }
+
+    return;
 }
 

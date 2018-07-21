@@ -21,8 +21,6 @@ using cls = news::rss_cycle_feed_headline;
 void cls::init(string file_location) {
     _file_location = file_location;
 
-    _set = new news::rss_set_feed_headline;
-
     return;
 }
 
@@ -48,7 +46,7 @@ news::rss_set_feed_headline cls::get_feed_headlines(const news::rss_data_feed_na
 
     fhs = fm.pull_set(feed_name);
 
-    _set = &fhs;
+    _set = fhs;
 
     return fhs;
 }
@@ -59,7 +57,7 @@ news::rss_set_consequence cls::set_single_feed_headline(const news::rss_data_fee
 
     //Add the spec to the set.
 
-    news::rss_set_consequence cs = fm.save_set(feed_name, *_set);
+    news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
     return cs;
 }
@@ -70,7 +68,7 @@ news::rss_set_consequence cls::set_multiple_feed_headlines(const news::rss_data_
 
     //Pass along the set.
 
-    news::rss_set_consequence cs = fm.save_set(feed_name, *_set);
+    news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
     return cs;
 }
@@ -81,7 +79,7 @@ news::rss_set_consequence cls::remove_single_feed_headline(const news::rss_data_
 
     //Remove the spec from the set.
 
-    news::rss_set_consequence cs = fm.save_set(feed_name, *_set);
+    news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
     return cs;
 }
@@ -92,7 +90,7 @@ news::rss_set_consequence cls::remove_multiple_feed_headlines(const news::rss_da
 
     //Change and pass along the set.
 
-    news::rss_set_consequence cs = fm.save_set(feed_name, *_set);
+    news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
     return cs;
 }
