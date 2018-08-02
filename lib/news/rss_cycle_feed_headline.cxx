@@ -59,6 +59,12 @@ news::rss_set_consequence cls::set_single_feed_headline(const news::rss_data_fee
 
     news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
+
     return cs;
 }
 
@@ -69,6 +75,12 @@ news::rss_set_consequence cls::set_multiple_feed_headlines(const news::rss_data_
     //Pass along the set.
 
     news::rss_set_consequence cs = fm.save_set(feed_name, _set);
+
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
 
     return cs;
 }
@@ -81,6 +93,12 @@ news::rss_set_consequence cls::remove_single_feed_headline(const news::rss_data_
 
     news::rss_set_consequence cs = fm.save_set(feed_name, _set);
 
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
+
     return cs;
 }
 
@@ -91,6 +109,12 @@ news::rss_set_consequence cls::remove_multiple_feed_headlines(const news::rss_da
     //Change and pass along the set.
 
     news::rss_set_consequence cs = fm.save_set(feed_name, _set);
+
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
 
     return cs;
 }

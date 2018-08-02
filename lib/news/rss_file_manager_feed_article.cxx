@@ -108,6 +108,12 @@ news::rss_set_consequence cls::save_spec(const news::rss_data_feed_article_spec&
     rss_techconstruct::file rssfile;
     rssfile.persist_stream(_file_location, call_rss_line);
 
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
+
     return cs;
 }
 

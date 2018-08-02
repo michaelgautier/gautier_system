@@ -40,6 +40,12 @@ news::rss_set_consequence cls::set_single_feed_article(const news::rss_data_feed
 
     news::rss_set_consequence cs;
 
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
+
     return cs;
 }
 
@@ -50,6 +56,12 @@ news::rss_set_consequence cls::remove_multiple_feed_articles(const news::rss_dat
     //Remove the specs from the set.
 
     news::rss_set_consequence cs;
+
+    news::rss_data_consequence_spec consq;
+    consq.set_catalog_number(1);
+    consq.set_statement("completed");
+
+    cs.add(consq);
 
     return cs;
 }
