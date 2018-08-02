@@ -18,3 +18,22 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_data_consequence_spec;
 
+string cls::get_statement() {
+    return _statement;
+}
+
+void cls::set_statement(const string& ctx_v) {
+    _statement = ctx_v;
+
+    return;
+}
+
+int cls::get_catalog_number() {
+    return _catalog_number;
+}
+
+void cls::set_catalog_number(const int& ctx_v) {
+    _catalog_number = ctx_v;
+
+    return;
+}

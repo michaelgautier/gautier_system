@@ -25,7 +25,14 @@ namespace news {
 using namespace std;
 class rss_data_consequence_spec {
   private:
+    string _statement;
+    int _catalog_number = 80000;
   public:
+    string get_statement();
+    void set_statement(const string& ctx_v);
+
+    int get_catalog_number();
+    void set_catalog_number(const int& ctx_v);
 };
 }
 #endif
