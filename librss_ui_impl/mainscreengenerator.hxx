@@ -69,15 +69,7 @@ class mainscreengenerator {
     void generate();
 
   private:
-    int _feed_index = 0;//Defaults to the first feed, if available;
-    int _headline_index = -1;
-
-    string _feed_names_location = "feeds.txt";
-    vector<news::rss_data_feed_headline_spec> _feed_headlines;
-
-    bool update_feed_source();
-    void get_rss_feed_names_and_articles();
-    void get_screen_wh();
+    bool _inited = false;
 
     Glib::RefPtr<Gtk::CssProvider> _css_provider;
 
@@ -113,6 +105,13 @@ class mainscreengenerator {
         WebKitSettings* _article_content_web_backend_settings = nullptr;
     */
 
+    vector<news::rss_data_feed_headline_spec> _feed_headlines;
+
+    string _feed_names_location = "feeds.txt";
+
+    int _feed_index = 0;//Defaults to the first feed, if available;
+    int _headline_index = -1;
+
     int _screen_w = 0;
     int _screen_h = 0;
 
@@ -124,12 +123,6 @@ class mainscreengenerator {
 
     int _screen_max_w = 0;
     int _screen_max_h = 0;
-
-    const int _feed_name_button_h = 34;
-
-    const int _widget_xy_offset = 22;
-
-    const int _headline_description_max_chars = 180;
 
     int _region_header_w = 0;
     int _region_header_h = 0;
@@ -149,13 +142,21 @@ class mainscreengenerator {
     int _region_feed_names_w = 0;
     int _region_feed_names_h = 0;
 
+    const int _feed_name_button_h = 34;
+    const int _widget_xy_offset = 22;
+    const int _headline_description_max_chars = 180;
+
     int show_screen();
 
-    void show_feed(int feed_index);
+    bool update_feed_source();
+    void get_rss_feed_names_and_articles();
+    void get_screen_wh();
+
+    void show_feed(const int& feed_index);
     void show_feed_names();
     void show_headlines();
     void show_headline_description_selected_row(Gtk::ListBoxRow* row);
-    void show_headline_description(int headline_index);
+    void show_headline_description(const int& headline_index);
 
     void setup_ui_layout_parameters();
     void setup_ui_region_layout_parameters();

@@ -30,31 +30,91 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = ::rss::ui::mainscreengenerator;
 
+/*
+        Various levels of initialization
+        depending on the amount of preparation required
+        before the user interface is laid out.
+*/
 cls::mainscreengenerator() {
     return;
 }
 
 void cls::init() {
-    //Previously had something to init. Leave the interface point in place.
+    _inited = true;
+
     return;
 }
 
 void cls::generate() {
-    show_screen();
+    if(_inited) {
+        show_screen();
+    }
 
     return;
 }
 
+/*
+        Primary function that lays out the screen in the beginning.
+        It is called by the generate function.
+        The program will instantiate this class and after calling init, call generate.
+*/
 int cls::show_screen() {
     int gtk_app_err = 0;
 
     try {
+        /*
+                GTK+ starts with this call.
+                The user interface is setup first and
+                the app instance connects the user interface
+                instructions to the operating system's
+                graphics and interactivity processes.
+        */
         auto app = Gtk::Application::create("gautier.rss");
 
+        /*
+                Sets up the size of the program screen.
+                Initializes components for aesthetics.
+                Calls setup_ui_region_layout_parameters() which
+                sets up the initial geometry for the screen.
+
+                The geometry is important because it provides
+                more granular control over how the screen is laid out.
+
+                While it is true GTK provides abundant automatic layout
+                capability, you still need granular control to have the
+                screen appear properly. Rather that hard set most of the
+                geometry throughout the screen logic functions, the core
+                geometry is consolidated into the setup_ui_region_layout_parameters() function.
+        */
         setup_ui_layout_parameters();
 
+        /*
+                The window is where all the individual visual parts
+                reside and the general context in which operations
+                of an interactive nature are exercised.
+        */
         create_ui_window();
 
+        /*
+                Visually represented program functions are defined within
+                functional areas called regions. A region is a geometric
+                area that defines the maximum visual placement of
+                visually represented functions as well as the continued
+                existence of those functions.
+
+                Regions are generally created the same way and are then
+                setup with specialized visual elements. Existence of visual elements
+                are sustained by the existence of regions within a running window
+                within an active GTK app instance.
+
+                Each visual element in a region is specialized based on the
+                intended purpose of the region. A region has an overall set of
+                functions that each widget supports. It is the visual element
+                in the region that maps the visual interface to the underlying
+                logic/data interface at the application level.
+
+                These are the unique, application specific layout functions for the RSS program.
+        */
         create_ui_region_header();
         create_ui_region_headlines();
         create_ui_region_article_summary();
@@ -62,13 +122,40 @@ int cls::show_screen() {
         create_ui_region_feed_edit();
         create_ui_region_feed_names();
 
+        /*
+                A second pass at the screen geometry based on updates
+                from the realization of all regions.
+
+                The region geometry function is also defined separately
+                as it is reapplied during externally triggered window/screen modifications.
+        */
         setup_ui_region_layout_parameters();
 
+        /*
+                This does not really show anything, just flags the visual elements as ready for presentation on screen.
+        */
         _gautier_rss_window->show_all();
 
+        /*
+                Get RSS data, apply logic, and ready visual elements with the information to show on screen.
+        */
         show_feed(0);
 
+        /*
+                Once the following is called, the screen in its initial form is shown
+                including any updates to the visual widgets. After this point,
+                the program will hold here and any interactivity is dependent on GTK signaling system.
+        */
         gtk_app_err = app->run(*_gautier_rss_window);
+
+        /*
+                The following exception handlers are primarily useful during development of the program
+                to catch errors in setting up GTK or the RSS engine.
+
+                When the program is setup correctly and barring any system interface issues, these exception
+                handlers would not be called. A default handler is defined as a fallback to provide diagnostic
+                information when the stated reliability expectation does not apply in a given situtation.
+        */
     } catch(const Gtk::CssProviderError& ex) {
         std::cout << "CssProviderError, Gtk::CssProvider::load_from_path() failed: " << ex.what() << "\n";
     } catch(const Glib::Error& ex) {
@@ -313,6 +400,27 @@ void cls::create_ui_region_feed_names() {
     return;
 }
 
+/*
+        Primary screen layout function.
+        Generally speaking, this function can work independent of
+        GTK which means it applies to all user interface engines.
+
+        Previous versions of this program had a similar function.
+        This one has been calibrated to the particular use of GTK.
+
+        However, the general principle is the same. Define
+        geometric area in which user interface widgets present.
+        That constrains the size and position of those widgets.
+
+        While it is true GTK provides abundant automatic layout
+        capability, you still need granular control to have the
+        screen appear properly. Rather that hard set most of the
+        geometry throughout the screen logic functions, the core
+        geometry is consolidated into the setup_ui_region_layout_parameters() function.
+
+        This function is also applied whenever the window/screen is updated
+        through externally triggered changes.
+*/
 void cls::setup_ui_region_layout_parameters() {
     if(_last_window_h != _window_h || _last_window_w != _window_w) {
         int window_h = _screen_h;
@@ -421,7 +529,7 @@ void cls::setup_ui_region_layout_parameters() {
     return;
 }
 
-void cls::show_feed(int feed_index) {
+void cls::show_feed(const int& feed_index) {
     _feed_index = feed_index;
 
     if(_feed_index >= 0) {
@@ -633,7 +741,7 @@ void cls::show_feed_names() {
     return;
 }
 
-void cls::show_headline_description(int headline_index) {
+void cls::show_headline_description(const int& headline_index) {
     news::rss_data_feed_headline_spec feed_headline_entry;
 
     int headlines_size = _feed_headlines.size();
