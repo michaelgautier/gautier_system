@@ -29,6 +29,7 @@ class rss_set_consequence {
   private:
     vector<rss_data_consequence_spec> _set;
   public:
+    bool add(const rss_data_consequence_spec& spec);
 };
 }
 #endif

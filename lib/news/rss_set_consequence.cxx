@@ -18,3 +18,10 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 using namespace std;
 using cls = news::rss_set_consequence;
 
+bool cls::add(const rss_data_consequence_spec& spec) {
+    int set_size = _set.size();
+
+    _set.push_back(spec);
+
+    return set_size < _set.size();
+}
