@@ -167,6 +167,20 @@ int cls::show_screen() {
     return gtk_app_err;
 }
 
+/*
+        GTK provides a way to incorporate CSS directives
+        into the program. This prevents loss of the CSS data
+        and speeds up retrieval of this information.
+
+        This function preloads the CSS information in order
+        to systematically update appearance.
+
+        Geometric size of the screen is also gathered to
+        be used by the setup_ui_region_layout_parameters() function.
+
+        Initial size of the regions, padding, and margins are
+        defined through this function.
+*/
 void cls::setup_ui_layout_parameters() {
     /*GTK Styles*/
     _css_provider = Gtk::CssProvider::create();
@@ -180,6 +194,16 @@ void cls::setup_ui_layout_parameters() {
     return;
 }
 
+/*
+        Primary visual element within which all other visual elements
+        are defined, presented, and managed.
+
+        This is not the only way to define a visual window
+        and I chose a minimal construction to defer more to
+        the default settings for the operating system for
+        constructed windows. Extensive window customization is
+        not necessary in this case.
+*/
 void cls::create_ui_window() {
     _gautier_rss_window = new Gtk::ApplicationWindow();
     _gautier_rss_window->set_title("Gautier RSS");
@@ -196,6 +220,8 @@ void cls::create_ui_window() {
     style_ctx_window->add_class("window");
 
     /*
+    I left this here as a cautionary note of what not to do:
+
     Causes real issues/problems
         The headlines area won't show correctly after when another feed is clicked.
 
@@ -220,6 +246,13 @@ void cls::create_ui_window() {
     return;
 }
 
+/*
+        Geometry of the screen that contains the window.
+        The maximum visual boundary used to define
+        subsequent geometries. This function should be called
+        first. Many user interfaces will have a function like
+        this somewhere either overt (like here) or buried in an abstraction.
+*/
 void cls::get_screen_wh() {
     auto display = Gdk::Display::get_default();
     auto screen = display->get_default_screen();
@@ -230,6 +263,31 @@ void cls::get_screen_wh() {
     return;
 }
 
+/*
+
+        The following functions setup the visual areas
+        within the main window. Interactive visual elements
+        for the program start within these functions.
+
+        The functions themselves set the geometric boundaries
+        for the visual elements contained. Initial triggers
+        for some visual elements are also defined.
+
+        However, main logic involving RSS feed data is fully
+        separate and initiates in the show_feed() function.
+        The show_feed() function then unites the RSS logic/data
+        facilities with the visual representation of RSS operations
+        involving network, file, and data.
+
+        This is stated as the regions are not essential for
+        RSS functionality but are part of the means to present
+        RSS data and trigger RSS operations through visual interaction.
+
+*/
+
+/*
+****************************START REGION SETUP
+*/
 void cls::create_ui_region_header() {
     _region_header = new Gtk::Box(Gtk::Orientation::ORIENTATION_HORIZONTAL);
 
@@ -287,6 +345,8 @@ void cls::create_ui_region_content() {
     _region_content->add(*_article_content);
 
     /*
+        I left this here in case this proves useful in the future.
+
         Previously used to show the full article web page in the program.
         Worked well, but I decided that was not the best use of browser rendering capabilities.
         Better to allow full web browsers like Mozilla Firefox, Google Chrome, Chromium, and Microsoft Edge
@@ -399,6 +459,9 @@ void cls::create_ui_region_feed_names() {
 
     return;
 }
+/*
+****************************END OF REGION SETUP
+*/
 
 /*
         Primary screen layout function.
@@ -529,6 +592,9 @@ void cls::setup_ui_region_layout_parameters() {
     return;
 }
 
+/*
+****************************START USER INTERFACE FUNCTIONALITY
+*/
 void cls::show_feed(const int& feed_index) {
     _feed_index = feed_index;
 
@@ -765,14 +831,6 @@ void cls::show_headline_description(const int& headline_index) {
         headline_description = headline_description.substr(0, _headline_description_max_chars);
     }
 
-    /*
-        Previously used to just show headline text in the description area.
-            _region_article_summary->set_lines(1);
-            _region_article_summary->set_max_width_chars(_headline_description_max_chars);
-            _region_article_summary->set_single_line_mode(true);
-            _region_article_summary->set_text(headline_description);
-    */
-
     _article_content->set_single_line_mode(false);
     _article_content->set_text(feed_headline_entry.description);
 
@@ -853,7 +911,65 @@ bool cls::update_feed_source() {
 
     return feed_sources_updated;
 }
+/*
+****************************END USER INTERFACE FUNCTIONALITY
+*/
 
+/*
+        RESOURCE CLEANUP
+        RAW POINTER DEALLOCATION
+
+        C++ RAII Technique
+        Automatic resource cleanup
+
+        I rarely use raw pointers in this program.
+        Discovering any pointers in the RSS library is nearly impossible.
+        The primary exception in the RSS library is the network interface.
+
+        However, the user interface uses several raw pointers as I find
+        the lifetime of the visual elements is better managed that way.
+
+        The many hours of tests I ran on the difference between using
+        raw pointers versus scoped objects are not definitive. Rather,
+        I observed more consistent user interface behavior in a
+        C++ application on Fedora Linux under the Gnome 3 desktop with
+        a user interface is defined in gtkmm where the widgets were
+        referenced via raw pointer.
+
+        I did not evaluate the use of smart pointers. I actually wanted
+        precise determinism in the use of pointers. Some of the gtkmm
+        widgets are themselves defined in a type of smart pointer and
+        I needed those instances to automatically persist rather than
+        automatically deallocate.
+
+        As a result, I concluded that I can achieve appropriate
+        raw pointer initialization at various stages in the
+        user interface's construction. Such is the case in the
+        single pass execution of the region construction functions.
+        When those functions run, most raw pointers to widgets that
+        define the overall user interface are established once and
+        maintained at class scope. Many of them are deallocated in the
+        following destructor function as the program moves beyond the
+        point of using an instance of the class.
+
+        The typical case for activation of the destructor is when the
+        program ends. Since the primary region objects are often
+        containers of other visual elements, they are checked for the
+        existence of elements. Each visual element in a container that
+        denotes a region is then systematically cleaned up followed by
+        removal of the region itself from computer memory. It is often
+        best to do it this way to ensure there are no dangling pointers
+        to widgets previously associated with the region. Also, in some
+        cases, a segmentation fault will occur on attempt to delete a
+        region's raw pointer without first deallocating memory used for
+        contained widgets.
+
+        The overall process of allocation/deallocation has been vetted
+        through various settings in Valgrind on Fedora Linux. That is
+        not a definitive guarantee that memory consumed is comprehensively
+        recovered, but the matter of memory acquire/release has been
+        examined in detail sufficient to the software application.
+*/
 cls::~mainscreengenerator() {
     if(_region_feed_names) {
         _region_feed_names->remove_with_viewport();
