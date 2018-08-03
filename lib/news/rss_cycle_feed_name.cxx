@@ -65,6 +65,25 @@ news::rss_set_consequence cls::set_single_feed_name(const news::rss_data_feed_na
     consq.set_catalog_number(1);
     consq.set_statement("completed");
 
+    if(cs.size() > 0) {
+        auto consq_number = cs[0].get_catalog_number();
+        auto consq_reason = cs[0].get_statement();
+
+        if(consq_number < 1) {
+            consq.set_catalog_number(0);
+            consq.set_statement("failed");
+
+            cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
+        } else {
+            cout << __func__ << " " << __LINE__ << " " << consq_reason << "\n";
+        }
+    } else {
+        consq.set_catalog_number(0);
+        consq.set_statement("failed");
+
+        cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
+    }
+
     cs.add(consq);
 
     return cs;
