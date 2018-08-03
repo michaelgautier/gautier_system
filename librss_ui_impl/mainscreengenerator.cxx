@@ -845,13 +845,9 @@ bool cls::update_feed_source() {
         }
 
         if(!feed_name_found) {
-            rss_c_feed_name.set_single_feed_name(feed_name_entry);
+            news::rss_set_consequence cs = rss_c_feed_name.set_single_feed_name(feed_name_entry);
 
-            //if( check consequence ) {
-            //get_rss_feed_names_and_articles();
-
-            feed_sources_updated = true;
-            //}
+            feed_sources_updated = (cs.size() > 0 && cs[0].get_catalog_number() > 0);
         }
     }
 
