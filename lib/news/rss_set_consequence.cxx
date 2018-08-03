@@ -19,9 +19,21 @@ using namespace std;
 using cls = news::rss_set_consequence;
 
 bool cls::add(const rss_data_consequence_spec& spec) {
-    int set_size = _set.size();
+    int set_size = size();
 
     _set.push_back(spec);
 
-    return set_size < _set.size();
+    return set_size < size();
+}
+
+std::vector<news::rss_data_consequence_spec>::size_type cls::size() {
+    return _set.size();
+}
+
+news::rss_data_consequence_spec& cls::operator[](std::size_t idx)       {
+    return _set[idx];
+}
+
+const news::rss_data_consequence_spec& cls::operator[](std::size_t idx) const {
+    return _set[idx];
 }

@@ -30,6 +30,10 @@ class rss_set_consequence {
     vector<rss_data_consequence_spec> _set;
   public:
     bool add(const rss_data_consequence_spec& spec);
+    std::vector<rss_data_consequence_spec>::size_type size();
+
+    rss_data_consequence_spec& operator[](std::size_t idx);
+    const rss_data_consequence_spec& operator[](std::size_t idx) const;
 };
 }
 #endif
