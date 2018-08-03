@@ -110,7 +110,7 @@ news::rss_set_consequence cls::save_spec(const news::rss_data_feed_article_spec&
 
     news::rss_data_consequence_spec consq;
     consq.set_catalog_number(1);
-    consq.set_statement("completed");
+    consq.set_statement("set saved operation finished");
 
     cs.add(consq);
 
