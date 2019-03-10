@@ -11,8 +11,33 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#include "rss_data_feed_headline_spec.hxx"
+#ifndef __techconstruct_textfilter__
+#define __techconstruct_textfilter__
 
-using namespace std;
-using cls = news::rss_data_feed_headline_spec;
+#include <algorithm>
+#include <string>
 
+namespace rss_techconstruct {
+/*Based on example listed on cppreference.com on the page for std::toupper*/
+std::string text_toupper(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+    [](unsigned char c) {
+        return std::toupper(c);
+    }
+                  );
+
+    return s;
+}
+
+/*Based on example listed on cppreference.com on the page for std::tolower*/
+std::string text_tolower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+    [](unsigned char c) {
+        return std::tolower(c);
+    }
+                  );
+
+    return s;
+}
+}
+#endif

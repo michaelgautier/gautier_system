@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,8 +9,6 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include <ctime>
@@ -18,12 +16,11 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-#include <Poco/String.h>
-
 #include "rss_file_manager_feed_headline.hxx"
 
 #include "techconstruct/http.hxx"
 #include "techconstruct/file.hxx"
+#include "techconstruct/textfilter.hxx"
 
 using namespace std;
 
@@ -267,7 +264,7 @@ vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data_feed
 }
 
 void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
-    const string parentnode_name = (parentnode ? Poco::toLower(string(reinterpret_cast<const char*>(parentnode->name))) : "");
+    const string parentnode_name = (parentnode ? rss_techconstruct::text_tolower(string(reinterpret_cast<const char*>(parentnode->name))) : "");
 
     const bool parentnode_is_rss_item = (parentnode_name == _headline_node_name_rss);
     const bool parentnode_is_atom_entry = (parentnode_name == _headline_node_name_atom);
@@ -284,7 +281,7 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* paren
                 continue;
             }
 
-            const string name = Poco::toLower(string(reinterpret_cast<const char*>(childnode->name)));
+            const string name = rss_techconstruct::text_tolower(string(reinterpret_cast<const char*>(childnode->name)));
 
             //cout << "node name: " << name << "\n";
 
