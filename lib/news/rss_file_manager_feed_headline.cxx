@@ -11,8 +11,24 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
+<<<<<<< HEAD
 #include "rss_file_manager_feed_headline.hxx"
 
+=======
+#include <ctime>
+
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
+#include "rss_file_manager_feed_headline.hxx"
+
+#include "techconstruct/http.hxx"
+#include "techconstruct/file.hxx"
+#include "techconstruct/textfilter.hxx"
+
+using namespace std;
+
+>>>>>>> b7588274ce3f10ef4cb8f2d7331c970e1677002c
 using cls = news::rss_file_manager_feed_headline;
 using http = rss_techconstruct::http;
 
@@ -252,8 +268,13 @@ std::vector<news::rss_data_feed_headline_spec> get_rss_feed(const news::rss_data
     return v;
 }
 
+<<<<<<< HEAD
 void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* parentnode, std::vector<news::rss_data_feed_headline_spec>& v) {
     const std::string parentnode_name = (parentnode ? rss_techconstruct::text_tolower(std::string(reinterpret_cast<const char*>(parentnode->name))) : "");
+=======
+void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* parentnode, vector<news::rss_data_feed_headline_spec>& v) {
+    const string parentnode_name = (parentnode ? rss_techconstruct::text_tolower(string(reinterpret_cast<const char*>(parentnode->name))) : "");
+>>>>>>> b7588274ce3f10ef4cb8f2d7331c970e1677002c
 
     const bool parentnode_is_rss_item = (parentnode_name == _headline_node_name_rss);
     const bool parentnode_is_atom_entry = (parentnode_name == _headline_node_name_atom);
@@ -270,7 +291,11 @@ void process_node(const news::rss_data_feed_name_spec& feed_name, xmlNode* paren
                 continue;
             }
 
+<<<<<<< HEAD
             const std::string name = rss_techconstruct::text_tolower(std::string(reinterpret_cast<const char*>(childnode->name)));
+=======
+            const string name = rss_techconstruct::text_tolower(string(reinterpret_cast<const char*>(childnode->name)));
+>>>>>>> b7588274ce3f10ef4cb8f2d7331c970e1677002c
 
             //cout << "node name: " << name << "\n";
 
