@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,160 +9,94 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #ifndef __rss_ui_mainscreengenerator__
 #define __rss_ui_mainscreengenerator__
-#include <vector>
-#include <map>
-#include <string>
+#include <cctype>
+#include <chrono>
+#include <ctime>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
-/*WebKit*/
-//#include <webkit2/webkit2.h>
+#include <wx/wx.h>
+#include <wx/hyperlink.h>
 
-/*GDK*/
-#include <gdkmm/display.h>
-#include <gdkmm/displaymanager.h>
-#include <gdkmm/general.h>
-#include <gdkmm/rgba.h>
-#include <gdkmm/screen.h>
-
-/*GLib*/
-#include <glibmm/ustring.h>
-
-/*GTK*/
-#include <gtkmm/application.h>
-#include <gtkmm/applicationwindow.h>
-#include <gtkmm/box.h>
-#include <gtkmm/button.h>
-#include <gtkmm/cssprovider.h>
-#include <gtkmm/entry.h>
-#include <gtkmm/eventbox.h>
-#include <gtkmm/flowbox.h>
-#include <gtkmm/label.h>
-#include <gtkmm/layout.h>
-#include <gtkmm/linkbutton.h>
-#include <gtkmm/listbox.h>
-#include <gtkmm/listboxrow.h>
-#include <gtkmm/listviewtext.h>
-#include <gtkmm/scrolledwindow.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/textview.h>
-#include <gtkmm/viewport.h>
-
-#include "rss_data_feed_name_spec.hxx"
-#include "rss_data_feed_headline_spec.hxx"
+#include "rss_cycle_feed_article.hxx"
+#include "rss_cycle_feed_headline.hxx"
+#include "rss_cycle_feed_name.hxx"
 #include "rss_data_feed_article_spec.hxx"
+#include "rss_data_feed_headline_spec.hxx"
+#include "rss_data_feed_name_spec.hxx"
+#include "rss_set_feed_headline.hxx"
+#include "rss_set_feed_name.hxx"
+#include "textfilter.hxx"
 
 namespace rss {
 namespace ui {
-using namespace std;
-class mainscreengenerator {
+class mainscreengenerator : public wxFrame {
   public:
-    mainscreengenerator();
-    ~mainscreengenerator();
-
-    void init();
+    mainscreengenerator(const wxString& title, const wxPoint& pos, const wxSize& size, int style);
     void generate();
 
   private:
-    bool _inited = false;
-
-    Glib::RefPtr<Gtk::CssProvider> _css_provider;
-
-    Gtk::Label* _article_content = nullptr;
-    Gtk::Layout* _headlines = nullptr;
-
-    Gtk::ApplicationWindow* _gautier_rss_window = nullptr;
-    Gtk::Box* _gautier_rss_area = nullptr;
-    Gtk::Box* _region_header = nullptr;
-    Gtk::ScrolledWindow* _region_headlines = nullptr;
-    Gtk::Box* _region_article_summary = nullptr;
-    Gtk::ScrolledWindow* _region_content = nullptr;
-    Gtk::Box* _region_feed_edit = nullptr;
-    Gtk::ScrolledWindow* _region_feed_names = nullptr;
-
-    Gtk::Label* _header_text = nullptr;
-    Gtk::Label* _feed_name_label = nullptr;
-    Gtk::Entry* _feed_name_edit = nullptr;
-    Gtk::Label* _feed_url_label = nullptr;
-    Gtk::Entry* _feed_url_edit = nullptr;
-    Gtk::Button* _feed_edit_button = nullptr;
-    Gtk::Layout* _feed_names_field = nullptr;
-
-    Gtk::LinkButton* _article_link_button = nullptr;
-    Gtk::Label* _article_link_label = nullptr;
-    Gtk::Label* _article_source_label = nullptr;
-
     /*
-        //https://stackoverflow.com/questions/17039942/example-of-using-webkitgtk-with-gtkmm-3-0
-        WebKitWebView* _article_content_web_backend = nullptr;
-        Gtk::Widget* _article_content_web = nullptr;
 
-        WebKitSettings* _article_content_web_backend_settings = nullptr;
+
+    	wxWidgets	EventHandlers
+
+
     */
+    void headline_list_select_event(wxCommandEvent& event);
+    void feed_change_event(wxCommandEvent& event);
+    void feed_save_event(wxCommandEvent& event);
+    /*
 
-    vector<news::rss_data_feed_headline_spec> _feed_headlines;
 
-    string _feed_names_location = "feeds.txt";
+    	Application Logic
 
-    int _feed_index = 0;//Defaults to the first feed, if available;
-    int _headline_index = -1;
 
-    int _screen_w = 0;
-    int _screen_h = 0;
+    */
+    std::vector<::news::rss_data_feed_headline_spec> _feed_headlines;
 
-    int _window_w = 0;
-    int _window_h = 0;
-
-    int _last_window_w = -1;
-    int _last_window_h = -1;
-
-    int _screen_max_w = 0;
-    int _screen_max_h = 0;
-
-    int _region_header_w = 0;
-    int _region_header_h = 0;
-
-    int _region_headlines_w = 0;
-    int _region_headlines_h = 0;
-
-    int _region_article_summary_w = 0;
-    int _region_article_summary_h = 0;
-
-    int _region_content_w = 0;
-    int _region_content_h = 0;
-
-    int _region_feed_edit_w = 0;
-    int _region_feed_edit_h = 0;
-
-    int _region_feed_names_w = 0;
-    int _region_feed_names_h = 0;
-
-    const int _feed_name_button_h = 34;
-    const int _widget_xy_offset = 22;
-    const int _headline_description_max_chars = 180;
-
-    int show_screen();
+    int _feed_index = 0;
 
     bool update_feed_source();
-    void get_rss_feed_names_and_articles();
-    void get_screen_wh();
+    std::vector<news::rss_data_feed_name_spec> get_feed_names();
+    news::rss_data_feed_name_spec get_feed_name(const int feed_index);
+    std::string get_feeds_location();
 
-    void show_feed(const int& feed_index);
+    void show_feed(const int feed_index);
     void show_feed_names();
     void show_headlines();
-    void show_headline_description_selected_row(Gtk::ListBoxRow* row);
-    void show_headline_description(const int& headline_index);
+    void show_headline_description(const int headline_index);
+    void show_feed_edit(const int feed_index);
+    /*
 
-    void setup_ui_layout_parameters();
-    void setup_ui_region_layout_parameters();
 
-    void resize_headlines();
-    void remove_headlines();
+    	User Interface
+
+
+    */
+    wxBoxSizer* _frame_sizer;
+    wxStaticText* _program_header;
+    wxListBox* _headlines_list_view;
+
+    wxFlexGridSizer* _article_sizer;
+    wxStaticText* _feed_name_text;
+    wxHyperlinkCtrl* _feed_headline_hyperlink;
+    wxStaticText* _article_summary_text;
+
+    wxStaticBoxSizer* _feed_input_sizer;
+    wxStaticText* _feed_name_label;
+    wxTextCtrl* _feed_name_edit;
+    wxStaticText* _feed_url_label;
+    wxTextCtrl* _feed_url_edit;
+    wxButton* _feed_name_save_button;
+
+    wxStaticBoxSizer* _feed_buttons_sizer;
 
     void create_ui_window();
     void create_ui_region_header();

@@ -1,18 +1,26 @@
-#include <iostream>
-#include <fstream>
+/*
+Copyright 2019 Michael Gautier
 
+This file is part of Gautier RSS System by Michael Gautier.
+
+Gautier RSS System by Michael Gautier is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Gautier RSS System by Michael Gautier is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
+
+C++ Standard Library; Copyright 2018 Standard C++ Foundation.
+*/
 #include "file.hxx"
-
-using namespace std;
 using cls = rss_techconstruct::file;
 
-void cls::read_file_into_string(string location, string& output) {
-    ifstream rss_file(location.data());
+void cls::read_file_into_string(std::string location, std::string& output) {
+    std::ifstream rss_file(location.data());
 
     while(!rss_file.eof()) {
-        string line;
+        std::string line;
 
-        getline(rss_file, line);
+        std::getline(rss_file, line);
 
         output.append(line);
     }
@@ -25,14 +33,14 @@ void cls::read_file_into_string(string location, string& output) {
     return;
 }
 
-void cls::read_file_into_string(string location, function<void(string&)> file_callable) {
-    ifstream rss_file(location.data());
+void cls::read_file_into_string(std::string location, std::function<void(std::string&)> file_callable) {
+    std::ifstream rss_file(location.data());
 
-    if(rss_file.rdstate() == ios_base::goodbit) {
+    if(rss_file.rdstate() == std::ios_base::goodbit) {
         while(!rss_file.eof()) {
-            string line;
+            std::string line;
 
-            getline(rss_file, line);
+            std::getline(rss_file, line);
 
             file_callable(line);
         }
@@ -46,18 +54,18 @@ void cls::read_file_into_string(string location, function<void(string&)> file_ca
     return;
 }
 
-void cls::read_file_into_string(string location, function<void(string&,bool&)> file_callable) {
-    ifstream rss_file(location.data());
+void cls::read_file_into_string(std::string location, std::function<void(std::string&,bool&)> file_callable) {
+    std::ifstream rss_file(location.data());
 
-    if(rss_file.rdstate() == ios_base::goodbit) {
+    if(rss_file.rdstate() == std::ios_base::goodbit) {
         bool ended = false;
 
         while(!rss_file.eof()) {
-            string line;
+            std::string line;
 
-            getline(rss_file, line);
+            std::getline(rss_file, line);
 
-            file_callable(line,ended);
+            file_callable(line, ended);
 
             if(ended) {
                 break;
@@ -70,19 +78,19 @@ void cls::read_file_into_string(string location, function<void(string&,bool&)> f
     return;
 }
 
-void cls::get_stream(string location, string& output) {
+void cls::get_stream(std::string location, std::string& output) {
     read_file_into_string(location, output);
 
     return;
 }
 
-void cls::read_istream_into_string(istream& input, string& output) {
+void cls::read_istream_into_string(std::istream& input, std::string& output) {
     char data;
 
     while(!input.eof()) {
         input.get(data);
 
-        if(input.rdstate() == ios_base::goodbit) {
+        if(input.rdstate() == std::ios_base::goodbit) {
             output.push_back(data);
         }
     }
@@ -90,10 +98,10 @@ void cls::read_istream_into_string(istream& input, string& output) {
     return;
 }
 
-void cls::erase_stream(string location) {
-    string feed_file_name(location.data(), ios_base::out | ios_base::trunc);
+void cls::erase_stream(std::string location) {
+    std::string feed_file_name(location.data(), std::ios_base::out | std::ios_base::trunc);
 
-    ofstream feed_offline_file(feed_file_name.data());
+    std::ofstream feed_offline_file(feed_file_name.data());
 
     feed_offline_file << "";
 
@@ -104,11 +112,11 @@ void cls::erase_stream(string location) {
     return;
 }
 
-void cls::persist_stream(string location, string data_to_persist) {
+void cls::persist_stream(std::string location, std::string data_to_persist) {
     if(!data_to_persist.empty()) {
-        string feed_file_name(location.data(), ios_base::out | ios_base::app);
+        std::string feed_file_name(location.data(), std::ios_base::out | std::ios_base::app);
 
-        ofstream feed_offline_file(feed_file_name.data());
+        std::ofstream feed_offline_file(feed_file_name.data());
 
         feed_offline_file << data_to_persist;
 
@@ -120,10 +128,10 @@ void cls::persist_stream(string location, string data_to_persist) {
     return;
 }
 
-void cls::persist_stream(string location, function<void(ofstream&)> file_callable) {
-    string feed_file_name(location.data(), ios_base::out | ios_base::app);
+void cls::persist_stream(std::string location, std::function<void(std::ofstream&)> file_callable) {
+    std::string feed_file_name(location.data(), std::ios_base::out | std::ios_base::app);
 
-    ofstream feed_offline_file(feed_file_name.data());
+    std::ofstream feed_offline_file(feed_file_name.data());
 
     file_callable(feed_offline_file);
 

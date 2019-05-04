@@ -11,19 +11,19 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#ifndef __news_rss_data_feed_article_spec__
-#define __news_rss_data_feed_article_spec__
-#include <string>
-#include "rss_data_feed_headline_spec.hxx"
+#ifndef __rss_news_wxApp__
+#define __rss_news_wxApp__
+#include <wx/wx.h>
+#include "mainscreengenerator.hxx"
 
+namespace rss {
 namespace news {
-class rss_data_feed_article_spec {
-  private:
+class rss_app : public wxApp {
   public:
-    rss_data_feed_headline_spec feed_headline;
+    virtual bool OnInit();
 
-    std::string content;
+    wxSize get_display2D_minimum_size();
 };
 }
+}
 #endif
-

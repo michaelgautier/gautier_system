@@ -11,19 +11,15 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#ifndef __news_rss_data_feed_article_spec__
-#define __news_rss_data_feed_article_spec__
+#ifndef __techconstruct_textfilter__
+#define __techconstruct_textfilter__
+
+#include <algorithm>
 #include <string>
-#include "rss_data_feed_headline_spec.hxx"
 
-namespace news {
-class rss_data_feed_article_spec {
-  private:
-  public:
-    rss_data_feed_headline_spec feed_headline;
-
-    std::string content;
-};
+namespace rss_techconstruct {
+std::string make_printable(const std::string& s);
+std::string text_toupper(std::string s);
+std::string text_tolower(std::string s);
 }
 #endif
-

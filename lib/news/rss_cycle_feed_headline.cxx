@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,16 +9,13 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include "rss_cycle_feed_headline.hxx"
 
-using namespace std;
 using cls = news::rss_cycle_feed_headline;
 
-void cls::init(string file_location) {
+void cls::init(std::string file_location) {
     _file_location = file_location;
 
     return;
@@ -29,7 +26,7 @@ news::rss_data_feed_headline_spec cls::get_single_feed_headline(const news::rss_
 
     news::rss_set_feed_headline fhs = get_feed_headlines(feed_name);
 
-    vector<news::rss_data_feed_headline_spec> fh = fhs.get_specs();
+    std::vector<news::rss_data_feed_headline_spec> fh = fhs.get_specs();
 
     if(headline_index < fh.size()) {
         h = fh[headline_index];

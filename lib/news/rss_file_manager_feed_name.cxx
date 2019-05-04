@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,16 +9,13 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include "rss_file_manager_feed_name.hxx"
 
-using namespace std;
 using cls = news::rss_file_manager_feed_name;
 
-void cls::init(const string& file_location) {
+void cls::init(const std::string& file_location) {
     _file_location = file_location;
 
     return;
@@ -28,19 +25,19 @@ news::rss_set_feed_name cls::get_set() {
     news::rss_set_feed_name fn_set;
 
     //Read the file, get the feed name/feed url combinations, update the set.
-    auto call_rss_line = [=,&fn_set](string& data) {
-        if(data.size() > 1 && string(&data[0]) == _comment_char) {
+    auto call_rss_line = [=,&fn_set](std::string& data) {
+        if(data.size() > 1 && std::string(&data[0]) == _comment_char) {
             return;
         }
 
         const auto tab_pos = data.find_first_of(_tab_char, 0);
 
-        if(tab_pos == string::npos) {
+        if(tab_pos == std::string::npos) {
             return;
         }
 
-        const string name = data.substr(0, tab_pos);
-        const string url = data.substr(tab_pos+1);
+        const std::string name = data.substr(0, tab_pos);
+        const std::string url = data.substr(tab_pos+1);
 
         news::rss_data_feed_name_spec spec;
 
@@ -60,9 +57,9 @@ news::rss_set_consequence cls::save_set(news::rss_set_feed_name& rss_set) {
     news::rss_set_consequence cs;
 
     //Read the feed name/feed url combinations and create/replace the file.
-    vector<news::rss_data_feed_name_spec> v = rss_set.get_specs();
+    std::vector<news::rss_data_feed_name_spec> v = rss_set.get_specs();
 
-    auto call_rss_line = [=,&v](ofstream& data) {
+    auto call_rss_line = [=,&v](std::ofstream& data) {
         for(news::rss_data_feed_name_spec& spec : v) {
             data << spec.name << _tab_char << spec.url << _newline_char;
         }

@@ -11,19 +11,26 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-#ifndef __news_rss_data_feed_article_spec__
-#define __news_rss_data_feed_article_spec__
-#include <string>
-#include "rss_data_feed_headline_spec.hxx"
+#include "rss_app.hxx"
 
-namespace news {
-class rss_data_feed_article_spec {
-  private:
-  public:
-    rss_data_feed_headline_spec feed_headline;
+wxSize rss::news::rss_app::get_display2D_minimum_size() {
+    wxRect physical_display_2D = wxGetClientDisplayRect();
 
-    std::string content;
-};
+    const double display_client_width2D = physical_display_2D.GetWidth();
+    const double display_client_height2D = physical_display_2D.GetHeight();
+
+    const double display_client_min_width = display_client_width2D * 0.8;
+    const double display_client_min_height = display_client_height2D * 0.8;
+
+    wxSize minimum_size((int)display_client_min_width, (int)display_client_min_height);
+
+    return minimum_size;
 }
-#endif
 
+bool rss::news::rss_app::OnInit() {
+    rss::ui::mainscreengenerator* frame = new rss::ui::mainscreengenerator("Gautier RSS", wxPoint(100, 100), get_display2D_minimum_size(), wxDEFAULT_FRAME_STYLE | wxMAXIMIZE);
+
+    frame->generate();
+
+    return true;
+}

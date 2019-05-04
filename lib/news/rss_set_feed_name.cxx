@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,13 +9,10 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include "rss_set_feed_name.hxx"
 
-using namespace std;
 using cls = news::rss_set_feed_name;
 
 void cls::add(const news::rss_data_feed_name_spec spec) {
@@ -24,7 +21,7 @@ void cls::add(const news::rss_data_feed_name_spec spec) {
     return;
 }
 
-vector<news::rss_data_feed_name_spec> cls::get_specs() {
+std::vector<news::rss_data_feed_name_spec> cls::get_specs() {
     return _set;
 }
 

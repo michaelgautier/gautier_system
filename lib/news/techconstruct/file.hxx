@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,31 +9,26 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-
-#ifndef __file__
-#define __file__
+#ifndef __techconstruct_file__
+#define __techconstruct_file__
 
 #include <functional>
 #include <string>
 #include <fstream>
 
 namespace rss_techconstruct {
-using namespace std;
-
 class file {
   public:
-    void get_stream(string location, string& output);
-    void erase_stream(string location);
-    void persist_stream(string location, string data_to_persist);
-    void persist_stream(string location, function<void(ofstream&)> file_callable);
-    void read_istream_into_string(istream& input, string& output);
-    void read_file_into_string(string location, string& output);
-    void read_file_into_string(string location, function<void(string&)> file_callable);
-    void read_file_into_string(string location, function<void(string&,bool&)> file_callable);
+    void get_stream(std::string location, std::string& output);
+    void erase_stream(std::string location);
+    void persist_stream(std::string location, std::string data_to_persist);
+    void persist_stream(std::string location, std::function<void(std::ofstream&)> file_callable);
+    void read_istream_into_string(std::istream& input, std::string& output);
+    void read_file_into_string(std::string location, std::string& output);
+    void read_file_into_string(std::string location, std::function<void(std::string&)> file_callable);
+    void read_file_into_string(std::string location, std::function<void(std::string&,bool&)> file_callable);
 };
 }
 #endif

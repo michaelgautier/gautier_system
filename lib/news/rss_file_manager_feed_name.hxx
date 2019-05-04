@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,34 +9,25 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-
 #ifndef __news_rss_file_manager_feed_name__
 #define __news_rss_file_manager_feed_name__
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
-#include <map>
-#include <functional>
-
-#include "techconstruct/file.hxx"
-#include "rss_set_feed_name.hxx"
 #include "rss_set_consequence.hxx"
+#include "rss_set_feed_name.hxx"
+#include "textfilter.hxx"
+#include "file.hxx"
 
 namespace news {
-using namespace std;
 class rss_file_manager_feed_name {
   private:
-    string _file_location;
-    const string _tab_char = "\t";
-    const string _comment_char = "#";
-    const string _newline_char = "\n";
+    std::string _file_location;
+    const std::string _tab_char = "\t";
+    const std::string _comment_char = "#";
+    const std::string _newline_char = "\n";
   public:
-    void init(const string& file_location);
+    void init(const std::string& file_location);
     rss_set_feed_name get_set();
     rss_set_consequence save_set(rss_set_feed_name& rss_set);
 };

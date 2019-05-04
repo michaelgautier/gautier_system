@@ -1,5 +1,5 @@
 /*
-Copyright 2018 Michael Gautier
+Copyright 2019 Michael Gautier
 
 This file is part of Gautier RSS System by Michael Gautier.
 
@@ -9,16 +9,13 @@ Gautier RSS System by Michael Gautier is distributed in the hope that it will be
 
 You should have received a copy of the GNU General Public License along with Gautier RSS System by Michael Gautier.  If not, see <http://www.gnu.org/licenses/>.
 
-Portions of the POCO C++ Libraries utilize the following copyrighted material, the use of which is hereby acknowledged.
-POCO C++ Libraries released under the Boost Software License; Copyright 2018, Applied Informatics Software Engineering GmbH and Contributors;
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
 #include "rss_cycle_feed_name.hxx"
 
-using namespace std;
 using cls = news::rss_cycle_feed_name;
 
-void cls::init(string file_location) {
+void cls::init(std::string file_location) {
     _file_location = file_location;
 
     return;
@@ -29,7 +26,7 @@ news::rss_data_feed_name_spec cls::get_single_feed_name(const unsigned short int
 
     news::rss_set_feed_name fns = get_feed_names();
 
-    vector<news::rss_data_feed_name_spec> feed_names = fns.get_specs();
+    std::vector<news::rss_data_feed_name_spec> feed_names = fns.get_specs();
 
     if(feed_index < feed_names.size()) {
         n = feed_names[feed_index];
@@ -55,6 +52,8 @@ news::rss_set_consequence cls::set_single_feed_name(const news::rss_data_feed_na
     news::rss_file_manager_feed_name fm;
     fm.init(_file_location);
 
+    get_feed_names();
+
     if(!feed_name.name.empty() && !feed_name.url.empty()) {
         _set.add(feed_name);
     }
@@ -73,15 +72,15 @@ news::rss_set_consequence cls::set_single_feed_name(const news::rss_data_feed_na
             consq.set_catalog_number(0);
             consq.set_statement("failed");
 
-            cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
+            std::cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
         } else {
-            cout << __func__ << " " << __LINE__ << " " << consq_reason << "\n";
+            std::cout << __func__ << " " << __LINE__ << " " << consq_reason << "\n";
         }
     } else {
         consq.set_catalog_number(0);
         consq.set_statement("failed");
 
-        cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
+        std::cout << __func__ << " " << __LINE__ << " " << consq.get_statement() << "\n";
     }
 
     cs.add(consq);
