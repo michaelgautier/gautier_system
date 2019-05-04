@@ -18,32 +18,8 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 #include <string>
 
 namespace rss_techconstruct {
-<<<<<<< HEAD
 std::string make_printable(const std::string& s);
 std::string text_toupper(std::string s);
 std::string text_tolower(std::string s);
-=======
-/*Based on example listed on cppreference.com on the page for std::toupper*/
-std::string text_toupper(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(),
-    [](unsigned char c) {
-        return std::toupper(c);
-    }
-                  );
-
-    return s;
-}
-
-/*Based on example listed on cppreference.com on the page for std::tolower*/
-std::string text_tolower(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(),
-    [](unsigned char c) {
-        return std::tolower(c);
-    }
-                  );
-
-    return s;
-}
->>>>>>> b7588274ce3f10ef4cb8f2d7331c970e1677002c
 }
 #endif
