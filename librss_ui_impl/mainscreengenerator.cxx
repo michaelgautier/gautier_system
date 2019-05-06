@@ -156,16 +156,19 @@ void rss::ui::mainscreengenerator::show_feed_names() {
 
     const int feednames_size = feed_names.size();
 
+    /*Left padding*/
+    _feed_buttons_sizer->Add(21, 1, 0);
+
     for(int feedname_index = 0; feedname_index < feednames_size; feedname_index++) {
         std::string feedname = feed_names[feedname_index].name;
 
-        wxButton* feed_button = new wxButton(this, wxID_ANY, wxString(feedname));
+        wxButton* feed_button = new wxButton(_feed_buttons_panel, wxID_ANY, wxString(feedname));
         feed_button->SetBackgroundColour(wxColour("#ffcc00"));
         feed_button->SetForegroundColour(wxColour("#800000"));
         feed_button->SetId(feedname_index);
         feed_button->Bind(wxEVT_BUTTON, &rss::ui::mainscreengenerator::feed_change_event, this);
 
-        _feed_buttons_sizer->Add(feed_button, 0, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 7);
+        _feed_buttons_sizer->Add(feed_button, 0, wxLEFT | wxTOP | wxBOTTOM, 7);
     }
 
     return;
@@ -288,10 +291,10 @@ void rss::ui::mainscreengenerator::create_ui_window() {
 
     _frame_sizer->Add(_program_header, 0, wxEXPAND | wxALIGN_CENTER);
     _frame_sizer->Add(_headlines_list_view, 6, wxEXPAND | wxALIGN_TOP);
-    _frame_sizer->Add(_article_sizer, 0, wxEXPAND | wxALIGN_TOP);
+    _frame_sizer->Add(_feed_info_panel, 0, wxEXPAND | wxALIGN_TOP);
     _frame_sizer->Add(_article_summary_text, 1, wxEXPAND | wxALIGN_TOP);
-    _frame_sizer->Add(_feed_input_sizer, 0, wxEXPAND | wxALIGN_TOP);
-    _frame_sizer->Add(_feed_buttons_sizer, 0, wxLEFT | wxEXPAND | wxALIGN_TOP);
+    _frame_sizer->Add(_feed_input_panel, 0, wxEXPAND | wxALIGN_TOP);
+    _frame_sizer->Add(_feed_buttons_panel, 0, wxLEFT | wxEXPAND | wxALIGN_TOP);
 
     SetSizer(_frame_sizer);
 
@@ -303,7 +306,7 @@ void rss::ui::mainscreengenerator::create_ui_region_header() {
     _program_header->SetBackgroundColour(wxColour("#ffb380"));
 
     wxFont program_header_font = _program_header->GetFont();
-    program_header_font.SetPointSize(28);
+    program_header_font.SetPointSize(18);
 
     _program_header->SetFont(program_header_font);
 
@@ -320,13 +323,32 @@ void rss::ui::mainscreengenerator::create_ui_region_headlines() {
 }
 
 void rss::ui::mainscreengenerator::create_ui_region_article_summary() {
-    _article_sizer = new wxFlexGridSizer(1, 2, 7, 7);
+    _feed_info_panel = new wxPanel(this, wxID_ANY);
+    _feed_info_sizer = new wxBoxSizer(wxHORIZONTAL);
+    _feed_info_panel->SetSizer(_feed_info_sizer);
 
-    _feed_name_text = new wxStaticText(this, wxID_ANY, wxString("NO RSS FEED YET"));
-    _feed_headline_hyperlink = new wxHyperlinkCtrl(this, wxID_ANY, wxString("NO RSS URL YET"), wxString("http://about:blank"));
+    _feed_info_panel->SetBackgroundColour(wxColour("#4c2f00"));
 
-    _article_sizer->Add(_feed_name_text, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-    _article_sizer->Add(_feed_headline_hyperlink, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
+    _feed_name_text = new wxStaticText(_feed_info_panel, wxID_ANY, wxString("NO RSS FEED YET"));
+    _feed_name_text->SetForegroundColour(wxColour("#f4e1c3"));
+    wxFont feed_name_font = _feed_name_text->GetFont();
+
+    auto changed_font = feed_name_font.Larger();
+    changed_font = changed_font.Bold();
+
+    _feed_name_text->SetFont(changed_font);
+
+    _feed_headline_hyperlink = new wxHyperlinkCtrl(_feed_info_panel, wxID_ANY, wxString("NO RSS URL YET"), wxString("http://about:blank"));
+
+    _feed_headline_hyperlink->SetHoverColour(wxColour("#f4e1c3"));
+    _feed_headline_hyperlink->SetNormalColour(wxColour("#d5f6ff"));
+    _feed_headline_hyperlink->SetVisitedColour(wxColour("#d5f6ff"));
+
+    /*Left padding*/
+    _feed_info_sizer->Add(23, 1, 0);
+
+    _feed_info_sizer->Add(_feed_name_text, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 7);
+    _feed_info_sizer->Add(_feed_headline_hyperlink, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 
     return;
 }
@@ -339,19 +361,28 @@ void rss::ui::mainscreengenerator::create_ui_region_content() {
 }
 
 void rss::ui::mainscreengenerator::create_ui_region_feed_edit() {
-    _feed_input_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this);
+    _feed_input_panel = new wxPanel(this, wxID_ANY);
+    _feed_input_sizer = new wxBoxSizer(wxHORIZONTAL);
+    _feed_input_panel->SetSizer(_feed_input_sizer);
 
-    auto box = _feed_input_sizer->GetStaticBox();
-    box->SetBackgroundColour(wxColour("#f2fffc"));
+    _feed_input_panel->SetBackgroundColour(wxColour("#552200"));
 
-    _feed_name_label = new wxStaticText(this, wxID_ANY, wxString("Feed name"));
-    _feed_name_edit = new wxTextCtrl(this, wxID_ANY);
-    _feed_url_label = new wxStaticText(this, wxID_ANY, wxString("Feed address"));
-    _feed_url_edit = new wxTextCtrl(this, wxID_ANY);
-    _feed_name_save_button = new wxButton(this, wxID_ANY, wxString("Save"));
+    _feed_name_label = new wxStaticText(_feed_input_panel, wxID_ANY, wxString("Feed name"));
+    _feed_name_label->SetForegroundColour(wxColour("#fff6d5"));
+
+    _feed_name_edit = new wxTextCtrl(_feed_input_panel, wxID_ANY);
+
+    _feed_url_label = new wxStaticText(_feed_input_panel, wxID_ANY, wxString("Feed address"));
+    _feed_url_label->SetForegroundColour(wxColour("#fff6d5"));
+
+    _feed_url_edit = new wxTextCtrl(_feed_input_panel, wxID_ANY);
+    _feed_name_save_button = new wxButton(_feed_input_panel, wxID_ANY, wxString("Save"));
 
     _feed_name_save_button->SetBackgroundColour(wxColour("#ffcc00"));
     _feed_name_save_button->SetForegroundColour(wxColour("#800000"));
+
+    /*Left padding*/
+    _feed_input_sizer->Add(19, 1, 0);
 
     _feed_input_sizer->Add(_feed_name_label, 0, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 7);
     _feed_input_sizer->Add(_feed_name_edit, 1, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, 7);
@@ -365,11 +396,13 @@ void rss::ui::mainscreengenerator::create_ui_region_feed_edit() {
 }
 
 void rss::ui::mainscreengenerator::create_ui_region_feed_names() {
-    _feed_buttons_sizer = new wxStaticBoxSizer(wxHORIZONTAL, this);
+    _feed_buttons_panel = new wxScrolledWindow(this, wxID_ANY);
+    _feed_buttons_sizer = new wxBoxSizer(wxHORIZONTAL);
+    _feed_buttons_panel->SetSizer(_feed_buttons_sizer);
 
-    auto box = _feed_buttons_sizer->GetStaticBox();
-    box->SetBackgroundColour(wxColour("#aa4400"));
-    box->SetWindowStyle(wxBORDER_NONE);
+    _feed_buttons_panel->SetBackgroundColour(wxColour("#aa4400"));
+    _feed_buttons_panel->ShowScrollbars(wxSHOW_SB_DEFAULT, wxSHOW_SB_NEVER);
+    _feed_buttons_panel->SetScrollRate(17, 0);
 
     return;
 }

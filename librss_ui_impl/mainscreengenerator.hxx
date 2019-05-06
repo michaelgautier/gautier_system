@@ -84,19 +84,24 @@ class mainscreengenerator : public wxFrame {
     wxStaticText* _program_header;
     wxListBox* _headlines_list_view;
 
-    wxFlexGridSizer* _article_sizer;
+    wxPanel* _feed_info_panel;
+    wxBoxSizer* _feed_info_sizer;
+
     wxStaticText* _feed_name_text;
     wxHyperlinkCtrl* _feed_headline_hyperlink;
     wxStaticText* _article_summary_text;
 
-    wxStaticBoxSizer* _feed_input_sizer;
+    wxPanel* _feed_input_panel;
+    wxBoxSizer* _feed_input_sizer;
+
     wxStaticText* _feed_name_label;
     wxTextCtrl* _feed_name_edit;
     wxStaticText* _feed_url_label;
     wxTextCtrl* _feed_url_edit;
     wxButton* _feed_name_save_button;
 
-    wxStaticBoxSizer* _feed_buttons_sizer;
+    wxScrolledWindow* _feed_buttons_panel;
+    wxBoxSizer* _feed_buttons_sizer;
 
     void create_ui_window();
     void create_ui_region_header();
