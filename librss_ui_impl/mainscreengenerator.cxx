@@ -163,13 +163,18 @@ void rss::ui::mainscreengenerator::show_feed_names() {
         std::string feedname = feed_names[feedname_index].name;
 
         wxButton* feed_button = new wxButton(_feed_buttons_panel, wxID_ANY, wxString(feedname));
+        #ifndef __WIN32__
         feed_button->SetBackgroundColour(wxColour("#ffcc00"));
         feed_button->SetForegroundColour(wxColour("#800000"));
+        #endif
         feed_button->SetId(feedname_index);
         feed_button->Bind(wxEVT_BUTTON, &rss::ui::mainscreengenerator::feed_change_event, this);
 
         _feed_buttons_sizer->Add(feed_button, 0, wxLEFT | wxTOP | wxBOTTOM, 7);
     }
+
+    _feed_buttons_sizer->Layout();
+    Update();
 
     return;
 }
@@ -401,6 +406,7 @@ void rss::ui::mainscreengenerator::create_ui_region_feed_names() {
     _feed_buttons_panel->SetSizer(_feed_buttons_sizer);
 
     _feed_buttons_panel->SetBackgroundColour(wxColour("#aa4400"));
+    _feed_buttons_panel->SetForegroundColour(wxTransparentColour);
     _feed_buttons_panel->ShowScrollbars(wxSHOW_SB_DEFAULT, wxSHOW_SB_NEVER);
     _feed_buttons_panel->SetScrollRate(17, 0);
 

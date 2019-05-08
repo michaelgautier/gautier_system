@@ -11,12 +11,7 @@ You should have received a copy of the GNU General Public License along with Gau
 
 C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 */
-// For compilers that support precompilation, includes "wx/wx.h".
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif
-
 #include "rss_app.hxx"
 #include <iostream>
 
@@ -25,5 +20,4 @@ C++ Standard Library; Copyright 2018 Standard C++ Foundation.
 
 	wxWidgets does not use a main method.
 */
-
 wxIMPLEMENT_APP(rss::news::rss_app);

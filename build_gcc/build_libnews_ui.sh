@@ -9,7 +9,7 @@ rm obj/librssui_mainscreengenerator.o
 
 echo "build main screen generator"
 
-g++ -std=c++17 -O3 -c -fPIC -I../lib/news/ -I../lib/news/techconstruct/ `xml2-config --cflags` -I../librss_ui_impl/ `../../../build_shared/wx/bin/wx-config --cxxflags` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
+g++ -std=c++17 -O3 -c -fPIC -I../lib/news/ -I../lib/news/techconstruct/ `xml2-config --cflags` -I../librss_ui_impl/ `../../../build_shared/wxWidgets/bin/wx-config --cxxflags` -o obj/librssui_mainscreengenerator.o ../librss_ui_impl/mainscreengenerator.cxx
 
 ls -gGh obj/librssui_mainscreengenerator*
 
